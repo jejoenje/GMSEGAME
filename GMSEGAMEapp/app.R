@@ -4,6 +4,10 @@ library(GMSE)
 source("../app_plotting.R")
 
 ui <- fluidPage(
+    tags$style(HTML("
+        .tabbable > .nav > li > a                  {background-color: white;  color:white}
+        .tabbable > .nav > li[class=active]    > a {background-color: white; color:white}
+    ")),
     useShinyjs(),
     
     titlePanel("GMSE-GAME"),
