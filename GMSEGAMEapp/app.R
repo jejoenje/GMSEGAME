@@ -3,6 +3,24 @@ library(shinyjs)
 library(GMSE)
 source("../app_plotting.R")
 
+d.LAND_OWNERSHIP = TRUE
+d.STAKEHOLDERS = 4
+d.MANAGER_BUDGET = 1000
+d.MANAGE_TARGET = 8000
+d.OBSERVE_TYPE = 0
+d.RES_MOVE_OBS = TRUE
+d.RES_DEATH_K = 5000
+d.LAMBDA = 0.3
+d.RES_DEATH_TYPE = 3
+d.REMOVE_PR = 0.05
+d.USER_BUDGET = 1500
+d.CULLING = TRUE
+d.SCARING = TRUE
+d.TEND_CROPS = TRUE
+d.SHOWSUGGESTED = TRUE
+d.K = 5
+
+
 ui <- fluidPage(
     useShinyjs(),
     
@@ -16,20 +34,20 @@ ui <- fluidPage(
             column(3,
                 wellPanel(
                     h3("General environment"),
-                    checkboxInput("LAND_OWNERSHIP", strong("Land ownership"), value = TRUE),
+                    disabled(checkboxInput("LAND_OWNERSHIP", strong("Land ownership"), value = d.LAND_OWNERSHIP)),
                     sliderInput("STAKEHOLDERS", "No. of stakeholders (users)",
-                                min = 4, max = 32, value = 4, step = 1),
+                                min = 4, max = 32, value = d.STAKEHOLDERS, step = 1),
                     sliderInput("MANAGER_BUDGET", "Manager budget",
-                                       min = 100, max = 5000, value = 1000, step = 100),
+                                       min = 100, max = 5000, value = d.MANAGER_BUDGET, step = 100),
                     sliderInput("MANAGE_TARGET", "Management population target (for initial time steps only)",
-                                       min = 500, max = 10000, value = 1500, step = 100),
+                                       min = 500, max = 10000, value = d.MANAGE_TARGET, step = 100),
                     selectInput("OBSERVE_TYPE", "Resource observation type", 
                                        choices = list("Density-based" = 0,
                                                       "Mark-recapture estimate" = 1, 
                                                       "Transect sampling (linear)" = 2,
                                                       "Transect sampling (block)" = 3
-                                                      ), selected = 0),
-                    checkboxInput("RES_MOVE_OBS", strong("Resources move during observation"), value = TRUE)
+                                                      ), selected = d.OBSERVE_TYPE),
+                    checkboxInput("RES_MOVE_OBS", strong("Resources move during observation"), value = d.RES_MOVE_OBS)
                 )    
             ),
                 
@@ -37,15 +55,15 @@ ui <- fluidPage(
                 wellPanel(
                     h3("Resource population controls"),
                     sliderInput("RES_DEATH_K", "K (resource carrying capacity)",
-                                       min = 100, max = 10000, value = 3000, step = 100),
+                                       min = 100, max = 10000, value = d.RES_DEATH_K, step = 100),
                     sliderInput("LAMBDA", "Lambda (resource max growth rate)",
-                                       min = 0.1, max = 2, value = 0.3, step = 0.1),
-                    selectInput("RES_DEATH_TYPE", "Resource removal (death) type", 
+                                       min = 0.1, max = 2, value = d.LAMBDA, step = 0.1),
+                    disabled(selectInput("RES_DEATH_TYPE", "Resource removal (death) type", 
                                        choices = list("Density-independent" = 1, 
                                                       "Density-dependent" = 2,
-                                                      "Both" = 3), selected = 3),
+                                                      "Both" = 3), selected = d.RES_DEATH_TYPE)),
                     sliderInput("REMOVE_PR", "Fixed mortality probability",
-                                       min = 0, max = 0.95, value = 0.05, step = 0.05)
+                                       min = 0, max = 0.95, value = d.REMOVE_PR, step = 0.05)
                 )
             ),
             
@@ -53,21 +71,21 @@ ui <- fluidPage(
                 wellPanel(
                     h3("User action controls"),
                     sliderInput("USER_BUDGET", "User budget",
-                                   min = 100, max = 5000, value = 1500, step = 100),
-                    disabled(checkboxInput("CULLING", "Culling", value = TRUE)),
-                    disabled(checkboxInput("SCARING", "Scaring", value = TRUE)),
-                    disabled(checkboxInput("TEND_CROPS", "Tending crops", value = TRUE))
+                                   min = 100, max = 5000, value = d.USER_BUDGET, step = 100),
+                    disabled(checkboxInput("CULLING", "Culling", value = d.CULLING)),
+                    disabled(checkboxInput("SCARING", "Scaring", value = d.SCARING)),
+                    disabled(checkboxInput("TEND_CROPS", "Tending crops", value = d.TEND_CROPS))
                 ),
                 wellPanel(style = "background: white",
                     h3("Misc controls"),
                     column(6,numericInput("K", "No. of initial time steps",
-                                          min = 2, max = 10, value = 5, step = 1)
+                                          min = 2, max = 10, value = d.K, step = 1)
                     ),
-                    column(6,checkboxInput("SHOWSUGGESTED", strong("Show suggested costs"), value = FALSE)
+                    column(6,checkboxInput("SHOWSUGGESTED", strong("Show suggested costs"), value = d.SHOWSUGGESTED)
                            ),
                     br(),
                     actionButton("runGame", "GO!", icon = icon("gamepad")),
-                    disabled(actionButton("resetGame_setup", "Reset game"))
+                    actionButton("resetInputs", "Reset settings")
                 )
             ),
         
@@ -87,10 +105,10 @@ ui <- fluidPage(
             ),
             column(5,
                 fluidRow(
-                    sliderInput("culling_cost_in", "Culling cost",
-                                min = 10, max = 100001, value = 50, step = 10),
-                    sliderInput("scaring_cost_in", "Scaring cost",
-                                min = 10, max = 100001, value = 10, step = 10),
+                    numericInput("culling_cost_in", "Culling cost",
+                                min = 10, max = MANAGER_BUDGET, value = MANAGER_BUDGET/2, step = 10),
+                    numericInput("scaring_cost_in", "Scaring cost",
+                                min = 10, max = MANAGER_BUDGET, value = MANAGER_BUDGET/2, step = 10),
                     actionButton("nextStep", "Next step"),
                     actionButton("resetGame", "Reset game")
                 ),
@@ -136,13 +154,43 @@ server <- function(input, output, session) {
         GDATA$laststep = initdata$gmse_list[[length(initdata$gmse_list)]]
         GDATA$observed_suggested = initdata$observed_suggested
         
-        updateNumericInput(session = getDefaultReactiveDomain(), 
-                           inputId = "culling_cost_in", 
-                           value = unique(GDATA$observed_suggested$culling))
+        if(input$SHOWSUGGESTED==TRUE) {
+            updateNumericInput(session = getDefaultReactiveDomain(), 
+                               inputId = "culling_cost_in", 
+                               value = unique(GDATA$observed_suggested$culling))
+            updateNumericInput(session = getDefaultReactiveDomain(), 
+                               inputId = "scaring_cost_in", 
+                               value = unique(GDATA$observed_suggested$scaring))    
+        } else {
+            updateNumericInput(session = getDefaultReactiveDomain(), 
+                               inputId = "culling_cost_in", 
+                               value = floor(input$MANAGER_BUDGET/2))
+            updateNumericInput(session = getDefaultReactiveDomain(), 
+                               inputId = "scaring_cost_in", 
+                               value = floor(input$MANAGER_BUDGET/2))
+        }
+        
+        
+        
     })
     
-    observeEvent(input$resetGame_setup, {
-        toggleSetup("Setup")
+    observeEvent(input$resetInputs, {
+        updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "LAND_OWNERSHIP", value = d.LAND_OWNERSHIP)
+        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "STAKEHOLDERS", value = d.STAKEHOLDERS)
+        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "MANAGER_BUDGET", value = d.MANAGER_BUDGET)
+        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "MANAGE_TARGET", value = d.MANAGE_TARGET)
+        updateSelectInput(session = getDefaultReactiveDomain(), inputId = "OBSERVE_TYPE", selected = d.OBSERVE_TYPE)
+        updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "RES_MOVE_OBS", value = d.RES_MOVE_OBS)
+        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "RES_DEATH_K", value = d.RES_DEATH_K)
+        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "LAMBDA", value = d.LAMBDA)
+        updateSelectInput(session = getDefaultReactiveDomain(), inputId = "RES_DEATH_TYPE", selected = d.RES_DEATH_TYPE)
+        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "REMOVE_PR", value = d.REMOVE_PR)
+        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "USER_BUDGET", value = d.USER_BUDGET)
+        updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "CULLING", value = d.CULLING)
+        updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "SCARING", value = d.SCARING)
+        updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "TEND_CROPS", value = d.TEND_CROPS)
+        updateNumericInput(session = getDefaultReactiveDomain(), inputId = "K", value = d.K)
+        updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "SHOWSUGGESTED", value = d.SHOWSUGGESTED)
     })
     
     observeEvent(input$resetGame, {
@@ -156,7 +204,7 @@ server <- function(input, output, session) {
     observeEvent(input$nextStep, {
         
         ### User input
-        costs_as_input = list(culling = input$culling_cost_in, scaring = input$culling_cost_in)
+        costs_as_input = list(culling = input$culling_cost_in, scaring = input$scaring_cost_in)
         prev = GDATA$laststep
         prev = set_man_costs(prev, newcost = costs_as_input)
         
@@ -173,6 +221,13 @@ server <- function(input, output, session) {
                 updateNumericInput(session = getDefaultReactiveDomain(), 
                                    inputId = "scaring_cost_in", 
                                    value = unique(GDATA$observed_suggested$scaring))    
+            } else {
+                updateNumericInput(session = getDefaultReactiveDomain(), 
+                                   inputId = "culling_cost_in", 
+                                   value = costs_as_input$culling)
+                updateNumericInput(session = getDefaultReactiveDomain(), 
+                                   inputId = "scaring_cost_in", 
+                                   value = costs_as_input$scaring)
             }
             
             # Add appropriate outputs.
@@ -228,13 +283,14 @@ toggleSetup = function(switchToTab) {
         disable("STAKEHOLDERS")
         disable("LAND_OWNERSHIP")
         disable("runGame")
-        disable("resetGame_setup")
+        disable("resetInputs")
+        
     }
     
     if(switchToTab=="Setup") {
         enable("REMOVE_PR")
         enable("K")
-        enable("RES_DEATH_TYPE")
+        #enable("RES_DEATH_TYPE")
         enable("LAMBDA")
         enable("RES_DEATH_K")
         #enable("TEND_CROPS")
@@ -244,12 +300,10 @@ toggleSetup = function(switchToTab) {
         enable("MANAGE_TARGET")
         enable("MANAGER_BUDGET")
         enable("STAKEHOLDERS")
-        enable("LAND_OWNERSHIP")
+        #enable("LAND_OWNERSHIP")
         enable("runGame")
-        enable("resetGame_setup")
+        enable("resetInputs")
     }
-    
-    ### Needs an "if" to clear game output when resetGame_setup is pressed
     
     updateTabsetPanel(session = getDefaultReactiveDomain(), "MainPanels",
                       selected = switchToTab)
