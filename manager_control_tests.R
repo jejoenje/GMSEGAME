@@ -1,5 +1,5 @@
-library(devtools)
-install_github("ConFooBio/gmse", ref = "man_control")
+# library(devtools)
+# install_github("ConFooBio/gmse", ref = "man_control")
 
 rm(list=ls())
 
@@ -62,17 +62,17 @@ plot_land_res = function(land, resources) {
 LAND_OWNERSHIP = TRUE
 TEND_CROPS = TRUE
 SCARING = TRUE
-CULLING = TRUE
-OBSERVE_TYPE = 1
+CULLING = FALSE
+OBSERVE_TYPE = 0
 RES_MOVE_OBS = TRUE
 RES_DEATH_K = 3000
 LAMBDA = 0.3
 MANAGE_TARGET = 1500
-STAKEHOLDERS = 8
+STAKEHOLDERS = 4
 USER_BUDGET = 1500
 MANAGER_BUDGET = 1000
 RES_DEATH_TYPE = 3
-REMOVE_PR = 0.10
+REMOVE_PR = 0.05
 
 ### Initial time steps:
 init_steps = init_man_control(K = 5)
@@ -87,9 +87,10 @@ init_steps$observed_suggested
 par(mfrow = c(1,2))
 plot_pop(output, track_range = FALSE)
 plot_land_res(prev$LAND, prev$RESOURCES)
+output
 
 ### User input
-costs_as_input = list(culling = 100001, scaring = 10)
+costs_as_input = list(culling = 10, scaring = 10)
 prev = set_man_costs(prev, newcost = costs_as_input)
 
 ### Run next time step:
@@ -107,6 +108,7 @@ if(class(nxt)!="try-error") {
     par(mfrow = c(1,2))
     plot_pop(output, track_range = FALSE)
     plot_land_res(prev$LAND, prev$RESOURCES)
+    output
 } else {
     print("STOP - POPULATION WIPED OUT")
     output

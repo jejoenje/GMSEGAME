@@ -54,9 +54,9 @@ ui <- fluidPage(
                     h3("User action controls"),
                     sliderInput("USER_BUDGET", "User budget",
                                    min = 100, max = 5000, value = 1500, step = 100),
-                    checkboxInput("CULLING", "Culling", value = TRUE),
-                    checkboxInput("SCARING", "Scaring", value = TRUE),
-                    checkboxInput("TEND_CROPS", "Tending crops", value = TRUE)
+                    disabled(checkboxInput("CULLING", "Culling", value = TRUE)),
+                    disabled(checkboxInput("SCARING", "Scaring", value = TRUE)),
+                    disabled(checkboxInput("TEND_CROPS", "Tending crops", value = TRUE))
                 ),
                 wellPanel(style = "background: white",
                     h3("Misc controls"),
@@ -212,22 +212,42 @@ server <- function(input, output, session) {
 }
 
 toggleSetup = function(switchToTab) {
-    toggleState("REMOVE_PR")
-    toggleState("K")
-    toggleState("RES_DEATH_TYPE")
-    toggleState("LAMBDA")
-    toggleState("RES_DEATH_K")
-    toggleState("TEND_CROPS")
-    toggleState("SCARING")
-    toggleState("CULLING")
-    toggleState("USER_BUDGET")
-    toggleState("MANAGE_TARGET")
-    toggleState("MANAGER_BUDGET")
-    toggleState("STAKEHOLDERS")
-    toggleState("LAND_OWNERSHIP")
     
-    toggleState("runGame")
-    toggleState("resetGame_setup")
+    if(switchToTab=="Main") {
+        disable("REMOVE_PR")
+        disable("K")
+        disable("RES_DEATH_TYPE")
+        disable("LAMBDA")
+        disable("RES_DEATH_K")
+        #disable("TEND_CROPS")
+        #disable("SCARING")
+        #disable("CULLING")
+        disable("USER_BUDGET")
+        disable("MANAGE_TARGET")
+        disable("MANAGER_BUDGET")
+        disable("STAKEHOLDERS")
+        disable("LAND_OWNERSHIP")
+        disable("runGame")
+        disable("resetGame_setup")
+    }
+    
+    if(switchToTab=="Setup") {
+        enable("REMOVE_PR")
+        enable("K")
+        enable("RES_DEATH_TYPE")
+        enable("LAMBDA")
+        enable("RES_DEATH_K")
+        #enable("TEND_CROPS")
+        #enable("SCARING")
+        #enable("CULLING")
+        enable("USER_BUDGET")
+        enable("MANAGE_TARGET")
+        enable("MANAGER_BUDGET")
+        enable("STAKEHOLDERS")
+        enable("LAND_OWNERSHIP")
+        enable("runGame")
+        enable("resetGame_setup")
+    }
     
     ### Needs an "if" to clear game output when resetGame_setup is pressed
     
