@@ -4,10 +4,6 @@ library(GMSE)
 source("../app_plotting.R")
 
 ui <- fluidPage(
-    tags$style(HTML("
-        .tabbable > .nav > li > a                  {background-color: white;  color:white}
-        .tabbable > .nav > li[class=active]    > a {background-color: white; color:white}
-    ")),
     useShinyjs(),
     
     titlePanel("GMSE-GAME"),
@@ -114,6 +110,8 @@ server <- function(input, output, session) {
     
     GDATA = reactiveValues(summary = NULL, laststep = NULL, land_dist = NULL, observed_suggested = NULL)
     
+    CHECK = reactiveValues(extinction = FALSE)
+    
     observeEvent(input$runGame, {
         toggleSetup("Main")
         
@@ -149,6 +147,10 @@ server <- function(input, output, session) {
     
     observeEvent(input$resetGame, {
         toggleSetup("Setup")
+        CHECK$extinction = FALSE
+        enable(id = "nextStep")
+        enable(id = "culling_cost_in")
+        enable(id = "scaring_cost_in")
     })
     
     observeEvent(input$nextStep, {
@@ -179,6 +181,14 @@ server <- function(input, output, session) {
             GDATA$laststep = nxt
 
         } else {
+            
+            CHECK$extinction = TRUE
+            
+            toggleState("nextStep")
+            toggleState("culling_cost_in")
+            toggleState("scaring_cost_in")
+            
+            
             # print("STOP - POPULATION WIPED OUT")
             # output
         }
@@ -192,7 +202,7 @@ server <- function(input, output, session) {
     })
     
     output$pop_plot <- renderPlot({
-        plot_pop(GDATA$summary, track_range = FALSE)
+        plot_pop(GDATA$summary, track_range = FALSE, extinction_message = CHECK$extinction)
     })
     
     output$land_plot <- renderPlot({

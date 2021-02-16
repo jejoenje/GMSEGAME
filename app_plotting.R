@@ -1,5 +1,5 @@
 
-plot_pop = function(dat, yrange = 10, track_range = TRUE) {
+plot_pop = function(dat, yrange = 10, track_range = TRUE, extinction_message = FALSE) {
   obs = dat[,"obs"]
   t = 1:nrow(dat)
   if(length(obs)<yrange) {
@@ -16,6 +16,9 @@ plot_pop = function(dat, yrange = 10, track_range = TRUE) {
   axis(1, at = t)
   points(tail(t[!is.na(obs)],1),tail(obs[!is.na(obs)],1), 
          pch = 21, col = "black", bg = "red", lwd = 2, cex = 1.25)
+  
+  if(extinction_message == TRUE) text(x = 5, y = max(obs, na.rm=T)*1.9, "Population wiped out!", col = "red", cex = 4)
+  
 }
 
 plot_land = function(x) {
