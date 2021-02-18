@@ -104,8 +104,8 @@ ui <- fluidPage(
             ),
             column(5,
                 fluidRow(
-                    sliderInput("culling_cost_in", "Culling cost", min = 0, max = (d.MANAGER_BUDGET/10), value = 99, step = 10),
-                    sliderInput("scaring_cost_in", "Scaring cost", min = 0, max = (d.MANAGER_BUDGET/10), value = 99, step = 10),
+                    sliderInput("culling_cost_in", "Culling cost", min = 10, max = (d.MANAGER_BUDGET/10)+10, value = 99, step = 10),
+                    sliderInput("scaring_cost_in", "Scaring cost", min = 10, max = (d.MANAGER_BUDGET/10)+10, value = 99, step = 10),
                     actionButton("nextStep", "Next step"),
                     actionButton("resetGame", "Reset game"),
                 ),
@@ -155,34 +155,34 @@ server <- function(input, output, session) {
         
         if(input$SHOWSUGGESTED==TRUE) {
             
-            CURRENT_BUDGET$total = MANAGER_BUDGET
-            CURRENT_BUDGET$culling = (unique(GDATA$observed_suggested$culling)-10)*10
-            CURRENT_BUDGET$scaring = (unique(GDATA$observed_suggested$scaring)-10)*10
-            CURRENT_BUDGET$leftover = CURRENT_BUDGET$total-(CURRENT_BUDGET$culling+CURRENT_BUDGET$scaring)
-            
             updateSliderInput(session = getDefaultReactiveDomain(), 
                                inputId = "culling_cost_in", 
-                               max = (MANAGER_BUDGET/10),
+                               max = (MANAGER_BUDGET/10)+10,
                                value = unique(GDATA$observed_suggested$culling))
             updateSliderInput(session = getDefaultReactiveDomain(), 
                                inputId = "scaring_cost_in", 
-                               max = (MANAGER_BUDGET/10),
-                               value = unique(GDATA$observed_suggested$scaring))    
-        } else {
+                               max = (MANAGER_BUDGET/10)+10,
+                               value = unique(GDATA$observed_suggested$scaring))
             
-            CURRENT_BUDGET$total = MANAGER_BUDGET
-            CURRENT_BUDGET$culling = (CURRENT_BUDGET$total/10)*0.5*10
-            CURRENT_BUDGET$scaring = (CURRENT_BUDGET$total/10)*0.5*10
-            CURRENT_BUDGET$leftover = CURRENT_BUDGET$total-(CURRENT_BUDGET$culling+CURRENT_BUDGET$scaring)
+            CURRENT_BUDGET = updateCurrentBudget(CURRENT_BUDGET,
+                                                 culling_cost = input$culling_cost_in, 
+                                                 scaring_cost = input$scaring_cost_in)
+            
+        } else {
             
             updateSliderInput(session = getDefaultReactiveDomain(), 
                                inputId = "culling_cost_in", 
-                               max = (MANAGER_BUDGET/10),
-                               value = (MANAGER_BUDGET/10)*0.5)
+                               max = (MANAGER_BUDGET/10)+10,
+                               value = (MANAGER_BUDGET/10+10)*0.5)
             updateSliderInput(session = getDefaultReactiveDomain(), 
                                inputId = "scaring_cost_in", 
-                               max = (MANAGER_BUDGET/10),
-                               value = (MANAGER_BUDGET/10)*0.5)
+                               max = (MANAGER_BUDGET/10)+10,
+                               value = (MANAGER_BUDGET/10+10)*0.5)
+            
+            CURRENT_BUDGET = updateCurrentBudget(CURRENT_BUDGET, 
+                                                 culling_cost = input$culling_cost_in, 
+                                                 scaring_cost = input$scaring_cost_in)
+            
         }
         
         
@@ -216,34 +216,53 @@ server <- function(input, output, session) {
         enable(id = "scaring_cost_in")
     })
     
+    ### When CULLING cost is adjusted, update budget and check if still within limits. If not, adjust SCARING.
     observeEvent(input$culling_cost_in, {
-        n_culling = (input$culling_cost_in+10)*10
-        c_scaring = (input$scaring_cost_in+10)*10
-        if((n_culling + c_scaring)> 1200 ) {
-            n_scaring = (1200-n_culling)/10
+
+        CURRENT_BUDGET = updateCurrentBudget(CURRENT_BUDGET,
+                                             culling_cost = input$culling_cost_in, 
+                                             scaring_cost = input$scaring_cost_in)
+        culling_b = CURRENT_BUDGET$culling
+        scaring_b = CURRENT_BUDGET$scaring
+        total_b = CURRENT_BUDGET$total
+        
+        # If spend on culling+scaring exceeds total budget:
+        if((culling_b+scaring_b)>total_b) {
+            scaring_b_adj = total_b-culling_b
+            scaring_cost_adj = scaring_b_adj/10
             updateSliderInput(session = getDefaultReactiveDomain(), 
                               inputId = "scaring_cost_in", 
-                              value = n_scaring)
+                              value = scaring_cost_adj)
         }
-        
     })
     
+    ### When SCARING cost is adjusted, update budget and check if still within limits. If not, adjust CULLING.
     observeEvent(input$scaring_cost_in, {
-        n_scaring = (input$scaring_cost_in+10)*10
-        c_culling = (input$culling_cost_in+10)*10
-        if((n_scaring + c_culling)> 1200 ) {
-            n_culling = (1200-n_scaring)/10
+
+        CURRENT_BUDGET = updateCurrentBudget(CURRENT_BUDGET,
+                                             culling_cost = input$culling_cost_in, 
+                                             scaring_cost = input$scaring_cost_in)
+        culling_b = CURRENT_BUDGET$culling
+        scaring_b = CURRENT_BUDGET$scaring
+        total_b = CURRENT_BUDGET$total
+        
+        # If spend on culling+scaring exceeds total budget:
+        if((culling_b+scaring_b)>total_b) {        
+            # Max available to culling after new scaring cost input:
+            culling_b_adj = total_b-scaring_b
+            # This amounts to this updated cost for culling:
+            culling_cost_adj = culling_b_adj/10
+            # Update the slider; this in turn should update 
             updateSliderInput(session = getDefaultReactiveDomain(), 
                               inputId = "culling_cost_in", 
-                              value = n_culling)
+                              value = culling_cost_adj)
         }
-        
     })
     
     observeEvent(input$nextStep, {
         
         ### User input
-        costs_as_input = list(culling = input$culling_cost_in+10, scaring = input$scaring_cost_in+10)
+        costs_as_input = list(culling = input$culling_cost_in, scaring = input$scaring_cost_in)
         prev = GDATA$laststep
         prev = set_man_costs(prev, newcost = costs_as_input)
         
@@ -257,10 +276,10 @@ server <- function(input, output, session) {
                 GDATA$observed_suggested = observed_suggested(nxt)
                 updateNumericInput(session = getDefaultReactiveDomain(), 
                                    inputId = "culling_cost_in", 
-                                   value = unique(GDATA$observed_suggested$culling)-10)
+                                   value = unique(GDATA$observed_suggested$culling))
                 updateNumericInput(session = getDefaultReactiveDomain(), 
                                    inputId = "scaring_cost_in", 
-                                   value = unique(GDATA$observed_suggested$scaring)-10)    
+                                   value = unique(GDATA$observed_suggested$scaring))    
             } 
             
             # Add appropriate outputs.
@@ -276,9 +295,6 @@ server <- function(input, output, session) {
             toggleState("culling_cost_in")
             toggleState("scaring_cost_in")
             
-            
-            # print("STOP - POPULATION WIPED OUT")
-            # output
         }
         
         
@@ -306,6 +322,14 @@ server <- function(input, output, session) {
               )
     })
     
+}
+
+updateCurrentBudget = function(budget, culling_cost, scaring_cost) {
+    budget$total = MANAGER_BUDGET+3*10*10
+    budget$culling = culling_cost*10
+    budget$scaring = scaring_cost*10
+    budget$leftover = budget$total-(budget$culling+budget$scaring)
+    return(budget)
 }
 
 toggleSetup = function(switchToTab) {
