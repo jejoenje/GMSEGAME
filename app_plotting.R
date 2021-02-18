@@ -17,14 +17,22 @@ plot_pop = function(dat, yrange = 10, track_range = TRUE, extinction_message = F
   points(tail(t[!is.na(obs)],1),tail(obs[!is.na(obs)],1), 
          pch = 21, col = "black", bg = "red", lwd = 2, cex = 1.25)
   
-  if(extinction_message == TRUE) text(x = 5, y = max(obs, na.rm=T)*1.9, "Population wiped out!", col = "red", cex = 4)
+  if(extinction_message == TRUE) text(x = length(obs)/2, 
+                                      y = max(obs, na.rm=T)*1.8, 
+                                      "Population wiped out!", 
+                                      col = "red", cex = 4)
   
 }
 
-plot_land = function(x) {
+plot_land = function(x, cols = NULL) {
   # Pick colors
-  land_cols = grey.colors(length(table(x)))
-  land_cols = sample(land_cols, replace = FALSE)
+  
+  if(is.null(cols)) {
+    land_cols = grey.colors(length(table(x)))
+    land_cols = sample(land_cols, replace = FALSE)  
+  } else {
+    land_cols = cols
+  }
   
   if(sum(x == 1)>0) land_cols[1] = "#FFFFFF"
   
@@ -42,9 +50,11 @@ placeResources = function(res, xd, yd) {
   return(land_res)
 }
 
-plot_land_res = function(land, resources) {
-  plot_land(land[,,3])
-  par(new = T)
-  res_positions = placeResources(res = resources, xd = dim(land[,,3])[1], yd = dim(land[,,3])[1])
-  image(res_positions, col = "darkred", xaxt = "n", yaxt = "n")
+plot_land_res = function(land, resources, cols = NULL, extinction_message = FALSE) {
+  plot_land(land[,,3], cols = cols)
+  if(extinction_message==FALSE) {
+    par(new = T)
+    res_positions = placeResources(res = resources, xd = dim(land[,,3])[1], yd = dim(land[,,3])[1])
+    image(res_positions, col = "darkred", xaxt = "n", yaxt = "n")  
+  }
 }

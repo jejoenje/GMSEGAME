@@ -17,9 +17,8 @@ d.USER_BUDGET = 1500
 d.CULLING = TRUE
 d.SCARING = TRUE
 d.TEND_CROPS = TRUE
-d.SHOWSUGGESTED = TRUE
+d.SHOWSUGGESTED = FALSE
 d.K = 5
-
 
 ui <- fluidPage(
     useShinyjs(),
@@ -106,11 +105,14 @@ ui <- fluidPage(
             column(5,
                 fluidRow(
                     numericInput("culling_cost_in", "Culling cost",
-                                min = 10, max = MANAGER_BUDGET, value = MANAGER_BUDGET/2, step = 10),
+                                min = 10, max = d.MANAGER_BUDGET+300, value = 0, step = 10),
                     numericInput("scaring_cost_in", "Scaring cost",
-                                min = 10, max = MANAGER_BUDGET, value = MANAGER_BUDGET/2, step = 10),
+                                min = 10, max = d.MANAGER_BUDGET+300, value = 0, step = 10),
+                    sliderInput("testSlider", "Test slider", min = 0, max = 9999, value = c(99,101)),
+                    
                     actionButton("nextStep", "Next step"),
-                    actionButton("resetGame", "Reset game")
+                    actionButton("resetGame", "Reset game"),
+                    actionButton("testButton", "Test slider")
                 ),
                 fluidRow(tableOutput("df_data_out"))
             ),
@@ -127,13 +129,14 @@ ui <- fluidPage(
 server <- function(input, output, session) {
     
     GDATA = reactiveValues(summary = NULL, laststep = NULL, land_dist = NULL, observed_suggested = NULL)
-    
     CHECK = reactiveValues(extinction = FALSE)
+    LASTCOST = reactiveValues(culling = NULL, scaring = NULL)
     
     observeEvent(input$runGame, {
         toggleSetup("Main")
         
         ### Initial time steps:
+        land_colors <<- sample(grey.colors(input$STAKEHOLDERS))
         LAND_OWNERSHIP <<- input$LAND_OWNERSHIP
         TEND_CROPS <<- input$TEND_CROPS
         SCARING <<- input$SCARING
@@ -154,6 +157,9 @@ server <- function(input, output, session) {
         GDATA$laststep = initdata$gmse_list[[length(initdata$gmse_list)]]
         GDATA$observed_suggested = initdata$observed_suggested
         
+        LASTCOST$culling = mean(initdata$observed_suggested$culling)
+        LASTCOST$scaring = mean(initdata$observed_suggested$scaring)
+        
         if(input$SHOWSUGGESTED==TRUE) {
             updateNumericInput(session = getDefaultReactiveDomain(), 
                                inputId = "culling_cost_in", 
@@ -164,10 +170,10 @@ server <- function(input, output, session) {
         } else {
             updateNumericInput(session = getDefaultReactiveDomain(), 
                                inputId = "culling_cost_in", 
-                               value = floor(input$MANAGER_BUDGET/2))
+                               value = LASTCOST$culling)
             updateNumericInput(session = getDefaultReactiveDomain(), 
                                inputId = "scaring_cost_in", 
-                               value = floor(input$MANAGER_BUDGET/2))
+                               value = LASTCOST$scaring)
         }
         
         
@@ -211,6 +217,9 @@ server <- function(input, output, session) {
         ### Run next time step:
         nxt = try({gmse_apply_UROM(get_res = "Full", old_list = prev)}, silent = TRUE)
         
+        LASTCOST$culling = costs_as_input$culling
+        LASTCOST$scaring = costs_as_input$scaring
+        
         if(class(nxt)!="try-error") {
             # Get suggested costs, and set sliders:
             if(input$SHOWSUGGESTED == TRUE) {
@@ -224,10 +233,10 @@ server <- function(input, output, session) {
             } else {
                 updateNumericInput(session = getDefaultReactiveDomain(), 
                                    inputId = "culling_cost_in", 
-                                   value = costs_as_input$culling)
+                                   value = LASTCOST$culling)
                 updateNumericInput(session = getDefaultReactiveDomain(), 
                                    inputId = "scaring_cost_in", 
-                                   value = costs_as_input$scaring)
+                                   value = LASTCOST$scaring)
             }
             
             # Add appropriate outputs.
@@ -251,6 +260,10 @@ server <- function(input, output, session) {
         
     })
     
+    observeEvent(input$testButton, {
+        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "testSlider", value = c(250,750))
+    })
+    
     output$df_data_out <- renderTable({
         temp = GDATA$summary
         temp[order(1:nrow(temp), decreasing = TRUE),]
@@ -261,7 +274,8 @@ server <- function(input, output, session) {
     })
     
     output$land_plot <- renderPlot({
-        plot_land_res(GDATA$laststep$LAND, GDATA$laststep$RESOURCES)
+        plot_land_res(GDATA$laststep$LAND, GDATA$laststep$RESOURCES, 
+                      col = land_colors, extinction_message = CHECK$extinction)
     })
     
 }
