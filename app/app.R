@@ -1,5 +1,6 @@
 library(shiny)
 library(shinyjs)
+library(plotly)
 library(GMSE)
 source("../app_helpers.R")
 
@@ -104,11 +105,18 @@ ui <- fluidPage(
             ),
             column(5,
                 fluidRow(
-                    sliderInput("culling_cost_in", "Culling cost", min = 10, max = (d.MANAGER_BUDGET/10)+10, value = 99, step = 10),
-                    sliderInput("scaring_cost_in", "Scaring cost", min = 10, max = (d.MANAGER_BUDGET/10)+10, value = 99, step = 10),
-                    actionButton("nextStep", "Next step"),
-                    actionButton("resetGame", "Reset game"),
+                    column(4,
+                           sliderInput("culling_cost_in", "Culling cost", 
+                                       min = 10, max = (d.MANAGER_BUDGET/10)+10, value = 99, step = 10, width = "90%"),
+                           sliderInput("scaring_cost_in", "Scaring cost", 
+                                       min = 10, max = (d.MANAGER_BUDGET/10)+10, value = 99, step = 10, width = "90%"),
+                           ),
+                    column(8,
+                           plotly::plotlyOutput("budget_pie")
+                           )
                 ),
+                actionButton("nextStep", "Next step"),
+                actionButton("resetGame", "Reset game"),
                 textOutput("budget_total"),
                 fluidRow(tableOutput("df_data_out"))
             ),
@@ -312,6 +320,37 @@ server <- function(input, output, session) {
     output$land_plot <- renderPlot({
         plot_land_res(GDATA$laststep$LAND, GDATA$laststep$RESOURCES, 
                       col = land_colors, extinction_message = CHECK$extinction)
+    })
+    
+    output$budget_bar <- renderPlot({
+        par(oma = c(0.5,0.5,0.5,0.5))
+        par(mar = c(0.5,0.5,0.5,0.5))
+        #par(mfrow = c(1,2))
+        plotdat = matrix(c(CURRENT_BUDGET$culling, CURRENT_BUDGET$scaring, CURRENT_BUDGET$leftover), nrow = 3, ncol = 1)
+        barplot(plotdat, col = c("#f46d43","#3288bd","#abdda4"), yaxt = "n", border = NA)
+        #plot(x=1,y=1, ylim=c(0,CURRENT_BUDGET$total), type ="n", xaxt = "n", yaxt = "n", xlab ="n", ylab = "n", bty = "n")
+        #text(0.75, 300, "test", adj = 0, cex = 3, )
+    })
+    
+    output$budget_pie <- plotly::renderPlotly({
+        plotdat = matrix(c(CURRENT_BUDGET$culling, CURRENT_BUDGET$scaring, CURRENT_BUDGET$leftover), nrow = 3, ncol = 1)
+        plotdat = as.data.frame(plotdat, row.names = c("Culling","Scaring","Available"))
+        plotdat$items = row.names(plotdat)
+        colors = c("rgb(211,94,96)","rgb(144,103,167)","rgb(240, 245, 245)")
+        #tfont = list(family = "sans serif", size = 22)
+        fig2 = plot_ly(plotdat, 
+                       labels = ~items, values = ~V1, type = "pie", 
+                       textinfo = 'text+label',
+                       #textfont = tfont,
+                       hoverinfo = 'percent',
+                       text = ~paste('$', V1),
+                       marker = list(colors = colors, line = list(color = '#000000', width = 0)))
+        layout(fig2, title = 'Budget allocation', 
+               #font = tfont, 
+               showlegend = FALSE,
+               xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+        fig2
     })
     
     output$budget_total <- renderText({ 
