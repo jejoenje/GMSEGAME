@@ -1,12 +1,12 @@
 library(shiny)
 library(shinyjs)
 library(GMSE)
-source("../app_plotting.R")
+source("../app_helpers.R")
 
 d.LAND_OWNERSHIP = TRUE
 d.STAKEHOLDERS = 4
 d.MANAGER_BUDGET = 1000
-d.MANAGE_TARGET = 8000
+d.MANAGE_TARGET = 2000
 d.OBSERVE_TYPE = 0
 d.RES_MOVE_OBS = TRUE
 d.RES_DEATH_K = 5000
@@ -104,16 +104,12 @@ ui <- fluidPage(
             ),
             column(5,
                 fluidRow(
-                    numericInput("culling_cost_in", "Culling cost",
-                                min = 10, max = d.MANAGER_BUDGET+300, value = 0, step = 10),
-                    numericInput("scaring_cost_in", "Scaring cost",
-                                min = 10, max = d.MANAGER_BUDGET+300, value = 0, step = 10),
-                    sliderInput("testSlider", "Test slider", min = 0, max = 9999, value = c(99,101)),
-                    
+                    sliderInput("culling_cost_in", "Culling cost", min = 0, max = (d.MANAGER_BUDGET/10), value = 99, step = 10),
+                    sliderInput("scaring_cost_in", "Scaring cost", min = 0, max = (d.MANAGER_BUDGET/10), value = 99, step = 10),
                     actionButton("nextStep", "Next step"),
                     actionButton("resetGame", "Reset game"),
-                    actionButton("testButton", "Test slider")
                 ),
+                textOutput("budget_total"),
                 fluidRow(tableOutput("df_data_out"))
             ),
             column(1),
@@ -128,9 +124,9 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
     
-    GDATA = reactiveValues(summary = NULL, laststep = NULL, land_dist = NULL, observed_suggested = NULL)
+    GDATA = reactiveValues(summary = NULL, laststep = NULL, observed_suggested = NULL)
     CHECK = reactiveValues(extinction = FALSE)
-    LASTCOST = reactiveValues(culling = NULL, scaring = NULL)
+    CURRENT_BUDGET = reactiveValues(total = NULL, culling = NULL, scaring = NULL, leftover = NULL)
     
     observeEvent(input$runGame, {
         toggleSetup("Main")
@@ -157,23 +153,36 @@ server <- function(input, output, session) {
         GDATA$laststep = initdata$gmse_list[[length(initdata$gmse_list)]]
         GDATA$observed_suggested = initdata$observed_suggested
         
-        LASTCOST$culling = mean(initdata$observed_suggested$culling)
-        LASTCOST$scaring = mean(initdata$observed_suggested$scaring)
-        
         if(input$SHOWSUGGESTED==TRUE) {
-            updateNumericInput(session = getDefaultReactiveDomain(), 
+            
+            CURRENT_BUDGET$total = MANAGER_BUDGET
+            CURRENT_BUDGET$culling = (unique(GDATA$observed_suggested$culling)-10)*10
+            CURRENT_BUDGET$scaring = (unique(GDATA$observed_suggested$scaring)-10)*10
+            CURRENT_BUDGET$leftover = CURRENT_BUDGET$total-(CURRENT_BUDGET$culling+CURRENT_BUDGET$scaring)
+            
+            updateSliderInput(session = getDefaultReactiveDomain(), 
                                inputId = "culling_cost_in", 
+                               max = (MANAGER_BUDGET/10),
                                value = unique(GDATA$observed_suggested$culling))
-            updateNumericInput(session = getDefaultReactiveDomain(), 
+            updateSliderInput(session = getDefaultReactiveDomain(), 
                                inputId = "scaring_cost_in", 
+                               max = (MANAGER_BUDGET/10),
                                value = unique(GDATA$observed_suggested$scaring))    
         } else {
-            updateNumericInput(session = getDefaultReactiveDomain(), 
+            
+            CURRENT_BUDGET$total = MANAGER_BUDGET
+            CURRENT_BUDGET$culling = (CURRENT_BUDGET$total/10)*0.5*10
+            CURRENT_BUDGET$scaring = (CURRENT_BUDGET$total/10)*0.5*10
+            CURRENT_BUDGET$leftover = CURRENT_BUDGET$total-(CURRENT_BUDGET$culling+CURRENT_BUDGET$scaring)
+            
+            updateSliderInput(session = getDefaultReactiveDomain(), 
                                inputId = "culling_cost_in", 
-                               value = LASTCOST$culling)
-            updateNumericInput(session = getDefaultReactiveDomain(), 
+                               max = (MANAGER_BUDGET/10),
+                               value = (MANAGER_BUDGET/10)*0.5)
+            updateSliderInput(session = getDefaultReactiveDomain(), 
                                inputId = "scaring_cost_in", 
-                               value = LASTCOST$scaring)
+                               max = (MANAGER_BUDGET/10),
+                               value = (MANAGER_BUDGET/10)*0.5)
         }
         
         
@@ -207,37 +216,52 @@ server <- function(input, output, session) {
         enable(id = "scaring_cost_in")
     })
     
+    observeEvent(input$culling_cost_in, {
+        n_culling = (input$culling_cost_in+10)*10
+        c_scaring = (input$scaring_cost_in+10)*10
+        if((n_culling + c_scaring)> 1200 ) {
+            n_scaring = (1200-n_culling)/10
+            updateSliderInput(session = getDefaultReactiveDomain(), 
+                              inputId = "scaring_cost_in", 
+                              value = n_scaring)
+        }
+        
+    })
+    
+    observeEvent(input$scaring_cost_in, {
+        n_scaring = (input$scaring_cost_in+10)*10
+        c_culling = (input$culling_cost_in+10)*10
+        if((n_scaring + c_culling)> 1200 ) {
+            n_culling = (1200-n_scaring)/10
+            updateSliderInput(session = getDefaultReactiveDomain(), 
+                              inputId = "culling_cost_in", 
+                              value = n_culling)
+        }
+        
+    })
+    
     observeEvent(input$nextStep, {
         
         ### User input
-        costs_as_input = list(culling = input$culling_cost_in, scaring = input$scaring_cost_in)
+        costs_as_input = list(culling = input$culling_cost_in+10, scaring = input$scaring_cost_in+10)
         prev = GDATA$laststep
         prev = set_man_costs(prev, newcost = costs_as_input)
         
         ### Run next time step:
         nxt = try({gmse_apply_UROM(get_res = "Full", old_list = prev)}, silent = TRUE)
         
-        LASTCOST$culling = costs_as_input$culling
-        LASTCOST$scaring = costs_as_input$scaring
-        
         if(class(nxt)!="try-error") {
-            # Get suggested costs, and set sliders:
+            
+            # If needed, set sliders to "suggested" costs:
             if(input$SHOWSUGGESTED == TRUE) {
                 GDATA$observed_suggested = observed_suggested(nxt)
                 updateNumericInput(session = getDefaultReactiveDomain(), 
                                    inputId = "culling_cost_in", 
-                                   value = unique(GDATA$observed_suggested$culling))
+                                   value = unique(GDATA$observed_suggested$culling)-10)
                 updateNumericInput(session = getDefaultReactiveDomain(), 
                                    inputId = "scaring_cost_in", 
-                                   value = unique(GDATA$observed_suggested$scaring))    
-            } else {
-                updateNumericInput(session = getDefaultReactiveDomain(), 
-                                   inputId = "culling_cost_in", 
-                                   value = LASTCOST$culling)
-                updateNumericInput(session = getDefaultReactiveDomain(), 
-                                   inputId = "scaring_cost_in", 
-                                   value = LASTCOST$scaring)
-            }
+                                   value = unique(GDATA$observed_suggested$scaring)-10)    
+            } 
             
             # Add appropriate outputs.
             GDATA$summary = append_UROM_output(dat = nxt, costs = costs_as_input, old_output = GDATA$summary)
@@ -260,10 +284,6 @@ server <- function(input, output, session) {
         
     })
     
-    observeEvent(input$testButton, {
-        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "testSlider", value = c(250,750))
-    })
-    
     output$df_data_out <- renderTable({
         temp = GDATA$summary
         temp[order(1:nrow(temp), decreasing = TRUE),]
@@ -276,6 +296,14 @@ server <- function(input, output, session) {
     output$land_plot <- renderPlot({
         plot_land_res(GDATA$laststep$LAND, GDATA$laststep$RESOURCES, 
                       col = land_colors, extinction_message = CHECK$extinction)
+    })
+    
+    output$budget_total <- renderText({ 
+        paste("Total budget: ", CURRENT_BUDGET$total, "\\n",
+              "Culling: ", CURRENT_BUDGET$culling, "\\n",
+              "Scaring: ", CURRENT_BUDGET$scaring, "\\n",
+              "Leftover: ", CURRENT_BUDGET$leftover
+              )
     })
     
 }
