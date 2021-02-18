@@ -173,6 +173,7 @@ server <- function(input, output, session) {
                                value = unique(GDATA$observed_suggested$scaring))
             
             CURRENT_BUDGET = updateCurrentBudget(CURRENT_BUDGET,
+                                                 manager_budget = input$MANAGER_BUDGET,
                                                  culling_cost = input$culling_cost_in, 
                                                  scaring_cost = input$scaring_cost_in)
             
@@ -188,6 +189,7 @@ server <- function(input, output, session) {
                                value = (MANAGER_BUDGET/10+10)*0.5)
             
             CURRENT_BUDGET = updateCurrentBudget(CURRENT_BUDGET, 
+                                                 manager_budget = input$MANAGER_BUDGET,
                                                  culling_cost = input$culling_cost_in, 
                                                  scaring_cost = input$scaring_cost_in)
             
@@ -228,6 +230,7 @@ server <- function(input, output, session) {
     observeEvent(input$culling_cost_in, {
 
         CURRENT_BUDGET = updateCurrentBudget(CURRENT_BUDGET,
+                                             manager_budget = input$MANAGER_BUDGET,
                                              culling_cost = input$culling_cost_in, 
                                              scaring_cost = input$scaring_cost_in)
         culling_b = CURRENT_BUDGET$culling
@@ -248,6 +251,7 @@ server <- function(input, output, session) {
     observeEvent(input$scaring_cost_in, {
 
         CURRENT_BUDGET = updateCurrentBudget(CURRENT_BUDGET,
+                                             manager_budget = input$MANAGER_BUDGET,
                                              culling_cost = input$culling_cost_in, 
                                              scaring_cost = input$scaring_cost_in)
         culling_b = CURRENT_BUDGET$culling
@@ -363,8 +367,8 @@ server <- function(input, output, session) {
     
 }
 
-updateCurrentBudget = function(budget, culling_cost, scaring_cost) {
-    budget$total = MANAGER_BUDGET+3*10*10
+updateCurrentBudget = function(budget, manager_budget, culling_cost, scaring_cost) {
+    budget$total = manager_budget+3*10*10
     budget$culling = culling_cost*10
     budget$scaring = scaring_cost*10
     budget$leftover = budget$total-(budget$culling+budget$scaring)
