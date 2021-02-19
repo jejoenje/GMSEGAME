@@ -10,12 +10,15 @@ plot_pop = function(dat, yrange = 10, track_range = TRUE, extinction_message = F
     obs = tail(obs, yrange)
     t = tail(t, yrange)
   }
+  
+  par(mar = c(5,5,2,1.5))
+  
   plot(t, obs, ylim = c(0, max(obs, na.rm=T)*2), 
        type = "b", pch = 21, col = "black", bg = "grey", lwd = 2, xaxt = "n",
-       xlab = "Time step", ylab = "Observed resource population size")
-  axis(1, at = t)
+       xlab = "Time step", ylab = "Observed population size", cex.axis = 1.5, cex.lab = 2)
+  axis(1, at = t, cex.lab = 1.5)
   points(tail(t[!is.na(obs)],1),tail(obs[!is.na(obs)],1), 
-         pch = 21, col = "black", bg = "red", lwd = 2, cex = 1.25)
+         pch = 21, col = "black", bg = "red", lwd = 2, cex = 2)
   
   if(extinction_message == TRUE) text(x = length(obs)/2, 
                                       y = max(obs, na.rm=T)*1.8, 
@@ -36,7 +39,8 @@ plot_land = function(x, cols = NULL) {
   
   if(sum(x == 1)>0) land_cols[1] = "#FFFFFF"
   
-  image(x = x, col = land_cols, yaxt = "n", xaxt = "n")  
+  par(mar = c(5,2,2,2))
+  image(x = x, col = land_cols, yaxt = "n", xaxt = "n")
 
 }
 
