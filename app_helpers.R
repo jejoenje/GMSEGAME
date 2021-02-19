@@ -20,7 +20,7 @@ plot_pop = function(dat, yrange = 10, track_range = TRUE, extinction_message = F
   if(extinction_message == TRUE) text(x = length(obs)/2, 
                                       y = max(obs, na.rm=T)*1.8, 
                                       "Population wiped out!", 
-                                      col = "red", cex = 4)
+                                      col = "#D35E60", cex = 3.5)
   
 }
 

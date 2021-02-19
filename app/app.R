@@ -102,7 +102,9 @@ ui <- fluidPage(
                 column(3, wellPanel(
                     plotOutput("land_plot",width = "100%")
                 )),
-                column(3, wellPanel("block3")),
+                column(3, wellPanel(
+                    plotOutput("actions_sum",width = "100%")
+                )),
                 column(1)
             ),
             fluidRow(
@@ -366,6 +368,14 @@ server <- function(input, output, session) {
                xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
         fig2
+    })
+    
+    output$actions_sum <- renderPlot({
+        yhi = ceiling(max(GDATA$summary[,c("culls","scares","tend_crops")],na.rm=T)/10)*10
+        barplot(GDATA$summary[nrow(GDATA$summary)-1,c("culls","scares","tend_crops")], 
+                col = c("#D35E60","#9067A7","#56BA47"), ylim = c(0,yhi), names = c("Culls","Scares","Tend crop"), 
+                las = 2,
+                ylab = "Total number of actions")
     })
     
     output$budget_total <- renderText({ 
