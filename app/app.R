@@ -93,39 +93,49 @@ ui <- fluidPage(
         
         ),
         tabPanel(title = "", value = "Main",
-            h3("Main Panel"),
-            column(1),
-            column(5,
-                fluidRow(
-                    plotOutput("pop_plot",width = "95%")
-                ),
-                fluidRow(
-                    plotOutput("land_plot",width = "95%")
-                )
-            ),
-            column(5,
-                fluidRow(
-                    column(4,
-                           sliderInput("culling_cost_in", "Culling cost", 
-                                       min = 10, max = (d.MANAGER_BUDGET/10)+10, value = 99, step = 10, width = "90%"),
-                           sliderInput("scaring_cost_in", "Scaring cost", 
-                                       min = 10, max = (d.MANAGER_BUDGET/10)+10, value = 99, step = 10, width = "90%"),
-                           ),
-                    column(8,
-                           plotly::plotlyOutput("budget_pie")
-                           )
-                ),
-                actionButton("nextStep", "Next step"),
-                actionButton("resetGame", "Reset game"),
-                textOutput("budget_total"),
-                fluidRow(tableOutput("df_data_out"))
-            ),
-            column(1),
-                 
-
             
-                 
-        )
+            fluidRow(
+                column(1),
+                column(4, wellPanel(
+                    plotOutput("pop_plot",width = "100%")
+                )),
+                column(3, wellPanel(
+                    plotOutput("land_plot",width = "100%")
+                )),
+                column(3, wellPanel("block3")),
+                column(1)
+            ),
+            fluidRow(
+                column(2),
+                column(8, wellPanel(style = "background: white",
+                    
+                    div(style="display:inline-block; vertical-align: middle;", 
+                        plotly::plotlyOutput("budget_pie", height = 200, width = 200)    
+                    ),
+                    div(style="display:inline-block; vertical-align: top; padding-left: 2em; padding-right: 2em", 
+                        span("Budget remaining", style="color:#D35E60; font-size:200%"),
+                        span(textOutput("budgetRemaining"), style="color:#D35E60; font-size:400%; font-weight: bold")
+                    ),
+                    div(style="display:inline-block; vertical-align: middle; padding-left: 4em; padding-right: 4em", 
+                        sliderInput("culling_cost_in", "Culling cost", 
+                                    min = 10, max = (d.MANAGER_BUDGET/10)+10, value = 99, step = 10, width = 300),
+                        sliderInput("scaring_cost_in", "Scaring cost", 
+                                    min = 10, max = (d.MANAGER_BUDGET/10)+10, value = 99, step = 10, width = 300)
+                    ),
+                    div(style="display:inline-block; vertical-align: middle; padding-left: 2em", 
+                        actionButton("nextStep", "GO !", width = 150,
+                                     icon("paper-plane"), 
+                                     style="font-size:200%; color: #fff; background-color: #D35E60; font-weight: bold"
+                                     ),br(),
+                        br(),
+                        actionButton("resetGame", "Reset game")
+                    )
+                    
+                )),
+                column(2)
+            )
+            
+        ) # e/o tabPanel
     )
     
 )
@@ -349,8 +359,9 @@ server <- function(input, output, session) {
                        hoverinfo = 'percent',
                        text = ~paste('$', V1),
                        marker = list(colors = colors, line = list(color = '#000000', width = 0)))
-        layout(fig2, title = 'Budget allocation', 
-               #font = tfont, 
+        fig2 = layout(fig2,
+               #font = tfont,
+               margin = list(l = 1, r = 1, b = 0, t = 0, pad = 0),
                showlegend = FALSE,
                xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
@@ -363,6 +374,10 @@ server <- function(input, output, session) {
               "Scaring: ", CURRENT_BUDGET$scaring, "\\n",
               "Leftover: ", CURRENT_BUDGET$leftover
               )
+    })
+    
+    output$budgetRemaining <- renderText({
+        paste("$", CURRENT_BUDGET$leftover)
     })
     
 }
