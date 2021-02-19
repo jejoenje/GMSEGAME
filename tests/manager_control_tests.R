@@ -1,6 +1,6 @@
 # library(devtools)
 # install_github("ConFooBio/gmse", ref = "man_control")
-
+library(GMSE)
 rm(list=ls())
 
 call_bogus_for_debug = function(res_mod  = resource, 

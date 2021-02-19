@@ -1,6 +1,8 @@
 library(shiny)
 library(shinyjs)
 library(plotly)
+#library(devtools)
+#install_github("ConFooBio/gmse", ref = "man_control")
 library(GMSE)
 source("../app_helpers.R")
 
@@ -96,14 +98,15 @@ ui <- fluidPage(
             
             fluidRow(
                 column(1),
-                column(4, wellPanel(
+                column(4, wellPanel(style = "background: white",
                     plotOutput("pop_plot",width = "100%")
                 )),
-                column(3, wellPanel(
+                column(3, wellPanel(style = "background: white",
                     plotOutput("land_plot",width = "100%")
                 )),
-                column(3, wellPanel(
-                    plotOutput("actions_sum",width = "100%")
+                column(3, wellPanel(style = "background: white",
+                    #plotOutput("actions_sum",width = "100%")
+                    plotOutput("actions_user",width = "100%")
                 )),
                 column(1)
             ),
@@ -370,12 +373,26 @@ server <- function(input, output, session) {
         fig2
     })
     
+    ### Plots actions in last time step summed across all users
     output$actions_sum <- renderPlot({
         yhi = ceiling(max(GDATA$summary[,c("culls","scares","tend_crops")],na.rm=T)/10)*10
         barplot(GDATA$summary[nrow(GDATA$summary)-1,c("culls","scares","tend_crops")], 
                 col = c("#D35E60","#9067A7","#56BA47"), ylim = c(0,yhi), names = c("Culls","Scares","Tend crop"), 
                 las = 2,
                 ylab = "Total number of actions")
+    })
+    
+    ### Plots actions per user in last time step
+    output$actions_user <- renderPlot({
+        # Extract all previous actions per user:
+        prev_acts = GDATA$laststep$PREV_ACTS
+        scare_cull = prev_acts[1,c(9,8),2:dim(prev_acts)[3]]
+        tend_crops = prev_acts[2,10,2:dim(prev_acts)[3]] 
+        # rows: scares, culls, tend_crops:
+        acts = rbind(scare_cull,t(as.matrix(tend_crops)))
+        par(mar = c(5,5,2,1.5))
+        barplot(acts, beside = FALSE, col = c("#D35E60","#9067A7","#56BA47"), space = 0.1, 
+                names = c(1:ncol(acts)), ylab = "Actions", xlab = "Stakeholder", cex.lab = 2, cex.axis = 1.5, cex.names = 1.5)
     })
     
     output$budget_total <- renderText({ 
