@@ -23,6 +23,8 @@ d.TEND_CROPS = TRUE
 d.SHOWSUGGESTED = FALSE
 d.K = 5
 
+NEWSESSION = TRUE
+
 ui <- fluidPage(
     useShinyjs(),
     
@@ -150,9 +152,20 @@ server <- function(input, output, session) {
     GDATA = reactiveValues(summary = NULL, laststep = NULL, observed_suggested = NULL, yields = NULL)
     CHECK = reactiveValues(extinction = FALSE)
     CURRENT_BUDGET = reactiveValues(total = NULL, culling = NULL, scaring = NULL, leftover = NULL)
+    NEWSESSION = reactiveValues(check = TRUE)
     
     observeEvent(input$runGame, {
         toggleSetup("Main")
+        
+        if(NEWSESSION$check == TRUE) {
+            showModal(modalDialog(size = "l", footer = modalButton("OK!"),
+                title = "Welcome to GMSE-GAME!",
+                "This dialog will contain some initial explanation of how the game works, what the elements of the screen are, etc.",
+                p(),
+                "This message will only be shown once, so not after the game is reset."
+            ))
+            NEWSESSION$check = FALSE
+        }
         
         ### Initial time steps:
         land_colors <<- sample(grey.colors(input$STAKEHOLDERS))
@@ -216,6 +229,28 @@ server <- function(input, output, session) {
     })
     
     observeEvent(input$resetInputs, {
+        showModal(
+            modalDialog(
+                size = "m", 
+                footer = NULL,
+                easyClose = TRUE,
+                title = "Warning!",
+                "This will reset all inputs to their default values.",
+                p(),
+                div(style="float:left", actionButton("resetInputs_cancel","Cancel")),
+                div(style="float:right", actionButton("resetInputs_ok","Reset")),
+                br(),
+                p(" "),
+            )
+        )
+    })
+    
+    observeEvent(input$resetInputs_cancel, {
+        removeModal()
+    })
+    
+    observeEvent(input$resetInputs_ok, {
+        removeModal()
         updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "LAND_OWNERSHIP", value = d.LAND_OWNERSHIP)
         updateSliderInput(session = getDefaultReactiveDomain(), inputId = "STAKEHOLDERS", value = d.STAKEHOLDERS)
         updateSliderInput(session = getDefaultReactiveDomain(), inputId = "MANAGER_BUDGET", value = d.MANAGER_BUDGET)
@@ -234,13 +269,47 @@ server <- function(input, output, session) {
         updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "SHOWSUGGESTED", value = d.SHOWSUGGESTED)
     })
     
+    
     observeEvent(input$resetGame, {
+        showModal(
+            modalDialog(
+                size = "m", 
+                footer = NULL,
+                easyClose = TRUE,
+                title = "Warning!",
+                "This will end the game and take you back to the start!",
+                p(),
+                div(style="float:left", actionButton("reset_cancel","Cancel")),
+                div(style="float:right", actionButton("reset_ok","Reset")),
+                br(),
+                p(" "),
+            )
+        )
+    })
+    
+    observeEvent(input$reset_cancel, {
+        removeModal()
+    })
+    
+    observeEvent(input$reset_ok, {
+        removeModal()
         toggleSetup("Setup")
+        GDATA$summary = NULL
+        GDATA$laststep = NULL
+        GDATA$observed_suggested = NULL
+        GDATA$yields = NULL
+        CHECK$extinction = FALSE
+        CURRENT_BUDGET$total = NULL
+        CURRENT_BUDGET$culling = NULL
+        CURRENT_BUDGET$scaring = NULL
+        CURRENT_BUDGET$leftover = NULL
+        
         CHECK$extinction = FALSE
         enable(id = "nextStep")
         enable(id = "culling_cost_in")
         enable(id = "scaring_cost_in")
     })
+    
     
     ### When CULLING cost is adjusted, update budget and check if still within limits. If not, adjust SCARING.
     observeEvent(input$culling_cost_in, {
@@ -335,74 +404,79 @@ server <- function(input, output, session) {
     })
     
     output$pop_plot <- renderPlot({
-        plot_pop(GDATA$summary, yield_dat = GDATA$yields, track_range = FALSE, extinction_message = CHECK$extinction)
+        if(!is.null(GDATA$summary)) {
+            plot_pop(GDATA$summary, yield_dat = GDATA$yields, track_range = FALSE, extinction_message = CHECK$extinction)    
+        }
     })
     
     output$land_plot <- renderPlot({
-        plot_land_res(GDATA$laststep$LAND, GDATA$laststep$RESOURCES, 
-                      col = land_colors, extinction_message = CHECK$extinction)
+        if(!is.null(GDATA$laststep)) {
+            plot_land_res(GDATA$laststep$LAND, GDATA$laststep$RESOURCES, 
+                          col = land_colors, extinction_message = CHECK$extinction)
+            
+        }
     })
     
     output$budget_bar <- renderPlot({
-        par(oma = c(0.5,0.5,0.5,0.5))
-        par(mar = c(0.5,0.5,0.5,0.5))
-        #par(mfrow = c(1,2))
-        plotdat = matrix(c(CURRENT_BUDGET$culling, CURRENT_BUDGET$scaring, CURRENT_BUDGET$leftover), nrow = 3, ncol = 1)
-        barplot(plotdat, col = c("#f46d43","#3288bd","#abdda4"), yaxt = "n", border = NA)
-        #plot(x=1,y=1, ylim=c(0,CURRENT_BUDGET$total), type ="n", xaxt = "n", yaxt = "n", xlab ="n", ylab = "n", bty = "n")
-        #text(0.75, 300, "test", adj = 0, cex = 3, )
+        if(!is.null(CURRENT_BUDGET$culling)) {
+            par(oma = c(0.5,0.5,0.5,0.5))
+            par(mar = c(0.5,0.5,0.5,0.5))
+            #par(mfrow = c(1,2))
+            plotdat = matrix(c(CURRENT_BUDGET$culling, CURRENT_BUDGET$scaring, CURRENT_BUDGET$leftover), nrow = 3, ncol = 1)
+            barplot(plotdat, col = c("#f46d43","#3288bd","#abdda4"), yaxt = "n", border = NA)
+            #plot(x=1,y=1, ylim=c(0,CURRENT_BUDGET$total), type ="n", xaxt = "n", yaxt = "n", xlab ="n", ylab = "n", bty = "n")
+            #text(0.75, 300, "test", adj = 0, cex = 3, )
+        }
     })
     
     output$budget_pie <- plotly::renderPlotly({
-        plotdat = matrix(c(CURRENT_BUDGET$culling, CURRENT_BUDGET$scaring, CURRENT_BUDGET$leftover), nrow = 3, ncol = 1)
-        plotdat = as.data.frame(plotdat, row.names = c("Culling","Scaring","Available"))
-        plotdat$items = row.names(plotdat)
-        colors = c("rgb(211,94,96)","rgb(144,103,167)","rgb(240, 245, 245)")
-        #tfont = list(family = "sans serif", size = 22)
-        fig2 = plot_ly(plotdat, 
-                       labels = ~items, values = ~V1, type = "pie", 
-                       textinfo = 'text+label',
-                       #textfont = tfont,
-                       hoverinfo = 'percent',
-                       text = ~paste('$', V1),
-                       marker = list(colors = colors, line = list(color = '#000000', width = 0)))
-        fig2 = layout(fig2,
-               #font = tfont,
-               margin = list(l = 1, r = 1, b = 0, t = 0, pad = 0),
-               showlegend = FALSE,
-               xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-        fig2
+        if(!is.null(CURRENT_BUDGET$culling)) {
+            plotdat = matrix(c(CURRENT_BUDGET$culling, CURRENT_BUDGET$scaring, CURRENT_BUDGET$leftover), nrow = 3, ncol = 1)
+            plotdat = as.data.frame(plotdat, row.names = c("Culling","Scaring","Available"))
+            plotdat$items = row.names(plotdat)
+            colors = c("rgb(211,94,96)","rgb(144,103,167)","rgb(240, 245, 245)")
+            #tfont = list(family = "sans serif", size = 22)
+            fig2 = plot_ly(plotdat, 
+                           labels = ~items, values = ~V1, type = "pie", 
+                           textinfo = 'text+label',
+                           #textfont = tfont,
+                           hoverinfo = 'percent',
+                           text = ~paste('$', V1),
+                           marker = list(colors = colors, line = list(color = '#000000', width = 0)))
+            fig2 = layout(fig2,
+                          #font = tfont,
+                          margin = list(l = 1, r = 1, b = 0, t = 0, pad = 0),
+                          showlegend = FALSE,
+                          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+            fig2
+        }
     })
     
     ### Plots actions in last time step summed across all users
     output$actions_sum <- renderPlot({
-        yhi = ceiling(max(GDATA$summary[,c("culls","scares","tend_crops")],na.rm=T)/10)*10
-        barplot(GDATA$summary[nrow(GDATA$summary)-1,c("culls","scares","tend_crops")], 
-                col = c("#D35E60","#9067A7","#56BA47"), ylim = c(0,yhi), names = c("Culls","Scares","Tend crop"), 
-                las = 2,
-                ylab = "Total number of actions")
+        if(!is.null(GDATA$summary)) {
+            yhi = ceiling(max(GDATA$summary[,c("culls","scares","tend_crops")],na.rm=T)/10)*10
+            barplot(GDATA$summary[nrow(GDATA$summary)-1,c("culls","scares","tend_crops")], 
+                    col = c("#D35E60","#9067A7","#56BA47"), ylim = c(0,yhi), names = c("Culls","Scares","Tend crop"), 
+                    las = 2,
+                    ylab = "Total number of actions")    
+        }
     })
     
     ### Plots actions per user in last time step
     output$actions_user <- renderPlot({
-        # Extract all previous actions per user:
-        prev_acts = GDATA$laststep$PREV_ACTS
-        scare_cull = prev_acts[1,c(9,8),2:dim(prev_acts)[3]]
-        tend_crops = prev_acts[2,10,2:dim(prev_acts)[3]] 
-        # rows: scares, culls, tend_crops:
-        acts = rbind(scare_cull,t(as.matrix(tend_crops)))
-        par(mar = c(5,5,2,1.5))
-        barplot(acts, beside = FALSE, col = c("#D35E60","#9067A7","#56BA47"), space = 0.1, 
-                names = c(1:ncol(acts)), ylab = "Actions", xlab = "Stakeholder", cex.lab = 2, cex.axis = 1.5, cex.names = 1.5)
-    })
-    
-    output$budget_total <- renderText({ 
-        paste("Total budget: ", CURRENT_BUDGET$total, "\\n",
-              "Culling: ", CURRENT_BUDGET$culling, "\\n",
-              "Scaring: ", CURRENT_BUDGET$scaring, "\\n",
-              "Leftover: ", CURRENT_BUDGET$leftover
-              )
+        if(!is.null(GDATA$laststep)) {
+            # Extract all previous actions per user:
+            prev_acts = GDATA$laststep$PREV_ACTS
+            scare_cull = prev_acts[1,c(9,8),2:dim(prev_acts)[3]]
+            tend_crops = prev_acts[2,10,2:dim(prev_acts)[3]] 
+            # rows: scares, culls, tend_crops:
+            acts = rbind(scare_cull,t(as.matrix(tend_crops)))
+            par(mar = c(5,5,2,1.5))
+            barplot(acts, beside = FALSE, col = c("#D35E60","#9067A7","#56BA47"), space = 0.1, 
+                    names = c(1:ncol(acts)), ylab = "Actions", xlab = "Stakeholder", cex.lab = 2, cex.axis = 1.5, cex.names = 1.5)    
+        }
     })
     
     output$budgetRemaining <- renderText({
