@@ -38,10 +38,18 @@ plot_pop = function(dat, yield_dat = NULL, yrange = 10, track_range = TRUE, exti
   }
   
   # The below needs amending for when yield data is added.
-  if(extinction_message == TRUE) text(x = length(obs)/2, 
-                                      y = max(obs, na.rm=T)*1.8, 
-                                      "Population wiped out!", 
-                                      col = "#D35E60", cex = 3.5)
+  if(extinction_message == TRUE) {
+    if(!is.null(yield_dat)) {
+      ext_mess_pos = max(yield_dat)*1.1
+    } else {
+      ext_mess_pos = max(obs, na.rm=T)*1.8
+    }
+
+    text(x = length(obs)/2, 
+         y = ext_mess_pos,
+         "Population wiped out!", 
+         col = "#D35E60", cex = 2.5)
+  }
   
 }
 
