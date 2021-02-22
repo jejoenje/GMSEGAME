@@ -147,7 +147,7 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
     
-    GDATA = reactiveValues(summary = NULL, laststep = NULL, observed_suggested = NULL)
+    GDATA = reactiveValues(summary = NULL, laststep = NULL, observed_suggested = NULL, yields = NULL)
     CHECK = reactiveValues(extinction = FALSE)
     CURRENT_BUDGET = reactiveValues(total = NULL, culling = NULL, scaring = NULL, leftover = NULL)
     
@@ -175,6 +175,7 @@ server <- function(input, output, session) {
         GDATA$summary = initdata$summary
         GDATA$laststep = initdata$gmse_list[[length(initdata$gmse_list)]]
         GDATA$observed_suggested = initdata$observed_suggested
+        GDATA$yields = get_init_yields(initdata$gmse_list)
         
         if(input$SHOWSUGGESTED==TRUE) {
             
@@ -311,6 +312,7 @@ server <- function(input, output, session) {
             
             # Add appropriate outputs.
             GDATA$summary = append_UROM_output(dat = nxt, costs = costs_as_input, old_output = GDATA$summary)
+            GDATA$yields = add_yields(nxt, GDATA$yields)
             # Reset time step
             GDATA$laststep = nxt
 
@@ -333,7 +335,7 @@ server <- function(input, output, session) {
     })
     
     output$pop_plot <- renderPlot({
-        plot_pop(GDATA$summary, track_range = FALSE, extinction_message = CHECK$extinction)
+        plot_pop(GDATA$summary, yield_dat = GDATA$yields, track_range = FALSE, extinction_message = CHECK$extinction)
     })
     
     output$land_plot <- renderPlot({

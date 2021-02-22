@@ -1,5 +1,9 @@
 
-plot_pop = function(dat, yrange = 10, track_range = TRUE, extinction_message = FALSE) {
+list.to.df = function(l) {
+  return(data.frame(matrix(unlist(l), nrow=length(l), byrow=T)))
+}
+
+plot_pop = function(dat, yield_dat = NULL, yrange = 10, track_range = TRUE, extinction_message = FALSE) {
   obs = dat[,"obs"]
   t = 1:nrow(dat)
   if(length(obs)<yrange) {
@@ -11,7 +15,7 @@ plot_pop = function(dat, yrange = 10, track_range = TRUE, extinction_message = F
     t = tail(t, yrange)
   }
   
-  par(mar = c(5,5,2,1.5))
+  par(mar = c(5,5,2,5))
   
   plot(t, obs, ylim = c(0, max(obs, na.rm=T)*2), 
        type = "b", pch = 21, col = "black", bg = "grey", lwd = 2, xaxt = "n",
@@ -20,11 +24,40 @@ plot_pop = function(dat, yrange = 10, track_range = TRUE, extinction_message = F
   points(tail(t[!is.na(obs)],1),tail(obs[!is.na(obs)],1), 
          pch = 21, col = "black", bg = "red", lwd = 2, cex = 2)
   
+  if(!is.null(yield_dat)) {
+    par(new = T)
+    yield_ylim = c(0, round(max(yield_dat)*1.25,2))
+    #yield_pos = seq(yield_ylim[1],yield_ylim[2],(yield_ylim[2]-yield_ylim[1])/6)
+    #yield_labs = yield_pos*100
+    plot(yield_dat[,1], type = "n", col = "darkgreen", xaxt = "n", yaxt = "n", xlab = "", ylab = "", ylim = yield_ylim)
+    apply(yield_dat, 2, function(x) lines(x, col = "darkgreen"))
+    #axis(4, at = yield_pos, labels = yield_labs, col.ticks = "darkgreen")
+    axis(4, col.ticks = "darkgreen")
+    mtext("Yield %",side = 4,cex = 2, line = 3, col = "darkgreen")
+    abline(h=1, col = "darkgreen", lty = "dashed")
+  }
+  
+  # The below needs amending for when yield data is added.
   if(extinction_message == TRUE) text(x = length(obs)/2, 
                                       y = max(obs, na.rm=T)*1.8, 
                                       "Population wiped out!", 
                                       col = "#D35E60", cex = 3.5)
   
+}
+
+### Takes a list of GMSE apply objects and extracts the mean or total yields across all users
+get_init_yields = function(x, type = "mean") {
+  if(type == "mean") {
+    mn_ylds = lapply(x, function(x) tapply(x$LAND[,,2], x$LAND[,,3],mean))
+    mn_ylds = list.to.df(mn_ylds)
+    return(mn_ylds)
+  }
+}
+
+# Takes a GMSE apply object (new_yields), calculates yields per user, and appends to existint "yields"
+#  table as output by get_init_yields().
+add_yields = function(new_yields, yields) {
+  rbind(yields, tapply(new_yields$LAND[,,2],new_yields$LAND[,,3],mean))
 }
 
 plot_land = function(x, cols = NULL) {
