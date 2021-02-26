@@ -1,6 +1,6 @@
-# library(devtools)
-# install_github("ConFooBio/gmse", ref = "man_control")
-library(GMSE) 
+#library(devtools)
+#install_github("ConFooBio/gmse", ref = "man_control")
+#library(GMSE) 
 rm(list=ls())
 
 call_bogus_for_debug = function(res_mod  = resource, 
@@ -40,15 +40,15 @@ prev = init_steps$gmse_list[[length(init_steps$gmse_list)]]
 init_steps$summary
 init_steps$observed_suggested
 
-YIELD = get_init_yields(init_steps$gmse_list)
+YIELD = init_steps$prev_yield
 
 #par(mfrow = c(1,2))
 plot_pop(output, yield_dat = YIELD, track_range = FALSE)
-plot_land_res(prev$LAND, prev$RESOURCES)
+#plot_land_res(prev$LAND, prev$RESOURCES)
 output
 
 ### User input
-costs_as_input = list(culling = 100, scaring = 10)
+costs_as_input = list(culling = 40, scaring = 100)
 prev = set_man_costs(prev, newcost = costs_as_input)
 
 ### Run next time step:
@@ -57,17 +57,18 @@ nxt = try({gmse_apply_UROM(get_res = "Full", old_list = prev)}, silent = TRUE)
 if(class(nxt)!="try-error") {
     # Add appropriate outputs.
     output = append_UROM_output(dat = nxt, costs = costs_as_input, old_output = output)
-    #YIELD = rbind(YIELD, tapply(nxt$LAND[,,2],nxt$LAND[,,3],mean))
-    YIELD = add_yields(nxt, YIELD)
+    #YIELD = add_yields(nxt, YIELD)
+    YIELD = rbind(YIELD, tapply(nxt$LAND[,,2],nxt$LAND[,,3],mean)) # Store per-user yield (before reset)
     # Reset time step
+    nxt$LAND[,,2] = 1    # Reset landscape yield
     prev = nxt
     
     ### Output new results:
     observed_suggested(prev)
     output
-    par(mfrow = c(1,2))
+    #par(mfrow = c(1,2))
     plot_pop(output, yield_dat = YIELD, track_range = FALSE)
-    plot_land_res(prev$LAND, prev$RESOURCES)
+    #plot_land_res(prev$LAND, prev$RESOURCES)
     output
 } else {
     print("STOP - POPULATION WIPED OUT")

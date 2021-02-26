@@ -9,10 +9,16 @@ plot_pop = function(dat, yield_dat = NULL, yrange = 10, track_range = TRUE, exti
   if(length(obs)<yrange) {
     obs = c(obs, rep(NA, yrange-length(obs)))
     t = c(t, (tail(t,1)+1):yrange)
+    
+    if(!is.null(yield_dat)) {
+      yield_dat = rbind(yield_dat, matrix(NA, ncol = ncol(yield_dat), nrow = yrange-nrow(yield_dat)))
+    }
+    
   }
   if(length(obs)>yrange & track_range == TRUE) {
     obs = tail(obs, yrange)
     t = tail(t, yrange)
+    yield_dat = tail(yield_dat, yrange)
   }
   
   par(mar = c(5,5,2,5))
@@ -26,7 +32,7 @@ plot_pop = function(dat, yield_dat = NULL, yrange = 10, track_range = TRUE, exti
   
   if(!is.null(yield_dat)) {
     par(new = T)
-    yield_ylim = c(0, round(max(yield_dat)*1.25,2))
+    yield_ylim = c(0, round(max(yield_dat, na.rm=T)*1.25,2))
     #yield_pos = seq(yield_ylim[1],yield_ylim[2],(yield_ylim[2]-yield_ylim[1])/6)
     #yield_labs = yield_pos*100
     plot(yield_dat[,1], type = "n", col = "darkgreen", xaxt = "n", yaxt = "n", xlab = "", ylab = "", ylim = yield_ylim)
@@ -51,6 +57,69 @@ plot_pop = function(dat, yield_dat = NULL, yrange = 10, track_range = TRUE, exti
          col = "#D35E60", cex = 2.5)
   }
   
+}
+
+plot_traj = function(dat, yield_dat = NULL) {
+
+  dat$t = 1:nrow(dat)
+  if(!is.null(yield_dat)) {
+    n_yield = ncol(yield_dat)
+    names(yield_dat) = paste("Y",1:n_yield,sep="")
+    dat = cbind(dat, yield_dat)
+  } else {
+    n_yield = 0 
+  }
+  
+  ax = list(title = "Time step", 
+            showgrid = FALSE, 
+            zeroline = FALSE, 
+            showline = TRUE, 
+            range = c(-1,51), 
+            ticks = "outside", 
+            mirror = TRUE, 
+            linewidth = 1)
+  ay = list(title = "Observed population size", 
+            showgrid = FALSE, 
+            zeroline = FALSE, 
+            showline = TRUE, 
+            range = c(0,ceiling(max(dat$obs)*1.1)), 
+            ticks = "outside", 
+            linewidth = 1)
+  ay2 = list(title = "Yield (proportion of max)", 
+             showgrid = FALSE, 
+             zeroline = FALSE, 
+             showline = TRUE, 
+             overlaying = "y", 
+             ticks = "outside", 
+             linewidth = 1, 
+             side = "right", 
+             range = c(-5,60))
+  
+  p = plot_ly(dat)
+  p = add_trace(p, x = ~t, y = ~obs, mode = "lines+markers",
+                line = list(color = "#000000"),
+                marker = list(
+                  color = "#757575",
+                  size = 10,
+                  line = list(
+                    color = "#000000",
+                    width = 2)
+                )
+  )
+  p = add_trace(p, x = tail(dat$t,1), y = tail(dat$obs,1),
+                marker = list(
+                  color = '#FF0000',
+                  size = 15,
+                  line = list(
+                    color = "#000000",
+                    width = 3
+                  )
+                )
+  )
+  p = layout(p, xaxis = ax, yaxis = ay)
+  p
+  
+   
 }
 
 ### Takes a list of GMSE apply objects and extracts the mean or total yields across all users

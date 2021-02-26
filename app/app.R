@@ -1,8 +1,8 @@
 library(shiny)
 library(shinyjs)
 library(plotly)
-#library(devtools)
-#install_github("ConFooBio/gmse", ref = "man_control")
+# library(devtools)
+# install_github("ConFooBio/gmse", ref = "man_control")
 library(GMSE)
 source("../app_helpers.R")
 
@@ -142,7 +142,11 @@ ui <- fluidPage(
                 column(2)
             )
             
-        ) # e/o tabPanel
+        ), # e/o tabPanel
+        tabPanel(title = "", value = "Testing",
+            tableOutput("df_data_out"),
+            tableOutput("df_yield_out")
+        )  # e/o testing tabPanel
     )
     
 )
@@ -188,7 +192,7 @@ server <- function(input, output, session) {
         GDATA$summary = initdata$summary
         GDATA$laststep = initdata$gmse_list[[length(initdata$gmse_list)]]
         GDATA$observed_suggested = initdata$observed_suggested
-        GDATA$yields = get_init_yields(initdata$gmse_list)
+        GDATA$yields = initdata$prev_yield
         
         if(input$SHOWSUGGESTED==TRUE) {
             
@@ -381,8 +385,9 @@ server <- function(input, output, session) {
             
             # Add appropriate outputs.
             GDATA$summary = append_UROM_output(dat = nxt, costs = costs_as_input, old_output = GDATA$summary)
-            GDATA$yields = add_yields(nxt, GDATA$yields)
+            GDATA$yields = rbind(GDATA$yields, tapply(nxt$LAND[,,2],nxt$LAND[,,3],mean)) # Store per-user yield (before reset)
             # Reset time step
+            nxt$LAND[,,2] = 1    # Reset landscape yield
             GDATA$laststep = nxt
 
         } else {
@@ -400,6 +405,11 @@ server <- function(input, output, session) {
     
     output$df_data_out <- renderTable({
         temp = GDATA$summary
+        temp[order(1:nrow(temp), decreasing = TRUE),]
+    })
+    
+    output$df_yield_out <- renderTable({
+        temp = GDATA$yields
         temp[order(1:nrow(temp), decreasing = TRUE),]
     })
     
