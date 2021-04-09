@@ -90,6 +90,11 @@ ui <- fluidPage(
                     br(),
                     actionButton("runGame", "GO!", icon = icon("gamepad")),
                     actionButton("resetInputs", "Reset settings")
+                ),
+                wellPanel(style = "background: white",
+                    h3("Session info"),
+                    verbatimTextOutput("clientdataText"),
+                    verbatimTextOutput("sessiontoken")
                 )
             ),
         
@@ -152,6 +157,9 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
+    
+    # client data storage
+    cdata <- session$clientData
     
     GDATA = reactiveValues(summary = NULL, laststep = NULL, observed_suggested = NULL, yields = NULL)
     CHECK = reactiveValues(extinction = FALSE)
@@ -490,6 +498,19 @@ server <- function(input, output, session) {
     
     output$budgetRemaining <- renderText({
         paste("$", CURRENT_BUDGET$leftover)
+    })
+    
+    output$clientdataText <- renderText({
+        cnames <- names(cdata)
+        
+        allvalues <- lapply(cnames, function(name) {
+            paste(name, cdata[[name]], sep = " = ")
+        })
+        paste(allvalues, collapse = "\n")
+    })
+    
+    output$sessiontoken = renderText({
+        session$token
     })
     
 }
