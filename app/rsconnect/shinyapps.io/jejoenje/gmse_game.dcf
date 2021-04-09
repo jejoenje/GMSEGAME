@@ -1,0 +1,12 @@
+name: gmse_game
+title: gmse_game
+username:
+account: jejoenje
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3884762
+bundleId: 4412297
+url: https://jejoenje.shinyapps.io/gmse_game/
+when: 1617119074.2915
+asMultiple: FALSE
+asStatic: FALSE

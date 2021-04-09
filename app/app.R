@@ -1,10 +1,10 @@
 library(shiny)
 library(shinyjs)
 library(plotly)
-# library(devtools)
+### GMSE INSTALLATION SHOULD BE SPECIFIC man_control branch!
 # install_github("ConFooBio/gmse", ref = "man_control")
 library(GMSE)
-source("../app_helpers.R")
+source("app_helpers.R")
 
 d.LAND_OWNERSHIP = TRUE
 d.STAKEHOLDERS = 4
@@ -361,7 +361,7 @@ server <- function(input, output, session) {
     })
     
     observeEvent(input$nextStep, {
-        
+
         ### User input
         costs_as_input = list(culling = input$culling_cost_in, scaring = input$scaring_cost_in)
         prev = GDATA$laststep
@@ -399,7 +399,6 @@ server <- function(input, output, session) {
             toggleState("scaring_cost_in")
             
         }
-        
         
     })
     
