@@ -1,375 +1,196 @@
 library(shiny)
 library(shinyjs)
+#library(shinybusy)
+library(waiter)
 library(plotly)
-### GMSE INSTALLATION SHOULD BE SPECIFIC man_control branch!
-# install_github("ConFooBio/gmse", ref = "man_control")
-library(GMSE)
-source("app_helpers.R")
+library(GMSE) # CURRENTLY NEEDS devtools::install_github("ConFooBio/GMSE", ref = "man_control")
 
-d.LAND_OWNERSHIP = TRUE
-d.STAKEHOLDERS = 4
-d.MANAGER_BUDGET = 1000
-d.MANAGE_TARGET = 2000
-d.OBSERVE_TYPE = 0
-d.RES_MOVE_OBS = TRUE
-d.RES_DEATH_K = 5000
-d.LAMBDA = 0.3
-d.RES_DEATH_TYPE = 3
-d.REMOVE_PR = 0.05
-d.USER_BUDGET = 1500
-d.CULLING = TRUE
-d.SCARING = TRUE
-d.TEND_CROPS = TRUE
-d.SHOWSUGGESTED = FALSE
-d.K = 5
+source("app_helpers.R")
+source("infoDialogs.R")
+
+LAND_OWNERSHIP <<- TRUE
+STAKEHOLDERS  <<- 4
+MANAGER_BUDGET  <<- 1000
+MANAGE_TARGET  <<- 2000
+OBSERVE_TYPE  <<- 0
+RES_MOVE_OBS  <<- TRUE
+RES_DEATH_K  <<- 5000
+LAMBDA <<- 0.3
+RES_DEATH_TYPE  <<- 3
+REMOVE_PR <<- 0.05
+USER_BUDGET <<- 1500
+CULLING <<- TRUE
+SCARING <<- TRUE
+TEND_CROPS  <<- TRUE
+SHOWSUGGESTED  <<- FALSE
+INIT_SCARING_COST <<- 55
+INIT_CULLING_COST <<- 55
+K  <<- 5
+land_colors <<- sample(grey.colors(STAKEHOLDERS))
 
 NEWSESSION = TRUE
+START_OK = FALSE
+RESET_ME = FALSE
+
+initGame = function() {
+    gdata = list()
+    initdata = init_man_control(K = K)
+    gdata$summary = initdata$summary
+    gdata$laststep = initdata$gmse_list[[length(initdata$gmse_list)]]
+    gdata$observed_suggested = initdata$observed_suggested
+    gdata$yields = initdata$prev_yield
+    return(gdata)
+}
+
+initBudget = function() {
+    budget = list(
+        total = MANAGER_BUDGET+2*10*10,
+        culling = INIT_CULLING_COST*10,
+        scaring = INIT_SCARING_COST*10,
+        remaining = (MANAGER_BUDGET+2*10*10)-(INIT_CULLING_COST*10+INIT_SCARING_COST*10)
+    )
+    return(budget)
+}
+
+updateCurrentBudget = function(budget, manager_budget, culling_cost, scaring_cost) {
+    budget$total = manager_budget+2*10*10
+    budget$culling = culling_cost*10
+    budget$scaring = scaring_cost*10
+    budget$leftover = budget$total-(budget$culling+budget$scaring)
+    return(budget)
+}
+
+reset_waiting_screen <- tagList(
+    spin_flower(),
+    h4("Running initial time steps...")
+) 
+
+gdata = initGame()
+budget = initBudget()
 
 ui <- fluidPage(
-    useShinyjs(),
+
+    ### from library(waiter)
+    use_waiter(), # include dependencies
+    #waiter_preloader(),
     
     titlePanel("GMSE-GAME"),
     
-    tabsetPanel(id = "MainPanels", selected = "Setup", type = "pills",
-        tabPanel(title = "", value = "Setup",
-            h3("Game setup"),
-            
-            column(1),
-            column(3,
-                wellPanel(
-                    h3("General environment"),
-                    disabled(checkboxInput("LAND_OWNERSHIP", strong("Land ownership"), value = d.LAND_OWNERSHIP)),
-                    sliderInput("STAKEHOLDERS", "No. of stakeholders (users)",
-                                min = 4, max = 32, value = d.STAKEHOLDERS, step = 1),
-                    sliderInput("MANAGER_BUDGET", "Manager budget",
-                                       min = 100, max = 5000, value = d.MANAGER_BUDGET, step = 100),
-                    sliderInput("MANAGE_TARGET", "Management population target (for initial time steps only)",
-                                       min = 500, max = 10000, value = d.MANAGE_TARGET, step = 100),
-                    selectInput("OBSERVE_TYPE", "Resource observation type", 
-                                       choices = list("Density-based" = 0,
-                                                      "Mark-recapture estimate" = 1, 
-                                                      "Transect sampling (linear)" = 2,
-                                                      "Transect sampling (block)" = 3
-                                                      ), selected = d.OBSERVE_TYPE),
-                    checkboxInput("RES_MOVE_OBS", strong("Resources move during observation"), value = d.RES_MOVE_OBS)
-                )    
-            ),
-                
-            column(3,
-                wellPanel(
-                    h3("Resource population controls"),
-                    sliderInput("RES_DEATH_K", "K (resource carrying capacity)",
-                                       min = 100, max = 10000, value = d.RES_DEATH_K, step = 100),
-                    sliderInput("LAMBDA", "Lambda (resource max growth rate)",
-                                       min = 0.1, max = 2, value = d.LAMBDA, step = 0.1),
-                    disabled(selectInput("RES_DEATH_TYPE", "Resource removal (death) type", 
-                                       choices = list("Density-independent" = 1, 
-                                                      "Density-dependent" = 2,
-                                                      "Both" = 3), selected = d.RES_DEATH_TYPE)),
-                    sliderInput("REMOVE_PR", "Fixed mortality probability",
-                                       min = 0, max = 0.95, value = d.REMOVE_PR, step = 0.05)
-                )
-            ),
-            
-            column(3,
-                wellPanel(
-                    h3("User action controls"),
-                    sliderInput("USER_BUDGET", "User budget",
-                                   min = 100, max = 5000, value = d.USER_BUDGET, step = 100),
-                    disabled(checkboxInput("CULLING", "Culling", value = d.CULLING)),
-                    disabled(checkboxInput("SCARING", "Scaring", value = d.SCARING)),
-                    disabled(checkboxInput("TEND_CROPS", "Tending crops", value = d.TEND_CROPS))
-                ),
-                wellPanel(style = "background: white",
-                    h3("Misc controls"),
-                    column(6,numericInput("K", "No. of initial time steps",
-                                          min = 2, max = 10, value = d.K, step = 1)
-                    ),
-                    column(6,checkboxInput("SHOWSUGGESTED", strong("Show suggested costs"), value = d.SHOWSUGGESTED)
-                           ),
-                    br(),
-                    actionButton("runGame", "GO!", icon = icon("gamepad")),
-                    actionButton("resetInputs", "Reset settings")
-                ),
-                wellPanel(style = "background: white",
-                    h3("Session info"),
-                    verbatimTextOutput("clientdataText"),
-                    verbatimTextOutput("sessiontoken")
-                )
-            ),
-        
-            column(2) 
-        
-        ),
-        tabPanel(title = "", value = "Main",
-            
-            fluidRow(
-                column(1),
-                column(4, wellPanel(style = "background: white",
-                    plotOutput("pop_plot",width = "100%")
-                )),
-                column(3, wellPanel(style = "background: white",
-                    plotOutput("land_plot",width = "100%")
-                )),
-                column(3, wellPanel(style = "background: white",
-                    #plotOutput("actions_sum",width = "100%")
-                    plotOutput("actions_user",width = "100%")
-                )),
-                column(1)
-            ),
-            fluidRow(
-                column(2),
-                column(8, wellPanel(style = "background: white",
-                    
-                    div(style="display:inline-block; vertical-align: middle;", 
-                        plotly::plotlyOutput("budget_pie", height = 200, width = 200)    
-                    ),
-                    div(style="display:inline-block; vertical-align: top; padding-left: 2em; padding-right: 2em", 
-                        span("Budget remaining", style="color:#D35E60; font-size:200%"),
-                        span(textOutput("budgetRemaining"), style="color:#D35E60; font-size:400%; font-weight: bold")
-                    ),
-                    div(style="display:inline-block; vertical-align: middle; padding-left: 4em; padding-right: 4em", 
-                        sliderInput("culling_cost_in", "Culling cost", 
-                                    min = 10, max = (d.MANAGER_BUDGET/10)+10, value = 99, step = 10, width = 300),
-                        sliderInput("scaring_cost_in", "Scaring cost", 
-                                    min = 10, max = (d.MANAGER_BUDGET/10)+10, value = 99, step = 10, width = 300)
-                    ),
-                    div(style="display:inline-block; vertical-align: middle; padding-left: 2em", 
-                        actionButton("nextStep", "GO !", width = 150,
-                                     icon("paper-plane"), 
-                                     style="font-size:200%; color: #fff; background-color: #D35E60; font-weight: bold"
-                                     ),br(),
-                        br(),
-                        actionButton("resetGame", "Reset game")
-                    )
-                    
-                )),
-                column(2)
-            )
-            
-        ), # e/o tabPanel
-        tabPanel(title = "", value = "Testing",
-            tableOutput("df_data_out"),
-            tableOutput("df_yield_out")
-        )  # e/o testing tabPanel
+    fluidRow(
+        column(1),
+        column(4, wellPanel(style = "background: white",
+                            plotOutput("pop_plot",width = "100%")
+        )),
+        column(3, wellPanel(style = "background: white",
+                            plotOutput("land_plot",width = "100%")
+        )),
+        column(3, wellPanel(style = "background: white",
+                            plotOutput("actions_user",width = "100%")
+        )),
+        column(1)
+    ),
+    fluidRow(
+        column(7, wellPanel(style = "background: white",
+                            
+                            div(style="display:inline-block; vertical-align: middle;", 
+                                plotly::plotlyOutput("budget_pie", height = 200, width = 200)    
+                            ),
+                            div(style="display:inline-block; vertical-align: top; padding-left: 2em; padding-right: 2em", 
+                                span("Budget remaining", style="color:#D35E60; font-size:175%"),
+                                span(textOutput("budgetRemaining"), style="color:#D35E60; font-size:350%; font-weight: bold")
+                            ),
+                            div(style="display:inline-block; vertical-align: middle; padding-left: 4em; padding-right: 4em", 
+                                sliderInput("culling_cost_in", "Culling cost", 
+                                            min = 10, max = (MANAGER_BUDGET/10)+10, value = INIT_CULLING_COST, step = 5, width = 250),
+                                sliderInput("scaring_cost_in", "Scaring cost", 
+                                            min = 10, max = (MANAGER_BUDGET/10)+10, value = INIT_SCARING_COST, step = 5, width = 250)
+                            ),
+                            div(style="display:inline-block; vertical-align: middle; padding-left: 2em", 
+                                actionButton("nextStep", "GO !", width = 150,
+                                             icon("paper-plane"),
+                                             style="font-size:200%; color: #fff; background-color: #D35E60; font-weight: bold"),
+                                br(),
+                                br(),
+                                actionButton("resetGame", "Reset game")
+                            )
+                            
+        )),
+        column(5,
+               tableOutput("gdata_summary")
+        )
     )
-    
 )
 
 server <- function(input, output, session) {
     
-    # client data storage
-    cdata <- session$clientData
-    
-    GDATA = reactiveValues(summary = NULL, laststep = NULL, observed_suggested = NULL, yields = NULL)
-    CHECK = reactiveValues(extinction = FALSE)
-    CURRENT_BUDGET = reactiveValues(total = NULL, culling = NULL, scaring = NULL, leftover = NULL)
-    NEWSESSION = reactiveValues(check = TRUE)
-    
-    observeEvent(input$runGame, {
-        toggleSetup("Main")
+    if(NEWSESSION == TRUE) {
+        initModal()
+        NEWSESSION <<- FALSE
         
-        if(NEWSESSION$check == TRUE) {
-            showModal(modalDialog(size = "l", footer = modalButton("OK!"),
-                title = "Welcome to GMSE-GAME!",
-                "This dialog will contain some initial explanation of how the game works, what the elements of the screen are, etc.",
-                p(),
-                "This message will only be shown once, so not after the game is reset."
-            ))
-            NEWSESSION$check = FALSE
-        }
-        
-        ### Initial time steps:
-        land_colors <<- sample(grey.colors(input$STAKEHOLDERS))
-        LAND_OWNERSHIP <<- input$LAND_OWNERSHIP
-        TEND_CROPS <<- input$TEND_CROPS
-        SCARING <<- input$SCARING
-        CULLING <<- input$CULLING
-        OBSERVE_TYPE <<- as.numeric(input$OBSERVE_TYPE)
-        RES_MOVE_OBS <<- input$RES_MOVE_OBS
-        RES_DEATH_K <<- input$RES_DEATH_K
-        LAMBDA <<- input$LAMBDA
-        MANAGE_TARGET <<- input$MANAGE_TARGET
-        STAKEHOLDERS <<- input$STAKEHOLDERS
-        USER_BUDGET <<- input$USER_BUDGET
-        MANAGER_BUDGET <<- input$MANAGER_BUDGET
-        RES_DEATH_TYPE <<- as.numeric(input$RES_DEATH_TYPE)
-        REMOVE_PR <<- input$REMOVE_PR
-        
-        initdata = init_man_control(K = input$K)
-        GDATA$summary = initdata$summary
-        GDATA$laststep = initdata$gmse_list[[length(initdata$gmse_list)]]
-        GDATA$observed_suggested = initdata$observed_suggested
-        GDATA$yields = initdata$prev_yield
-        
-        if(input$SHOWSUGGESTED==TRUE) {
-            
-            updateSliderInput(session = getDefaultReactiveDomain(), 
-                               inputId = "culling_cost_in", 
-                               max = (MANAGER_BUDGET/10)+10,
-                               value = unique(GDATA$observed_suggested$culling))
-            updateSliderInput(session = getDefaultReactiveDomain(), 
-                               inputId = "scaring_cost_in", 
-                               max = (MANAGER_BUDGET/10)+10,
-                               value = unique(GDATA$observed_suggested$scaring))
-            
-            CURRENT_BUDGET = updateCurrentBudget(CURRENT_BUDGET,
-                                                 manager_budget = input$MANAGER_BUDGET,
-                                                 culling_cost = input$culling_cost_in, 
-                                                 scaring_cost = input$scaring_cost_in)
-            
-        } else {
-            
-            updateSliderInput(session = getDefaultReactiveDomain(), 
-                               inputId = "culling_cost_in", 
-                               max = (MANAGER_BUDGET/10)+10,
-                               value = (MANAGER_BUDGET/10+10)*0.5)
-            updateSliderInput(session = getDefaultReactiveDomain(), 
-                               inputId = "scaring_cost_in", 
-                               max = (MANAGER_BUDGET/10)+10,
-                               value = (MANAGER_BUDGET/10+10)*0.5)
-            
-            CURRENT_BUDGET = updateCurrentBudget(CURRENT_BUDGET, 
-                                                 manager_budget = input$MANAGER_BUDGET,
-                                                 culling_cost = input$culling_cost_in, 
-                                                 scaring_cost = input$scaring_cost_in)
-            
-        }
-        
-        
-        
-    })
+    }
     
-    observeEvent(input$resetInputs, {
-        showModal(
-            modalDialog(
-                size = "m", 
-                footer = NULL,
-                easyClose = TRUE,
-                title = "Warning!",
-                "This will reset all inputs to their default values.",
-                p(),
-                div(style="float:left", actionButton("resetInputs_cancel","Cancel")),
-                div(style="float:right", actionButton("resetInputs_ok","Reset")),
-                br(),
-                p(" "),
-            )
-        )
-    })
-    
-    observeEvent(input$resetInputs_cancel, {
-        removeModal()
-    })
-    
-    observeEvent(input$resetInputs_ok, {
-        removeModal()
-        updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "LAND_OWNERSHIP", value = d.LAND_OWNERSHIP)
-        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "STAKEHOLDERS", value = d.STAKEHOLDERS)
-        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "MANAGER_BUDGET", value = d.MANAGER_BUDGET)
-        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "MANAGE_TARGET", value = d.MANAGE_TARGET)
-        updateSelectInput(session = getDefaultReactiveDomain(), inputId = "OBSERVE_TYPE", selected = d.OBSERVE_TYPE)
-        updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "RES_MOVE_OBS", value = d.RES_MOVE_OBS)
-        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "RES_DEATH_K", value = d.RES_DEATH_K)
-        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "LAMBDA", value = d.LAMBDA)
-        updateSelectInput(session = getDefaultReactiveDomain(), inputId = "RES_DEATH_TYPE", selected = d.RES_DEATH_TYPE)
-        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "REMOVE_PR", value = d.REMOVE_PR)
-        updateSliderInput(session = getDefaultReactiveDomain(), inputId = "USER_BUDGET", value = d.USER_BUDGET)
-        updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "CULLING", value = d.CULLING)
-        updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "SCARING", value = d.SCARING)
-        updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "TEND_CROPS", value = d.TEND_CROPS)
-        updateNumericInput(session = getDefaultReactiveDomain(), inputId = "K", value = d.K)
-        updateCheckboxInput(session = getDefaultReactiveDomain(), inputId = "SHOWSUGGESTED", value = d.SHOWSUGGESTED)
-    })
-    
-    
-    observeEvent(input$resetGame, {
-        showModal(
-            modalDialog(
-                size = "m", 
-                footer = NULL,
-                easyClose = TRUE,
-                title = "Warning!",
-                "This will end the game and take you back to the start!",
-                p(),
-                div(style="float:left", actionButton("reset_cancel","Cancel")),
-                div(style="float:right", actionButton("reset_ok","Reset")),
-                br(),
-                p(" "),
-            )
-        )
-    })
-    
-    observeEvent(input$reset_cancel, {
-        removeModal()
-    })
-    
-    observeEvent(input$reset_ok, {
-        removeModal()
-        toggleSetup("Setup")
-        GDATA$summary = NULL
-        GDATA$laststep = NULL
-        GDATA$observed_suggested = NULL
-        GDATA$yields = NULL
-        CHECK$extinction = FALSE
-        CURRENT_BUDGET$total = NULL
-        CURRENT_BUDGET$culling = NULL
-        CURRENT_BUDGET$scaring = NULL
-        CURRENT_BUDGET$leftover = NULL
-        
-        CHECK$extinction = FALSE
-        enable(id = "nextStep")
-        enable(id = "culling_cost_in")
-        enable(id = "scaring_cost_in")
-    })
-    
-    
+    GDATA = reactiveValues(summary = gdata$summary, 
+                           laststep = gdata$laststep, 
+                           observed_suggested = gdata$observed_suggested, 
+                           yields = gdata$yields,
+                           extinction = FALSE
+    )
+    CURRENT_BUDGET = reactiveValues(total = budget$total, 
+                                    culling = budget$culling, 
+                                    scaring = budget$scaring, 
+                                    leftover = budget$remaining)
+
     ### When CULLING cost is adjusted, update budget and check if still within limits. If not, adjust SCARING.
     observeEvent(input$culling_cost_in, {
-
-        CURRENT_BUDGET = updateCurrentBudget(CURRENT_BUDGET,
-                                             manager_budget = input$MANAGER_BUDGET,
-                                             culling_cost = input$culling_cost_in, 
-                                             scaring_cost = input$scaring_cost_in)
+        
+        #CURRENT_BUDGET$culling = input$culling_cost_in*10
+        
+        CURRENT_BUDGET = updateCurrentBudget(
+            budget = CURRENT_BUDGET,
+            manager_budget = MANAGER_BUDGET,
+            culling_cost = input$culling_cost_in,
+            scaring_cost = input$scaring_cost_in)
         culling_b = CURRENT_BUDGET$culling
         scaring_b = CURRENT_BUDGET$scaring
         total_b = CURRENT_BUDGET$total
         
-        # If spend on culling+scaring exceeds total budget:
+        #If spend on culling+scaring exceeds total budget:
         if((culling_b+scaring_b)>total_b) {
             scaring_b_adj = total_b-culling_b
             scaring_cost_adj = scaring_b_adj/10
-            updateSliderInput(session = getDefaultReactiveDomain(), 
-                              inputId = "scaring_cost_in", 
+            updateSliderInput(session = getDefaultReactiveDomain(),
+                              inputId = "scaring_cost_in",
                               value = scaring_cost_adj)
         }
     })
     
     ### When SCARING cost is adjusted, update budget and check if still within limits. If not, adjust CULLING.
     observeEvent(input$scaring_cost_in, {
-
-        CURRENT_BUDGET = updateCurrentBudget(CURRENT_BUDGET,
-                                             manager_budget = input$MANAGER_BUDGET,
-                                             culling_cost = input$culling_cost_in, 
-                                             scaring_cost = input$scaring_cost_in)
+        
+        CURRENT_BUDGET = updateCurrentBudget(
+            budget = CURRENT_BUDGET,
+            manager_budget = MANAGER_BUDGET,
+            culling_cost = input$culling_cost_in,
+            scaring_cost = input$scaring_cost_in)
         culling_b = CURRENT_BUDGET$culling
         scaring_b = CURRENT_BUDGET$scaring
         total_b = CURRENT_BUDGET$total
         
         # If spend on culling+scaring exceeds total budget:
-        if((culling_b+scaring_b)>total_b) {        
+        if((culling_b+scaring_b)>total_b) {
             # Max available to culling after new scaring cost input:
             culling_b_adj = total_b-scaring_b
             # This amounts to this updated cost for culling:
             culling_cost_adj = culling_b_adj/10
-            # Update the slider; this in turn should update 
-            updateSliderInput(session = getDefaultReactiveDomain(), 
-                              inputId = "culling_cost_in", 
+            # Update the slider; this in turn should update
+            updateSliderInput(session = getDefaultReactiveDomain(),
+                              inputId = "culling_cost_in",
                               value = culling_cost_adj)
         }
     })
     
     observeEvent(input$nextStep, {
-
+        
         ### User input
         costs_as_input = list(culling = input$culling_cost_in, scaring = input$scaring_cost_in)
         prev = GDATA$laststep
@@ -380,56 +201,79 @@ server <- function(input, output, session) {
         
         if(class(nxt)!="try-error") {
             
-            # If needed, set sliders to "suggested" costs:
-            if(input$SHOWSUGGESTED == TRUE) {
-                GDATA$observed_suggested = observed_suggested(nxt)
-                updateNumericInput(session = getDefaultReactiveDomain(), 
-                                   inputId = "culling_cost_in", 
-                                   value = unique(GDATA$observed_suggested$culling))
-                updateNumericInput(session = getDefaultReactiveDomain(), 
-                                   inputId = "scaring_cost_in", 
-                                   value = unique(GDATA$observed_suggested$scaring))    
-            } 
-            
             # Add appropriate outputs.
             GDATA$summary = append_UROM_output(dat = nxt, costs = costs_as_input, old_output = GDATA$summary)
             GDATA$yields = rbind(GDATA$yields, tapply(nxt$LAND[,,2],nxt$LAND[,,3],mean)) # Store per-user yield (before reset)
             # Reset time step
             nxt$LAND[,,2] = 1    # Reset landscape yield
             GDATA$laststep = nxt
-
+            
         } else {
             
-            CHECK$extinction = TRUE
+            GDATA$extinction = TRUE
             
-            toggleState("nextStep")
-            toggleState("culling_cost_in")
-            toggleState("scaring_cost_in")
+            disable("nextStep")
             
         }
         
     })
     
-    output$df_data_out <- renderTable({
-        temp = GDATA$summary
-        temp[order(1:nrow(temp), decreasing = TRUE),]
+    observeEvent(input$resetGame, {
+        # Show reset confirm modal, and calls confirmReset if yes:
+        confirmResetModal()
     })
     
-    output$df_yield_out <- renderTable({
-        temp = GDATA$yields
-        temp[order(1:nrow(temp), decreasing = TRUE),]
+    observeEvent(input$confirmReset, {
+        
+        waiter_show(html = reset_waiting_screen, color = "black")
+        
+        removeModal()
+        ## Store existing data here and show scores.
+        
+        gdata = initGame()
+        budget = initBudget()
+        
+        GDATA$summary = gdata$summary
+        GDATA$laststep = gdata$laststep
+        GDATA$observed_suggested = gdata$observed_suggested
+        GDATA$yields = gdata$yields
+        GDATA$extinction = FALSE
+        
+        CURRENT_BUDGET$total = budget$total
+        CURRENT_BUDGET$culling = budget$culling
+        CURRENT_BUDGET$scaring = budget$scaring
+        CURRENT_BUDGET$leftover = budget$remaining
+        
+        updateSliderInput(session = getDefaultReactiveDomain(),
+                          inputId = "culling_cost_in",
+                          value = INIT_CULLING_COST)
+        updateSliderInput(session = getDefaultReactiveDomain(),
+                          inputId = "scaring_cost_in",
+                          value = INIT_SCARING_COST)
+        
+        waiter_hide()
+        
     })
     
+    output$gdata_summary = renderTable({
+        GDATA$summary
+    })
+
+
     output$pop_plot <- renderPlot({
         if(!is.null(GDATA$summary)) {
-            plot_pop(GDATA$summary, yield_dat = GDATA$yields, track_range = FALSE, extinction_message = CHECK$extinction)    
+            plot_pop(GDATA$summary, yield_dat = GDATA$yields, track_range = FALSE,
+                     extinction_message = GDATA$extinction
+            )    
         }
     })
     
     output$land_plot <- renderPlot({
         if(!is.null(GDATA$laststep)) {
             plot_land_res(GDATA$laststep$LAND, GDATA$laststep$RESOURCES, 
-                          col = land_colors, extinction_message = CHECK$extinction)
+                          col = land_colors,
+                          extinction_message = GDATA$extinction
+            )
             
         }
     })
@@ -470,17 +314,6 @@ server <- function(input, output, session) {
         }
     })
     
-    ### Plots actions in last time step summed across all users
-    output$actions_sum <- renderPlot({
-        if(!is.null(GDATA$summary)) {
-            yhi = ceiling(max(GDATA$summary[,c("culls","scares","tend_crops")],na.rm=T)/10)*10
-            barplot(GDATA$summary[nrow(GDATA$summary)-1,c("culls","scares","tend_crops")], 
-                    col = c("#D35E60","#9067A7","#56BA47"), ylim = c(0,yhi), names = c("Culls","Scares","Tend crop"), 
-                    las = 2,
-                    ylab = "Total number of actions")    
-        }
-    })
-    
     ### Plots actions per user in last time step
     output$actions_user <- renderPlot({
         if(!is.null(GDATA$laststep)) {
@@ -513,57 +346,6 @@ server <- function(input, output, session) {
         session$token
     })
     
-}
-
-updateCurrentBudget = function(budget, manager_budget, culling_cost, scaring_cost) {
-    budget$total = manager_budget+3*10*10
-    budget$culling = culling_cost*10
-    budget$scaring = scaring_cost*10
-    budget$leftover = budget$total-(budget$culling+budget$scaring)
-    return(budget)
-}
-
-toggleSetup = function(switchToTab) {
-    
-    if(switchToTab=="Main") {
-        disable("REMOVE_PR")
-        disable("K")
-        disable("RES_DEATH_TYPE")
-        disable("LAMBDA")
-        disable("RES_DEATH_K")
-        #disable("TEND_CROPS")
-        #disable("SCARING")
-        #disable("CULLING")
-        disable("USER_BUDGET")
-        disable("MANAGE_TARGET")
-        disable("MANAGER_BUDGET")
-        disable("STAKEHOLDERS")
-        disable("LAND_OWNERSHIP")
-        disable("runGame")
-        disable("resetInputs")
-        
-    }
-    
-    if(switchToTab=="Setup") {
-        enable("REMOVE_PR")
-        enable("K")
-        #enable("RES_DEATH_TYPE")
-        enable("LAMBDA")
-        enable("RES_DEATH_K")
-        #enable("TEND_CROPS")
-        #enable("SCARING")
-        #enable("CULLING")
-        enable("USER_BUDGET")
-        enable("MANAGE_TARGET")
-        enable("MANAGER_BUDGET")
-        enable("STAKEHOLDERS")
-        #enable("LAND_OWNERSHIP")
-        enable("runGame")
-        enable("resetInputs")
-    }
-    
-    updateTabsetPanel(session = getDefaultReactiveDomain(), "MainPanels",
-                      selected = switchToTab)
 }
 
 # Run the application 
