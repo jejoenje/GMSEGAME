@@ -1,5 +1,5 @@
 initModal = function() {
-  showModal(modalDialog(size = "l", footer = modalButton("OK!"),
+  showModal(modalDialog(size = "l", footer = actionButton("confirmStart", "Go!"),
                         title = "Welcome to GMSE-GAME!",
                         "This dialog will contain some initial explanation of how the game works, what the elements of the screen are, etc.",
                         p(),
@@ -13,6 +13,14 @@ confirmResetModal = function() {
                         "Resetting the game means you go back to the start!"
                         )
             )
+}
+
+extinctionModal = function() {
+  showModal(modalDialog(size = "m", footer = tagList(modalButton("Ok.")),
+                        title = "Population extinct!",
+                        "No resources left to manage!"
+                      )
+  )
 }
 
 

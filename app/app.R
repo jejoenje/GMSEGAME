@@ -65,8 +65,7 @@ reset_waiting_screen <- tagList(
     h4("Running initial time steps...")
 ) 
 
-gdata = initGame()
-budget = initBudget()
+
 
 ui <- fluidPage(
 
@@ -116,6 +115,7 @@ ui <- fluidPage(
                             
         )),
         column(5,
+               verbatimTextOutput("popK"),
                tableOutput("gdata_summary")
         )
     )
@@ -123,28 +123,64 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
     
+    START = reactiveValues(OK = FALSE)
+    GDATA = reactiveValues(summary = NULL,
+                           laststep = NULL,
+                           observed_suggested = NULL,
+                           yields = NULL,
+                           extinction = NULL
+    )
+    CURRENT_BUDGET = reactiveValues(total = NULL,
+                                    culling = NULL,
+                                    scaring = NULL,
+                                    leftover = NULL)
+    
+    initNewRun = reactive({
+        waiter_show(html = reset_waiting_screen, color = "black")
+        
+        gdata = initGame()
+        budget = initBudget()
+        
+        GDATA$summary = gdata$summary
+        GDATA$laststep = gdata$laststep
+        GDATA$observed_suggested = gdata$observed_suggested
+        GDATA$yields = gdata$yields
+        GDATA$extinction = FALSE
+        
+        CURRENT_BUDGET$total = budget$total
+        CURRENT_BUDGET$culling = budget$culling
+        CURRENT_BUDGET$scaring = budget$scaring
+        CURRENT_BUDGET$leftover = budget$remaining
+        
+        updateSliderInput(session = getDefaultReactiveDomain(),
+                          inputId = "culling_cost_in",
+                          value = INIT_CULLING_COST)
+        updateSliderInput(session = getDefaultReactiveDomain(),
+                          inputId = "scaring_cost_in",
+                          value = INIT_SCARING_COST)
+        
+        waiter_hide()
+    })
+    
     if(NEWSESSION == TRUE) {
         initModal()
-        NEWSESSION <<- FALSE
-        
+        NEWSESSION <<- FALSE    
     }
     
-    GDATA = reactiveValues(summary = gdata$summary, 
-                           laststep = gdata$laststep, 
-                           observed_suggested = gdata$observed_suggested, 
-                           yields = gdata$yields,
-                           extinction = FALSE
-    )
-    CURRENT_BUDGET = reactiveValues(total = budget$total, 
-                                    culling = budget$culling, 
-                                    scaring = budget$scaring, 
-                                    leftover = budget$remaining)
-
+    observeEvent(input$confirmStart, {
+        START$OK = TRUE
+        removeModal()
+        
+        initNewRun()
+        
+    })
+    
     ### When CULLING cost is adjusted, update budget and check if still within limits. If not, adjust SCARING.
     observeEvent(input$culling_cost_in, {
         
+        req(START$OK)
         #CURRENT_BUDGET$culling = input$culling_cost_in*10
-        
+
         CURRENT_BUDGET = updateCurrentBudget(
             budget = CURRENT_BUDGET,
             manager_budget = MANAGER_BUDGET,
@@ -166,6 +202,8 @@ server <- function(input, output, session) {
     
     ### When SCARING cost is adjusted, update budget and check if still within limits. If not, adjust CULLING.
     observeEvent(input$scaring_cost_in, {
+        
+        req(START$OK)
         
         CURRENT_BUDGET = updateCurrentBudget(
             budget = CURRENT_BUDGET,
@@ -191,6 +229,8 @@ server <- function(input, output, session) {
     
     observeEvent(input$nextStep, {
         
+        req(GDATA$summary)
+        
         ### User input
         costs_as_input = list(culling = input$culling_cost_in, scaring = input$scaring_cost_in)
         prev = GDATA$laststep
@@ -211,10 +251,15 @@ server <- function(input, output, session) {
         } else {
             
             GDATA$extinction = TRUE
-            
-            disable("nextStep")
-            
+
         }
+        
+    })
+    
+    observeEvent(GDATA$extinction, {
+        req(GDATA$extinction)
+        extinctionModal()
+        shinyjs::hideElement(id = "nextStep")
         
     })
     
@@ -255,12 +300,19 @@ server <- function(input, output, session) {
         
     })
     
+    ### Debugging output:
+    ###
+    output$popK = renderText({
+        paste("res_death_K:", RES_DEATH_K)
+    })
     output$gdata_summary = renderTable({
+        #req(START$OK)
         GDATA$summary
     })
-
+    ### e/o Debugging output
 
     output$pop_plot <- renderPlot({
+        #req(START$OK)
         if(!is.null(GDATA$summary)) {
             plot_pop(GDATA$summary, yield_dat = GDATA$yields, track_range = FALSE,
                      extinction_message = GDATA$extinction
@@ -269,6 +321,7 @@ server <- function(input, output, session) {
     })
     
     output$land_plot <- renderPlot({
+        #req(START$OK)
         if(!is.null(GDATA$laststep)) {
             plot_land_res(GDATA$laststep$LAND, GDATA$laststep$RESOURCES, 
                           col = land_colors,
@@ -279,6 +332,7 @@ server <- function(input, output, session) {
     })
     
     output$budget_bar <- renderPlot({
+        #req(START$OK)
         if(!is.null(CURRENT_BUDGET$culling)) {
             par(oma = c(0.5,0.5,0.5,0.5))
             par(mar = c(0.5,0.5,0.5,0.5))
@@ -291,6 +345,7 @@ server <- function(input, output, session) {
     })
     
     output$budget_pie <- plotly::renderPlotly({
+        #req(START$OK)
         if(!is.null(CURRENT_BUDGET$culling)) {
             plotdat = matrix(c(CURRENT_BUDGET$culling, CURRENT_BUDGET$scaring, CURRENT_BUDGET$leftover), nrow = 3, ncol = 1)
             plotdat = as.data.frame(plotdat, row.names = c("Culling","Scaring","Available"))
@@ -316,6 +371,7 @@ server <- function(input, output, session) {
     
     ### Plots actions per user in last time step
     output$actions_user <- renderPlot({
+        #req(START$OK)
         if(!is.null(GDATA$laststep)) {
             # Extract all previous actions per user:
             prev_acts = GDATA$laststep$PREV_ACTS
@@ -330,6 +386,7 @@ server <- function(input, output, session) {
     })
     
     output$budgetRemaining <- renderText({
+        #req(START$OK)
         paste("$", CURRENT_BUDGET$leftover)
     })
     
