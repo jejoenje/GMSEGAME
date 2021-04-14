@@ -1,12 +1,15 @@
+rm(list=ls())
 library(shiny)
 library(shinyjs)
 #library(shinybusy)
 library(waiter)
 library(plotly)
 library(GMSE) # CURRENTLY NEEDS devtools::install_github("ConFooBio/GMSE", ref = "man_control")
+library(RMySQL)
 
 source("app_helpers.R")
 source("infoDialogs.R")
+source("dbase_functions.R")
 
 LAND_OWNERSHIP <<- TRUE
 STAKEHOLDERS  <<- 4
@@ -14,10 +17,10 @@ MANAGER_BUDGET  <<- 1000
 MANAGE_TARGET  <<- 2000
 OBSERVE_TYPE  <<- 0
 RES_MOVE_OBS  <<- TRUE
-RES_DEATH_K  <<- 5000
+RES_DEATH_K  <<- 3000
 LAMBDA <<- 0.3
 RES_DEATH_TYPE  <<- 3
-REMOVE_PR <<- 0.05
+REMOVE_PR <<- 0
 USER_BUDGET <<- 1500
 CULLING <<- TRUE
 SCARING <<- TRUE
@@ -28,9 +31,9 @@ INIT_CULLING_COST <<- 55
 K  <<- 5
 land_colors <<- sample(grey.colors(STAKEHOLDERS))
 
+PLAYER_NAME = "initial global player"
+GO = FALSE
 NEWSESSION = TRUE
-START_OK = FALSE
-RESET_ME = FALSE
 
 initGame = function() {
     gdata = list()
@@ -70,25 +73,25 @@ init_waiting_screen <- tagList(
     h4("Starting game...")
 ) 
 
-store_data <- function(GDATA) {
+store_data <- function(GDATA, input) {
     GDATA$sessionEndTime = Sys.time()
     out_data = list(summary = GDATA$summary, 
                     yields = GDATA$yields,
                     extinction = GDATA$extinction,
                     sessionID = GDATA$sessionID, 
                     sessionStartTime = GDATA$sessionStartTime,
-                    sessionEndTime = GDATA$sessionEndTime
+                    sessionEndTime = GDATA$sessionEndTime,
+                    playerName = input$playerName 
     )
     save(out_data, file = paste0(as.character(as.numeric(Sys.time())*1000*100),".Rdata"))
 }
 
 
 ui <- fluidPage(
-
+    shinyjs::useShinyjs(),
     ### from library(waiter)
     use_waiter(), # include dependencies
-    #waiter_preloader(),
-    
+
     titlePanel("GMSE-GAME"),
     
     fluidRow(
@@ -133,9 +136,10 @@ ui <- fluidPage(
                             
         )),
         column(5,
-               verbatimTextOutput("popK"),
-               tableOutput("cbudget"),
-               tableOutput("gdata_summary"),
+               verbatimTextOutput("playername"),
+               verbatimTextOutput("runid")
+               #tableOutput("cbudget"),
+               #tableOutput("gdata_summary"),
         )
     )
 )
@@ -144,51 +148,60 @@ server <- function(input, output, session) {
     
     var_paras = reactiveValues(res_death_K = NULL)
     
-    START = reactiveValues(OK = FALSE)
+    RUN = reactiveValues(id = NULL)
+    
+    ### 'GDATA' holds "game data", that is the GMSE data for a given game run.
     GDATA = reactiveValues(summary = NULL,
                            laststep = NULL,
                            observed_suggested = NULL,
                            yields = NULL,
-                           extinction = NULL,
-                           sessionID = NULL,
-                           sessionStartTime = NULL,
-                           sessionEndTime = NULL
-    )
+                           extinction = NULL)
     CURRENT_BUDGET = reactiveValues(total = NULL,
                                     culling = NULL,
                                     scaring = NULL,
                                     leftover = NULL)
     
+    ### This updates a "global" player name in response to a change in the playerName input.
+    observeEvent(input$playerName, {
+        PLAYER_NAME <<- input$playerName  
+    })
+    
     if(NEWSESSION == TRUE) {
         initModal()
-        NEWSESSION <<- FALSE    
     }
     
-    observeEvent(input$confirmStart,{
+    observeEvent(input$dismissInitModal, {
+        NEWSESSION = FALSE
+        setPlayerModal(playername = PLAYER_NAME)
+    })
+    
+    observeEvent(input$confirmStart, {
+        
+        removeModal()
         
         waiter_show(html = init_waiting_screen, color = "black")
         
-        removeModal()
-        
-        GDATA$sessionID = session$token
-        GDATA$sessionStartTime = Sys.time()
-        
-        RES_DEATH_K <<- floor(runif(1, 1000,9000))
-        var_paras$res_death_K = RES_DEATH_K
-            
+        ### Run initial game steps and initialise budgets:
         gdata = initGame()
         budget = initBudget()
-        
+        ### Add initial game data to reactiveValues:
         GDATA$summary = gdata$summary
         GDATA$laststep = gdata$laststep
         GDATA$observed_suggested = gdata$observed_suggested
         GDATA$yields = gdata$yields
         GDATA$extinction = FALSE
-        
+        ### Initialise budget reactiveValues:
         CURRENT_BUDGET$total = budget$total
         CURRENT_BUDGET$culling = budget$culling
         CURRENT_BUDGET$scaring = budget$scaring
         CURRENT_BUDGET$leftover = budget$remaining
+        
+        ## Add new game run session data to database and get new runID token.
+        
+        RUN$id = newRunRecord(session = as.character(session$token),
+                             player = PLAYER_NAME,
+                             startTime = as.character(Sys.time()),
+                             extinct = as.numeric(GDATA$extinction))
         
         updateSliderInput(session = getDefaultReactiveDomain(),
                           inputId = "culling_cost_in",
@@ -198,47 +211,14 @@ server <- function(input, output, session) {
                           value = INIT_SCARING_COST)
         
         waiter_hide()
-        
     })
     
     observeEvent(input$confirmReset, {
-
-        waiter_show(html = reset_waiting_screen, color = "black")
-
-        removeModal()
-        ## Store existing data here and show scores.
-        store_data(GDATA)
-            
-        ## Set new session/run info:
-        GDATA$sessionID = session$token
-        GDATA$sessionStartTime = Sys.time()
-        GDATA$sessionEndTime = NULL
         
-        RES_DEATH_K <<- floor(runif(1, 1000,9000))
-        var_paras$res_death_K = RES_DEATH_K
+        updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
         
-        gdata = initGame()
-        budget = initBudget()
-
-        GDATA$summary = gdata$summary
-        GDATA$laststep = gdata$laststep
-        GDATA$observed_suggested = gdata$observed_suggested
-        GDATA$yields = gdata$yields
-        GDATA$extinction = FALSE
-
-        CURRENT_BUDGET$total = budget$total
-        CURRENT_BUDGET$culling = budget$culling
-        CURRENT_BUDGET$scaring = budget$scaring
-        CURRENT_BUDGET$leftover = budget$remaining
-
-        updateSliderInput(session = getDefaultReactiveDomain(),
-                          inputId = "culling_cost_in",
-                          value = INIT_CULLING_COST)
-        updateSliderInput(session = getDefaultReactiveDomain(),
-                          inputId = "scaring_cost_in",
-                          value = INIT_SCARING_COST)
-
-        waiter_hide()
+        ### setPlayerModal() has confirmStart button
+        setPlayerModal(playername = PLAYER_NAME)
 
     })
     
@@ -319,10 +299,15 @@ server <- function(input, output, session) {
     })
     
     observeEvent(GDATA$extinction, {
-        req(GDATA$extinction)
-        extinctionModal()
+        if(GDATA$extinction == TRUE) {
+            extinctionModal()    
+        }
+    })
+    
+    observeEvent(input$confirmExtinction, {
         shinyjs::hideElement(id = "nextStep")   ### Not working??
-        
+        shinyjs::disable(id = "testButton")
+        removeModal()
     })
     
     observeEvent(input$resetGame, {
@@ -330,15 +315,20 @@ server <- function(input, output, session) {
         confirmResetModal()
     })
     
-    
+    observeEvent(input$testButton, {
+        testModal()
+    })
     
     ### Debugging output:
     ###
-    output$popK = renderText({
-        paste("res_death_K:", var_paras$res_death_K)
-    })
     output$gdata_summary = renderTable({
         GDATA$summary
+    })
+    output$playername = renderText({
+        input$playerName
+    })
+    output$runid = renderText({
+        RUN$id
     })
     ### e/o Debugging output
 
