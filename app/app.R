@@ -25,10 +25,9 @@ USER_BUDGET <<- 1500
 CULLING <<- TRUE
 SCARING <<- TRUE
 TEND_CROPS  <<- TRUE
-SHOWSUGGESTED  <<- FALSE
-INIT_SCARING_COST <<- 55
-INIT_CULLING_COST <<- 55
-K  <<- 5
+
+INIT_SCARING_COST <<- 10
+INIT_CULLING_COST <<- 10
 land_colors <<- sample(grey.colors(STAKEHOLDERS))
 
 PLAYER_NAME = "initial global player"
@@ -96,55 +95,61 @@ ui <- fluidPage(
     
     fluidRow(
         column(1),
-        column(4, wellPanel(style = "background: white",
+        column(4, wellPanel(id = "pop_panel", style = "background: white",
                             plotOutput("pop_plot",width = "100%")
         )),
-        column(3, wellPanel(style = "background: white",
+        column(3, wellPanel(id = "land_panel", style = "background: white",
                             plotOutput("land_plot",width = "100%")
         )),
-        column(3, wellPanel(style = "background: white",
+        column(3, wellPanel(id = "actions_panel", style = "background: white",
                             plotOutput("actions_user",width = "100%")
         )),
         column(1)
     ),
     fluidRow(
-        column(7, wellPanel(style = "background: white",
+        column(2),
+        column(8, wellPanel(id = "bottom_panel", style = "background: white",
                             
                             div(style="display:inline-block; vertical-align: middle;", 
                                 plotly::plotlyOutput("budget_pie", height = 200, width = 200)    
                             ),
-                            div(style="display:inline-block; vertical-align: top; padding-left: 2em; padding-right: 2em", 
+                            div(id = "budget_report", style="display:inline-block; vertical-align: top; padding-left: 2em; padding-right: 2em", 
                                 span("Budget remaining", style="color:#D35E60; font-size:175%"),
                                 span(textOutput("budgetRemaining"), style="color:#D35E60; font-size:350%; font-weight: bold")
                             ),
-                            div(style="display:inline-block; vertical-align: middle; padding-left: 4em; padding-right: 4em", 
+                            div(id = "input_sliders", style="display:inline-block; vertical-align: middle; padding-left: 4em; padding-right: 4em", 
                                 sliderInput("culling_cost_in", "Culling cost", 
                                             min = 10, max = (MANAGER_BUDGET/10)+10, value = INIT_CULLING_COST, step = 5, width = 250),
                                 sliderInput("scaring_cost_in", "Scaring cost", 
                                             min = 10, max = (MANAGER_BUDGET/10)+10, value = INIT_SCARING_COST, step = 5, width = 250)
                             ),
-                            div(style="display:inline-block; vertical-align: middle; padding-left: 2em", 
+                            div(id = "input_buttons", style="display:inline-block; vertical-align: middle; padding-left: 2em", 
                                 actionButton("nextStep", "GO !", width = 150,
                                              icon("paper-plane"),
                                              style="font-size:200%; color: #fff; background-color: #D35E60; font-weight: bold"),
                                 br(),
                                 br(),
                                 actionButton("resetGame", "Reset game"),
-                                br(),
-                                actionButton("testButton","Test me")
                             )
                             
         )),
-        column(5,
-               verbatimTextOutput("playername"),
-               verbatimTextOutput("runid")
+        column(2)
+        ### EXTRA COLUMN FOR DEBUGGING INFO:
+        #column(5,
+               #verbatimTextOutput("playername"),
+               #verbatimTextOutput("runid")
                #tableOutput("cbudget"),
                #tableOutput("gdata_summary"),
-        )
+        #)
     )
 )
 
 server <- function(input, output, session) {
+    
+    shinyjs::hide(id = "pop_panel")
+    shinyjs::hide(id = "land_panel")
+    shinyjs::hide(id = "actions_panel")
+    shinyjs::hide(id = "bottom_panel")
     
     var_paras = reactiveValues(res_death_K = NULL)
     
@@ -179,6 +184,11 @@ server <- function(input, output, session) {
         
         removeModal()
         
+        shinyjs::show(id = "pop_panel")
+        shinyjs::show(id = "land_panel")
+        shinyjs::show(id = "actions_panel")
+        shinyjs::show(id = "bottom_panel")
+        
         waiter_show(html = init_waiting_screen, color = "black")
         
         ### Run initial game steps and initialise budgets:
@@ -197,11 +207,16 @@ server <- function(input, output, session) {
         CURRENT_BUDGET$leftover = budget$remaining
         
         ## Add new game run session data to database and get new runID token.
-        
         RUN$id = newRunRecord(session = as.character(session$token),
                              player = PLAYER_NAME,
                              startTime = as.character(Sys.time()),
                              extinct = as.numeric(GDATA$extinction))
+        
+        ## Add GMSE paras for session to database:
+        addRunPar(runID = RUN$id)
+        
+        ## Add initial time steps data to database:
+        addInitGdata(runID = RUN$id, gd = GDATA$summary)
         
         updateSliderInput(session = getDefaultReactiveDomain(),
                           inputId = "culling_cost_in",
@@ -215,11 +230,16 @@ server <- function(input, output, session) {
     
     observeEvent(input$confirmReset, {
         
-        updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
+        if(GDATA$extinction == FALSE) {
+            ### If extinct, this update would have happened already:
+            updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)    
+        }
         
         ### setPlayerModal() has confirmStart button
         setPlayerModal(playername = PLAYER_NAME)
 
+        shinyjs::show(id = "nextStep")
+        
     })
     
     ### When CULLING cost is adjusted, update budget and check if still within limits. If not, adjust SCARING.
@@ -286,7 +306,11 @@ server <- function(input, output, session) {
             # Add appropriate outputs.
             GDATA$summary = append_UROM_output(dat = nxt, costs = costs_as_input, old_output = GDATA$summary)
             GDATA$yields = rbind(GDATA$yields, tapply(nxt$LAND[,,2],nxt$LAND[,,3],mean)) # Store per-user yield (before reset)
-            # Reset time step
+            
+            # Add time new time step game data to database:
+            addNewData(runID = RUN$id, gd = GDATA$summary)
+            
+            # Reset time step for GMSE
             nxt$LAND[,,2] = 1    # Reset landscape yield
             GDATA$laststep = nxt
             
@@ -300,23 +324,20 @@ server <- function(input, output, session) {
     
     observeEvent(GDATA$extinction, {
         if(GDATA$extinction == TRUE) {
-            extinctionModal()    
+            updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
+            extinctionModal()
+            shinyjs::hide(id = "nextStep")
         }
     })
     
+    ### This can probably be removed and replaced by the simple modalButton action
     observeEvent(input$confirmExtinction, {
-        shinyjs::hideElement(id = "nextStep")   ### Not working??
-        shinyjs::disable(id = "testButton")
         removeModal()
     })
     
     observeEvent(input$resetGame, {
         # Show reset confirm modal, and calls confirmReset if yes:
         confirmResetModal()
-    })
-    
-    observeEvent(input$testButton, {
-        testModal()
     })
     
     ### Debugging output:
