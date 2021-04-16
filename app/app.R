@@ -89,8 +89,8 @@ store_data <- function(GDATA, input) {
 
 ui <- fluidPage(
     shinyjs::useShinyjs(),
-    use_waiter(), # from library(waiter)
-
+    use_waiter(),
+    
     titlePanel("GMSE-GAME"),
     
     fluidRow(
