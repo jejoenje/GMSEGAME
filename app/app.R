@@ -311,8 +311,8 @@ server <- function(input, output, session) {
             # Add time new time step game data to database:
             addNewData(runID = RUN$id, gd = GDATA$summary)
             
-            # Reset time step for GMSE
-            nxt$LAND[,,2] = 1    # Reset landscape yield
+            # Reset time step for GMSE, includes landscape reset.
+            nxt$LAND[,,2] = 1
             GDATA$laststep = nxt
             
         } else {
