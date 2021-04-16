@@ -51,6 +51,9 @@ addRunPar = function(runID) {
   q[[14]] = sprintf("UPDATE run_par SET culling = %d WHERE ID = %d", as.numeric(CULLING), runID )
   q[[14]] = sprintf("UPDATE run_par SET scaring = %d WHERE ID = %d", as.numeric(SCARING), runID )
   q[[15]] = sprintf("UPDATE run_par SET tend_crops = %d WHERE ID = %d", as.numeric(TEND_CROPS), runID )
+  q[[16]] = sprintf("UPDATE run_par SET land_dim_1 = %d WHERE ID = %d", as.numeric(LAND_DIM_1), runID )
+  q[[17]] = sprintf("UPDATE run_par SET land_dim_2 = %d WHERE ID = %d", as.numeric(LAND_DIM_2), runID )
+  
   lapply(q, function(x) dbGetQuery(db, x))
   dbDisconnect(db)
 }
