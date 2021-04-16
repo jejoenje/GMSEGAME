@@ -55,6 +55,7 @@ addRunPar = function(runID) {
   dbDisconnect(db)
 }
 
+### Called only on start of a new session. Inserts all K time steps into gdata dbase table.
 addInitGdata = function(runID, gd) {
   db = connect_game_dbase()
   t = 1:nrow(gd)
@@ -81,6 +82,10 @@ addInitGdata = function(runID, gd) {
   
 }
 
+### Adds new line to gdata file when nextStep is pressed.
+### Note this needs a few steps as it needs to both add a new line (with population count and observation but missing the actions,
+###  for the next time step) as well as updating the previous line with actions from previous step (as recorded in GDATA, but not the 
+###  inputs currently displayed!).
 addNewData = function(runID, gd) {
   db = connect_game_dbase()
   
@@ -117,6 +122,7 @@ addNewData = function(runID, gd) {
   
 }
 
+### Ensures that the last input cull and scare costs are entered when the population went extinct.
 addLastCostsOnExtinction = function(runID, cull_cost, scare_cost) {
   
   db = connect_game_dbase()
