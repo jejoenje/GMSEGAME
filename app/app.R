@@ -6,6 +6,7 @@ library(waiter)
 library(plotly)
 library(GMSE) # CURRENTLY NEEDS devtools::install_github("ConFooBio/GMSE", ref = "man_control")
 library(RMySQL)
+library(reshape2)
 
 source("app_helpers.R")
 source("infoDialogs.R")
@@ -220,6 +221,9 @@ server <- function(input, output, session) {
         ## Add initial time steps data to database:
         addInitGdata(runID = RUN$id, gd = GDATA$summary)
         
+        ## Add initial yield data to database:
+        addInitYieldData(runID = RUN$id, yields = GDATA$yields)
+        
         updateSliderInput(session = getDefaultReactiveDomain(),
                           inputId = "culling_cost_in",
                           value = INIT_CULLING_COST)
@@ -311,6 +315,9 @@ server <- function(input, output, session) {
             
             # Add time new time step game data to database:
             addNewData(runID = RUN$id, gd = GDATA$summary)
+            
+            # Add new yield data to database:
+            addYields(runID = RUN$id, yields = GDATA$yields)
             
             # Reset time step for GMSE, includes landscape reset.
             nxt$LAND[,,2] = 1

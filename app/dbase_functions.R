@@ -85,6 +85,57 @@ addInitGdata = function(runID, gd) {
   
 }
 
+addInitYieldData = function(runID, yields) {
+  db = connect_game_dbase()
+  
+  row.names(yields) = 1:nrow(yields)
+  yields = melt(yields)
+  names(yields) = c("t","user","pyield")
+  yields = yields[order(yields$t, yields$user),]
+  
+  yields = cbind(data.frame(id = rep(runID, nrow(yields))), yields)
+  
+  yields_names = names(yields)
+  yields_names =  paste(yields_names,collapse = ",")
+  
+  for(i in 1:nrow(yields)) {
+    dbGetQuery(db, sprintf("INSERT INTO yield (id, t, user, pyield) VALUES (%d,%d,%d,%f)", 
+                           yields[i,"id"], yields[i,"t"], yields[i,"user"], yields[i,"pyield"]))
+  }
+  
+  dbDisconnect(db)
+  
+}
+
+addYields = function(runID, yields) {
+  db = connect_game_dbase()
+  
+  new_t = nrow(yields)
+  new_yields = yields[new_t,]
+    
+  db_last_t = dbGetQuery(db, sprintf("SELECT max(t) FROM yield WHERE id = %d", runID))[[1]]
+  # Sanity safety catch:
+  if(db_last_t+1 != new_t) stop("addYields: LAST t IN NEW DATA DOES NOT MATCH WITH NEXT ONE FOR DBASE. QUITTING.")
+
+  db_users = dbGetQuery(db, sprintf("SELECT user FROM yield WHERE id = %d AND t = %d",runID,db_last_t))
+  db_users = db_users$user
+  if(length(db_users) != length(new_yields)) stop ("addYields: UNEXPECTED NUMBER OF USERS IN NEW DATA!")
+  
+  new_yields = melt(new_yields)
+  names(new_yields) = "pyield"
+  new_yields$id = runID
+  new_yields$t = new_t
+  new_yields$user = db_users
+  
+  for(i in 1:nrow(new_yields)) {
+    dbGetQuery(db, sprintf("INSERT INTO yield (id, t, user, pyield) VALUES (%d,%d,%d,%f)", 
+                           new_yields[i,"id"], new_yields[i,"t"], new_yields[i,"user"], new_yields[i,"pyield"]))
+  }
+  
+  dbDisconnect(db)
+  
+}
+
 ### Adds new line to gdata file when nextStep is pressed.
 ### Note this needs a few steps as it needs to both add a new line (with population count and observation but missing the actions,
 ###  for the next time step) as well as updating the previous line with actions from previous step (as recorded in GDATA, but not the 
@@ -168,4 +219,11 @@ addLastCostsOnExtinction = function(runID, cull_cost, scare_cost) {
 #   cull_cost INT,
 #   scare_cost INT,
 #   yield FLOAT
+# );
+
+# CREATE TABLE yield (
+#   id INT NOT NULL,
+#   t INT NOT NULL,
+#   user INT NOT NULL,
+#   pyield FLOAT NOT NULL
 # );
