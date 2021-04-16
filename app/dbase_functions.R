@@ -117,6 +117,18 @@ addNewData = function(runID, gd) {
   
 }
 
+addLastCostsOnExtinction = function(runID, cull_cost, scare_cost) {
+  
+  db = connect_game_dbase()
+  
+  last_t = dbGetQuery(db, sprintf("SELECT max(t) FROM gdata WHERE id = %d", runID))[[1]]
+  dbGetQuery(db, sprintf("UPDATE gdata SET cull_cost = %d WHERE id = %d AND t = %d", cull_cost, runID, last_t))
+  dbGetQuery(db, sprintf("UPDATE gdata SET scare_cost = %d WHERE id = %d AND t = %d", scare_cost, runID, last_t))
+  
+  dbDisconnect(db)
+  
+}
+
 # CREATE TABLE run_par (
 #   id INT NOT NULL UNIQUE, 
 #   K INT,

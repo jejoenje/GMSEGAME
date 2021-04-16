@@ -11,6 +11,7 @@ source("app_helpers.R")
 source("infoDialogs.R")
 source("dbase_functions.R")
 
+K <<- 5
 LAND_OWNERSHIP <<- TRUE
 STAKEHOLDERS  <<- 4
 MANAGER_BUDGET  <<- 1000
@@ -324,6 +325,7 @@ server <- function(input, output, session) {
     
     observeEvent(GDATA$extinction, {
         if(GDATA$extinction == TRUE) {
+            addLastCostsOnExtinction(runID = RUN$id, cull_cost = input$culling_cost_in, scare_cost = input$scaring_cost_in)
             updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
             extinctionModal()
             shinyjs::hide(id = "nextStep")
