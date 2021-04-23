@@ -239,7 +239,8 @@ server <- function(input, output, session) {
         
         if(GDATA$extinction == FALSE) {
             ### If extinct, this update would have happened already:
-            updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)    
+            updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
+            addScores(runID = RUN$id, gd = GDATA)
         }
         
         ### setPlayerModal() has confirmStart button
@@ -336,6 +337,7 @@ server <- function(input, output, session) {
         if(GDATA$extinction == TRUE) {
             addLastCostsOnExtinction(runID = RUN$id, cull_cost = input$culling_cost_in, scare_cost = input$scaring_cost_in)
             updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
+            addScores(runID = RUN$id, gd = GDATA)
             extinctionModal()
             shinyjs::hide(id = "nextStep")
         }

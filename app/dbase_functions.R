@@ -190,6 +190,22 @@ addLastCostsOnExtinction = function(runID, cull_cost, scare_cost) {
   
 }
 
+addScores = function(runID, gd) {
+  
+  db = connect_game_dbase()
+  
+  res = round((mean(gd$summary[,"res"])/RESOURCE_INI)*100)
+  yield = round(mean(gd$yields)*100)
+  steps = nrow(gd$summary)
+  total = round((yield+res)*(steps/10+1))
+  
+  dbGetQuery(db, sprintf("INSERT INTO scores (id, steps, mean_res, mean_yield, total) VALUES (%d,%d,%d,%d,%d)",runID,steps,res,yield,total))
+  
+  dbDisconnect(db)
+  
+}
+
+
 # CREATE TABLE run_par (
 #   id INT NOT NULL UNIQUE, 
 #   K INT,
@@ -227,4 +243,12 @@ addLastCostsOnExtinction = function(runID, cull_cost, scare_cost) {
 #   t INT NOT NULL,
 #   user INT NOT NULL,
 #   pyield FLOAT NOT NULL
+# );
+
+# CREATE TABLE scores (
+#   id INT NOT NULL UNIQUE,
+#   steps INT,
+#   mean_res INT,
+#   mean_yield INT,
+#   total INT
 # );
