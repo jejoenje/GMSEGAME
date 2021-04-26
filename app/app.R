@@ -186,12 +186,8 @@ server <- function(input, output, session) {
         NEWSESSION = FALSE
         setPlayerModal(playername = PLAYER_NAME)
     })
-    
-    #setPlayerModal(playername = PLAYER_NAME)
-    
+
     observeEvent(input$confirmStart, {
-        
-        #setPlayerModal(playername = PLAYER_NAME)
         
         removeModal()
         
