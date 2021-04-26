@@ -135,7 +135,8 @@ ui <- fluidPage(
                                 br(),
                                 br(),
                                 actionButton("resetGame", "Reset game"),
-                                actionButton("newGame", "New game")
+                                actionButton("newGame", "New game"),
+                                actionButton("showScores", "Scores")
                             )
                             
         )),
@@ -195,6 +196,7 @@ server <- function(input, output, session) {
         removeModal()
         
         shinyjs::hide(id = "newGame")
+        shinyjs::hide(id = "showScores")
         shinyjs::show(id = "resetGame")        
         shinyjs::show(id = "nextStep")        
         shinyjs::show(id = "pop_panel")
@@ -250,6 +252,7 @@ server <- function(input, output, session) {
             shinyjs::hide(id = "nextStep")
             shinyjs::hide(id = "resetGame")
             shinyjs::show(id = "newGame")
+            shinyjs::show(id = "showScores")
             ### If extinct, this update would have happened already:
             updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
             addScores(runID = RUN$id, gd = GDATA)
@@ -354,11 +357,15 @@ server <- function(input, output, session) {
             shinyjs::hide(id = "nextStep")
             shinyjs::hide(id = "resetGame")
             shinyjs::show(id = "newGame")
-            shinyjs::show(id = "resetGame")
+            shinyjs::show(id = "showScores")
         }
     })
     
     observeEvent(input$closeScores, {
+        setPlayerModal(playername = PLAYER_NAME)
+    })
+    
+    observeEvent(input$newGame, {
         setPlayerModal(playername = PLAYER_NAME)
     })
     
@@ -371,6 +378,10 @@ server <- function(input, output, session) {
     observeEvent(input$resetGame, {
         # Show reset confirm modal, and calls confirmReset if yes:
         confirmResetModal()
+    })
+    
+    observeEvent(input$showScores, {
+        scoresModal()
     })
     
     ### Debugging output:

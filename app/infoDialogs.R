@@ -33,7 +33,7 @@ extinctionModal = function() {
 }
 
 scoresModal = function() {
-  showModal(modalDialog(size = "l", footer = tagList(actionButton("closeScores", "Ok")),
+  showModal(modalDialog(size = "l", footer = tagList(modalButton("Close"),actionButton("closeScores", "New Game")), easyClose = TRUE,
                         title = "High scores",
                         dataTableOutput("highScores")
                         
