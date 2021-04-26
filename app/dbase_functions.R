@@ -205,6 +205,24 @@ addScores = function(runID, gd) {
   
 }
 
+getScores = function() {
+  db = connect_game_dbase()
+  
+  # Get top 10 and match player name:
+  scores = dbGetQuery(db, "SELECT scores.*, run.player FROM scores INNER JOIN run ON scores.id = run.id ORDER BY scores.total DESC LIMIT 10")
+  
+  dbDisconnect(db)
+  return(scores)
+}
+
+getCurrentRunScore = function(runID) {
+  db = connect_game_dbase()
+  scores = dbGetQuery(db, sprintf("SELECT * FROM scores WHERE id = '%d'", runID))
+  player = dbGetQuery(db, sprintf("SELECT player FROM run WHERE id = '%d'", runID))[[1]]
+  scores$player = player
+  dbDisconnect(db)
+  return(scores)
+}
 
 # CREATE TABLE run_par (
 #   id INT NOT NULL UNIQUE, 

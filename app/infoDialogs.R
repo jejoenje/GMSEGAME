@@ -32,11 +32,10 @@ extinctionModal = function() {
   )
 }
 
-testModal = function() {
-  showModal(modalDialog(size = "s", footer = tagList(modalButton("Ok.")),
-                        title = "test modal",
-                        "Testing"
-  ))
+scoresModal = function() {
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("closeScores", "Ok")),
+                        title = "High scores",
+                        dataTableOutput("highScores")
+                        
+  ))  
 }
-
-  

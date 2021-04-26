@@ -7,6 +7,7 @@ library(plotly)
 library(GMSE) # CURRENTLY NEEDS devtools::install_github("ConFooBio/GMSE", ref = "man_control")
 library(RMySQL)
 library(reshape2)
+library(DT)
 
 source("app_helpers.R")
 source("infoDialogs.R")
@@ -134,6 +135,7 @@ ui <- fluidPage(
                                 br(),
                                 br(),
                                 actionButton("resetGame", "Reset game"),
+                                actionButton("newGame", "New game")
                             )
                             
         )),
@@ -184,10 +186,17 @@ server <- function(input, output, session) {
         setPlayerModal(playername = PLAYER_NAME)
     })
     
+    #setPlayerModal(playername = PLAYER_NAME)
+    
     observeEvent(input$confirmStart, {
+        
+        #setPlayerModal(playername = PLAYER_NAME)
         
         removeModal()
         
+        shinyjs::hide(id = "newGame")
+        shinyjs::show(id = "resetGame")        
+        shinyjs::show(id = "nextStep")        
         shinyjs::show(id = "pop_panel")
         shinyjs::show(id = "land_panel")
         shinyjs::show(id = "actions_panel")
@@ -238,16 +247,19 @@ server <- function(input, output, session) {
     observeEvent(input$confirmReset, {
         
         if(GDATA$extinction == FALSE) {
+            shinyjs::hide(id = "nextStep")
+            shinyjs::hide(id = "resetGame")
+            shinyjs::show(id = "newGame")
             ### If extinct, this update would have happened already:
             updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
             addScores(runID = RUN$id, gd = GDATA)
+            
         }
+        scoresModal()
         
         ### setPlayerModal() has confirmStart button
-        setPlayerModal(playername = PLAYER_NAME)
+        #setPlayerModal(playername = PLAYER_NAME)
 
-        shinyjs::show(id = "nextStep")
-        
     })
     
     ### When CULLING cost is adjusted, update budget and check if still within limits. If not, adjust SCARING.
@@ -340,12 +352,20 @@ server <- function(input, output, session) {
             addScores(runID = RUN$id, gd = GDATA)
             extinctionModal()
             shinyjs::hide(id = "nextStep")
+            shinyjs::hide(id = "resetGame")
+            shinyjs::show(id = "newGame")
+            shinyjs::show(id = "resetGame")
         }
+    })
+    
+    observeEvent(input$closeScores, {
+        setPlayerModal(playername = PLAYER_NAME)
     })
     
     ### This can probably be removed and replaced by the simple modalButton action
     observeEvent(input$confirmExtinction, {
-        removeModal()
+        #removeModal()
+        scoresModal()
     })
     
     observeEvent(input$resetGame, {
@@ -437,6 +457,31 @@ server <- function(input, output, session) {
     
     output$budgetRemaining <- renderText({
         paste("$", CURRENT_BUDGET$leftover)
+    })
+    
+    output$highScores <- renderDataTable({
+        req(RUN$id)
+        scores = getScores()
+        if(!(RUN$id %in% scores$id)) {
+            scores = scores[1:9,]
+            current_score = getCurrentRunScore(RUN$id)
+            scores = rbind(scores,current_score)
+        }
+        current_player = unique(scores$player[which(scores$id == RUN$id)])
+
+        scores = subset(scores, select = c("player","steps","mean_res","mean_yield","total","id"))
+        # Make DT while hiding the "id" column:
+        scores_dt = datatable(scores, colnames = c("Player","Time","Population","Yield","TOTAL","id"), autoHideNavigation = TRUE, rownames = FALSE, filter = "none",
+                              options=list(columnDefs = list(list(visible=FALSE, targets=c(5))), dom = 't'))
+
+        scores_dt = formatStyle(scores_dt, "player", target = "row",  backgroundColor = styleEqual(current_player, "orange"), color = styleEqual(current_player, "white"))
+        
+        formatStyle(scores_dt, "id", target = "row",  backgroundColor = styleEqual(RUN$id, "darkred"), color = styleEqual(RUN$id, "white"))
+
+    })
+    
+    output$tableForTest <- renderDataTable({
+        datatable(cars)
     })
     
     output$clientdataText <- renderText({
