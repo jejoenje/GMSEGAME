@@ -42,6 +42,15 @@ NEWSESSION = TRUE
 
 initGame = function() {
     gdata = list()
+    
+    ### Para randomisation:
+    LAMBDA <<- runif(1, 0.2, 0.4)
+    RES_DEATH_K <<- round(runif(1, 1000, 6000))
+    STAKEHOLDERS <<- round(runif(1, 4, 12))
+    REMOVE_PR <<- runif(1, 0, 0.1)
+
+    land_colors <<- sample(grey.colors(STAKEHOLDERS))
+                            
     initdata = init_man_control(K = K)
     gdata$summary = initdata$summary
     gdata$laststep = initdata$gmse_list[[length(initdata$gmse_list)]]

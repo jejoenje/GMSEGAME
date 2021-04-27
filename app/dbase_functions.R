@@ -46,7 +46,7 @@ addRunPar = function(runID) {
   q[[9]] = sprintf("UPDATE run_par SET res_death_k = %d WHERE ID = %d", RES_DEATH_K, runID )
   q[[10]] = sprintf("UPDATE run_par SET lambda = %f WHERE ID = %d", LAMBDA, runID )
   q[[11]] = sprintf("UPDATE run_par SET res_death_type = %d WHERE ID = %d", RES_DEATH_TYPE, runID )
-  q[[12]] = sprintf("UPDATE run_par SET remove_pr = %d WHERE ID = %d", REMOVE_PR, runID )
+  q[[12]] = sprintf("UPDATE run_par SET remove_pr = %f WHERE ID = %f", REMOVE_PR, runID )
   q[[13]] = sprintf("UPDATE run_par SET user_budget = %d WHERE ID = %d", USER_BUDGET, runID )
   q[[14]] = sprintf("UPDATE run_par SET culling = %d WHERE ID = %d", as.numeric(CULLING), runID )
   q[[14]] = sprintf("UPDATE run_par SET scaring = %d WHERE ID = %d", as.numeric(SCARING), runID )
