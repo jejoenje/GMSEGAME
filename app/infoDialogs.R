@@ -1,11 +1,45 @@
-initModal = function() {
-  showModal(modalDialog(size = "l", footer = actionButton("dismissInitModal", "Ok!"),
-                        title = "Welcome to GMSE-GAME!",
-                        "This dialog will contain some initial explanation of how the game works, what the elements of the screen are, etc.",
-                        p(),
-                        "This message will only be shown once, so not after the game is reset."
+# initModal = function() {
+#   showModal(modalDialog(size = "l", footer = actionButton("dismissInitModal", "Ok!"),
+#                         #title = "Welcome to GMSE-GAME!",
+#                         includeMarkdown("introduction.Rmd")
+#   ))  
+# }
+
+initModal1 = function() {
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("toInit2", "Next"), actionButton("dismissInitModal", "Skip introduction")),
+                        #title = "Welcome to GMSE-GAME!",
+                        includeMarkdown("introduction1.Rmd")
   ))  
 }
+
+
+initModal2 = function() {
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("toInit3", "Next"), actionButton("dismissInitModal", "Skip introduction")),
+                        #title = "Welcome to GMSE-GAME!",
+                        includeMarkdown("introduction2.Rmd")
+  ))  
+}
+
+
+initModal3 = function() {
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("toInit4", "Next"), actionButton("dismissInitModal", "Skip introduction")),
+                        #title = "Welcome to GMSE-GAME!",
+                        includeMarkdown("introduction3.Rmd")
+  ))  
+}
+
+initModal4 = function() {
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("toInit5", "Next"), actionButton("dismissInitModal", "Skip introduction")),
+                        includeMarkdown("introduction4.Rmd")
+  ))  
+}
+
+initModal5 = function() {
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("dismissInitModal", "Okay, go!")),
+                        includeMarkdown("introduction5.Rmd")
+  ))  
+}
+
 
 setPlayerModal = function(playername) {
   showModal(modalDialog(size = "s", footer = actionButton("confirmStart", "Go!"),

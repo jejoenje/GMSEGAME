@@ -37,7 +37,7 @@ INIT_SCARING_COST <<- 10
 INIT_CULLING_COST <<- 10
 land_colors <<- sample(grey.colors(STAKEHOLDERS))
 
-PLAYER_NAME = "initial global player"
+PLAYER_NAME = "New Player"
 GO = FALSE
 NEWSESSION = TRUE
 
@@ -49,7 +49,8 @@ initGame = function() {
     RES_DEATH_K <<- round(runif(1, 1000, 6000))
     STAKEHOLDERS <<- round(runif(1, 4, 12))
     REMOVE_PR <<- runif(1, 0, 0.1)
-
+    TEND_CROP_YLD <<- runif(1, 0.1, 0.75)
+    
     land_colors <<- sample(grey.colors(STAKEHOLDERS))
                             
     initdata = init_man_control(K = K)
@@ -189,8 +190,29 @@ server <- function(input, output, session) {
     })
     
     if(NEWSESSION == TRUE) {
-        initModal()
+        initModal1()
     }
+    
+    observeEvent(input$toInit2, {
+        removeModal()
+        initModal2()
+    })
+    
+    observeEvent(input$toInit3, {
+        removeModal()
+        initModal3()
+    })
+    
+    observeEvent(input$toInit4, {
+        removeModal()
+        initModal4()
+    })
+    
+    observeEvent(input$toInit5, {
+        removeModal()
+        initModal5()
+    })
+    
     
     observeEvent(input$dismissInitModal, {
         NEWSESSION = FALSE

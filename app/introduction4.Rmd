@@ -1,0 +1,10 @@
+---
+output: html_document
+---
+
+<span style="color:darkred">**When you set your costs and clicked "Go!"**</span>, each farmer will make decisions on what to do, depending on how they can best manage their yield, given the costs you have set and the number of animals on their land.  
+Their actions are reported for each farmer (stakeholder), with their actions shown in different colours. 
+
+![](actions2.jpg)
+
+The effect of both your choice of costs, and their choice of actions, can be seen on how both the animal population and agricultural yield changes.

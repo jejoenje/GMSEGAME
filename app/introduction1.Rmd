@@ -1,0 +1,15 @@
+---
+output: html_document
+---
+
+
+## <span style="color:darkred">Welcome to GMSE-GAME!</span>
+
+
+This game is all about making decisions about sustainable management of animal populations.
+  
+<span style="color:darkred">**In this game, you will play the role of a manager tasked with managing a population of wild animals, which live in a farmland landscape, divided into a number of different farms.** </span>
+
+Each of these farms is occupied by a landowner who grow crops, which are consumed by the animals - the more animals, the less agricultural yield. 
+
+![](landscape_intro.jpg)
