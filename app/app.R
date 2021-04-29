@@ -252,6 +252,8 @@ server <- function(input, output, session) {
         CURRENT_BUDGET$scaring = budget$scaring
         CURRENT_BUDGET$leftover = budget$remaining
         
+        print("done with init runs")
+        
         ## Add new game run session data to database and get new runID token.
         RUN$id = newRunRecord(session = as.character(session$token),
                              player = PLAYER_NAME,
