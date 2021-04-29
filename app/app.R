@@ -222,6 +222,8 @@ server <- function(input, output, session) {
 
     observeEvent(input$confirmStart, {
         
+        print("confirmStart")
+        
         removeModal()
         
         if(!grepl("^[A-Za-z0-9]+$", PLAYER_NAME)) setPlayerModal(playername = "LettersOrNumbersOnlyPlease")
