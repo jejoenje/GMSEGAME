@@ -43,9 +43,13 @@ initModal5 = function() {
 
 setPlayerModal = function(playername) {
   showModal(modalDialog(size = "s", footer = actionButton("confirmStart", "Go!"),
-                        title = div(style="padding-left: 10%; padding-right: 10%", "What is your player name?"),
+                        title = div(style="padding-left: 10%; padding-right: 10%", "What is your player name?" ),
                         #div(style="padding-left: 20%; padding-right: 20%","This can be anything, we used it to make a scoreboard!"),
-                        div(style="padding-left: 10%; padding-right: 10%",textInput("playerName", label = NULL, value = playername, width = NULL, placeholder = NULL))
+                        div(style="padding-left: 10%; padding-right: 10%",
+                            textInput("playerName", label = NULL, value = playername, width = NULL, placeholder = NULL),
+                            "(Letters and numbers only please; and no spaces)"
+                            )
+                        
                         )
             )
 }

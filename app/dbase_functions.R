@@ -1,16 +1,4 @@
-connect_game_dbase = function(databaseName = "testing", 
-                              databaseHost = "127.0.0.1", 
-                              databasePort = 3306,
-                              databaseUser = "jejoenje", 
-                              databasePassword = "$Craigie17_st") {
-  db = dbConnect(MySQL(), 
-            dbname = databaseName, 
-            host = databaseHost, 
-            port = databasePort, 
-            user = databaseUser, 
-            password = databasePassword)
-  return(db)
-}
+
 
 newRunRecord = function(session, player, startTime, extinct) {
   
@@ -19,6 +7,7 @@ newRunRecord = function(session, player, startTime, extinct) {
   q = sprintf("INSERT INTO run (session, player, startTime, extinct) VALUES ('%s', '%s', '%s', %d)", session, player, startTime, extinct)
   dbGetQuery(db, q)
   newID = dbGetQuery(db, "SELECT max(id) FROM run")[1,]
+  if(is.null(newID)) newID = 1
   dbDisconnect(db)
   return(newID)
 }
@@ -225,27 +214,17 @@ getCurrentRunScore = function(runID) {
   return(scores)
 }
 
-# CREATE TABLE run_par (
-#   id INT NOT NULL UNIQUE, 
-#   K INT,
-#   land_ownership BOOLEAN, 
-#   stakeholders INT, 
-#   manager_budget INT, 
-#   manage_target INT,
-#   observe_type INT,
-#   res_move_obs INT,
-#   res_death_k INT,
-#   lambda FLOAT,
-#   res_death_type INT,
-#   remove_pr FLOAT,
-#   user_budget INT,
-#   culling BOOLEAN,
-#   scaring BOOLEAN,
-#   tend_crops BOOLEAN
+# CREATE TABLE run (
+#   id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+#   session VARCHAR(32) NOT NULL,
+#   player VARCHAR(64),
+#   startTime VARCHAR(23) NOT NULL,
+#   endTime VARCHAR(23),
+#   extinct BOOLEAN NOT NULL
 # );
 
 # CREATE TABLE gdata (
-#   id INT NOT NULL,
+#   id INT NOT NULL PRIMARY KEY,
 #   t INT,
 #   res INT,
 #   obs FLOAT,
@@ -257,8 +236,39 @@ getCurrentRunScore = function(runID) {
 #   yield FLOAT
 # );
 
+# CREATE TABLE run_par (
+#   id INT NOT NULL PRIMARY KEY,
+#   K INT,
+#   land_ownership BOOLEAN,
+#   stakeholders INT,
+#   manager_budget INT,
+#   manage_target INT,
+#   observe_type INT,
+#   res_move_obs INT,
+#   res_death_k INT,
+#   lambda FLOAT,
+#   res_death_type INT,
+#   remove_pr FLOAT,
+#   user_budget INT,
+#   culling BOOLEAN,
+#   scaring BOOLEAN,
+#   tend_crops BOOLEAN,
+#   land_dim_1 INT,
+#   land_dim_2 INT,
+#   resource_ini INT,
+#   tend_crop_yld FLOAT
+# );
+
+# CREATE TABLE scores (
+#   id INT NOT NULL PRIMARY KEY,
+#   steps INT,
+#   mean_res INT,
+#   mean_yield INT,
+#   total INT
+# );
+
 # CREATE TABLE yield (
-#   id INT NOT NULL,
+#   id INT NOT NULL PRIMARY KEY,
 #   t INT NOT NULL,
 #   user INT NOT NULL,
 #   pyield FLOAT NOT NULL

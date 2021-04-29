@@ -11,6 +11,7 @@ library(DT)
 
 source("app_helpers.R")
 source("infoDialogs.R")
+source("dbcon.R")
 source("dbase_functions.R")
 
 K <<- 5
@@ -37,7 +38,7 @@ INIT_SCARING_COST <<- 10
 INIT_CULLING_COST <<- 10
 land_colors <<- sample(grey.colors(STAKEHOLDERS))
 
-PLAYER_NAME = "New Player"
+PLAYER_NAME = "NewPlayer"
 GO = FALSE
 NEWSESSION = TRUE
 
@@ -222,6 +223,8 @@ server <- function(input, output, session) {
     observeEvent(input$confirmStart, {
         
         removeModal()
+        
+        if(!grepl("^[A-Za-z0-9]+$", PLAYER_NAME)) setPlayerModal(playername = "LettersOrNumbersOnlyPlease")
         
         shinyjs::hide(id = "newGame")
         shinyjs::hide(id = "showScores")
