@@ -224,7 +224,7 @@ getCurrentRunScore = function(runID) {
 # );
 
 # CREATE TABLE gdata (
-#   id INT NOT NULL PRIMARY KEY,
+#   id INT NOT NULL,
 #   t INT,
 #   res INT,
 #   obs FLOAT,
@@ -268,16 +268,8 @@ getCurrentRunScore = function(runID) {
 # );
 
 # CREATE TABLE yield (
-#   id INT NOT NULL PRIMARY KEY,
+#   id INT NOT NULL,
 #   t INT NOT NULL,
 #   user INT NOT NULL,
 #   pyield FLOAT NOT NULL
-# );
-
-# CREATE TABLE scores (
-#   id INT NOT NULL UNIQUE,
-#   steps INT,
-#   mean_res INT,
-#   mean_yield INT,
-#   total INT
 # );
