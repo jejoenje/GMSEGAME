@@ -11,7 +11,7 @@ library(DT)
 
 source("app_helpers.R")
 source("infoDialogs.R")
-source("dbcon.R")
+source("connect_db.R")
 source("dbase_functions.R")
 
 K <<- 5
