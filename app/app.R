@@ -222,8 +222,6 @@ server <- function(input, output, session) {
 
     observeEvent(input$confirmStart, {
         
-        print("confirmStart")
-        
         removeModal()
         
         if(!grepl("^[A-Za-z0-9]+$", PLAYER_NAME)) setPlayerModal(playername = "LettersOrNumbersOnlyPlease")
@@ -253,8 +251,6 @@ server <- function(input, output, session) {
         CURRENT_BUDGET$culling = budget$culling
         CURRENT_BUDGET$scaring = budget$scaring
         CURRENT_BUDGET$leftover = budget$remaining
-        
-        print("done with init runs")
         
         ## Add new game run session data to database and get new runID token.
         RUN$id = newRunRecord(session = as.character(session$token),
