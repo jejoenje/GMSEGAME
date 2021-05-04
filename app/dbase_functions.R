@@ -49,6 +49,23 @@ addRunPar = function(runID) {
   dbDisconnect(db)
 }
 
+addAllRunPar = function(runID,t) {
+  db = connect_game_dbase()
+  q = sprintf("INSERT INTO run_par_all (id, t, K, land_ownership, 
+                                    stakeholders, manager_budget, manage_target, observe_type, 
+                                    res_move_obs, res_death_K, lambda, res_death_type, remove_pr, 
+                                    user_budget, culling, scaring, tend_crops, land_dim_1, 
+                                    land_dim_2, resource_ini, tend_crop_yld) 
+                            VALUES (%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %f, %d, %f, 
+                                    %d, %d, %d, %d, %d, %d, %d, %f)", 
+              runID,t,K,LAND_OWNERSHIP,STAKEHOLDERS,MANAGER_BUDGET,MANAGE_TARGET,
+              OBSERVE_TYPE, RES_MOVE_OBS, RES_DEATH_K, LAMBDA, RES_DEATH_TYPE, REMOVE_PR,
+              USER_BUDGET, CULLING, SCARING, TEND_CROPS, LAND_DIM_1, LAND_DIM_2, RESOURCE_INI, 
+              TEND_CROP_YLD)
+  dbGetQuery(db, q)
+  dbDisconnect(db)
+}
+
 ### Called only on start of a new session. Inserts all K time steps into gdata dbase table.
 addInitGdata = function(runID, gd) {
   db = connect_game_dbase()
@@ -273,3 +290,27 @@ getCurrentRunScore = function(runID) {
 #   user INT NOT NULL,
 #   pyield FLOAT NOT NULL
 # );
+
+# CREATE TABLE run_par_all (
+#   id INT NOT NULL,
+#   t INT NOT NULL,
+#   K INT,
+#   land_ownership BOOLEAN,
+#   stakeholders INT,
+#   manager_budget INT,
+#   manage_target INT,
+#   observe_type INT,
+#   res_move_obs INT,
+#   res_death_k INT,
+#   lambda FLOAT,
+#   res_death_type INT,
+#   remove_pr FLOAT,
+#   user_budget INT,
+#   culling BOOLEAN,
+#   scaring BOOLEAN,
+#   tend_crops BOOLEAN,
+#   land_dim_1 INT,
+#   land_dim_2 INT,
+#   resource_ini INT,
+#   tend_crop_yld FLOAT
+# )

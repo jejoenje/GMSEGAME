@@ -367,6 +367,9 @@ server <- function(input, output, session) {
             # Add new yield data to database:
             addYields(runID = RUN$id, yields = GDATA$yields)
             
+            # Add "all para" parameters (parameters per time step, in case variable - also for debugging)
+            addAllRunPar(runID = RUN$id, t = nrow(GDATA$summary))
+            
             # Reset time step for GMSE, includes landscape reset.
             nxt$LAND[,,2] = 1
             GDATA$laststep = nxt
