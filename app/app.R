@@ -1,7 +1,6 @@
 rm(list=ls())
 library(shiny)
 library(shinyjs)
-#library(shinybusy)
 library(waiter)
 library(plotly)
 library(GMSE) # CURRENTLY NEEDS devtools::install_github("ConFooBio/GMSE", ref = "man_control")
@@ -17,7 +16,7 @@ source("dbase_functions.R")
 INIT_SCARING_COST = 10
 INIT_CULLING_COST = 10
 
-PLAYER_NAME = "NewPlayer"
+#PLAYER_NAME = "NewPlayer"
 NEWSESSION = TRUE
 
 initGame = function() {
@@ -110,20 +109,6 @@ init_waiting_screen <- tagList(
     h4("Starting game...")
 ) 
 
-# store_data <- function(GDATA, input) {
-#     GDATA$sessionEndTime = Sys.time()
-#     out_data = list(summary = GDATA$summary, 
-#                     yields = GDATA$yields,
-#                     extinction = GDATA$extinction,
-#                     sessionID = GDATA$sessionID, 
-#                     sessionStartTime = GDATA$sessionStartTime,
-#                     sessionEndTime = GDATA$sessionEndTime,
-#                     playerName = input$playerName 
-#     )
-#     save(out_data, file = paste0(as.character(as.numeric(Sys.time())*1000*100),".Rdata"))
-# }
-
-
 ui <- fluidPage(
     shinyjs::useShinyjs(),
     use_waiter(),
@@ -199,7 +184,8 @@ server <- function(input, output, session) {
                            laststep = NULL,
                            observed_suggested = NULL,
                            yields = NULL,
-                           extinction = NULL)
+                           extinction = NULL,
+                           PLAYER_NAME = NULL)
     CURRENT_BUDGET = reactiveValues(total = NULL,
                                     culling = NULL,
                                     scaring = NULL,
@@ -207,7 +193,7 @@ server <- function(input, output, session) {
     
     ### This updates a "global" player name in response to a change in the playerName input.
     observeEvent(input$playerName, {
-        PLAYER_NAME <<- input$playerName  
+        GDATA$PLAYER_NAME = input$playerName
     })
     
     if(NEWSESSION == TRUE) {
@@ -237,14 +223,14 @@ server <- function(input, output, session) {
     
     observeEvent(input$dismissInitModal, {
         NEWSESSION = FALSE
-        setPlayerModal(playername = PLAYER_NAME)
+        setPlayerModal(playername = GDATA$PLAYER_NAME)
     })
 
     observeEvent(input$confirmStart, {
         
         removeModal()
         
-        if(!grepl("^[A-Za-z0-9]+$", PLAYER_NAME)) setPlayerModal(playername = "LettersOrNumbersOnlyPlease")
+        if(!grepl("^[A-Za-z0-9]+$", GDATA$PLAYER_NAME)) setPlayerModal(playername = "LettersOrNumbersOnlyPlease")
         
         shinyjs::hide(id = "newGame")
         shinyjs::hide(id = "showScores")
@@ -276,7 +262,7 @@ server <- function(input, output, session) {
         
         ## Add new game run session data to database and get new runID token.
         RUN$id = newRunRecord(session = as.character(session$token),
-                             player = PLAYER_NAME,
+                             player = GDATA$PLAYER_NAME,
                              startTime = as.character(Sys.time()),
                              extinct = as.numeric(GDATA$extinction))
         
@@ -433,11 +419,11 @@ server <- function(input, output, session) {
     })
     
     observeEvent(input$closeScores, {
-        setPlayerModal(playername = PLAYER_NAME)
+        setPlayerModal(playername = GDATA$PLAYER_NAME)
     })
     
     observeEvent(input$newGame, {
-        setPlayerModal(playername = PLAYER_NAME)
+        setPlayerModal(playername = GDATA$PLAYER_NAME)
     })
     
     ### This can probably be removed and replaced by the simple modalButton action
