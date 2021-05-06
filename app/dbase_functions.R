@@ -21,35 +21,35 @@ updateRunRecord = function(runID, endTime, extinct) {
   dbDisconnect(db)
 }
 
-addRunPar = function(runID) {
+addRunPar = function(runID, paras) {
   db = connect_game_dbase()
   q = list()
   q[[1]] = sprintf("INSERT INTO run_par (id) VALUES (%d)", runID)
-  q[[2]] = sprintf("UPDATE run_par SET K = %d WHERE ID = %d", K, runID)
-  q[[3]] = sprintf("UPDATE run_par SET land_ownership = %d WHERE ID = %d", as.numeric(LAND_OWNERSHIP), runID )
-  q[[4]] = sprintf("UPDATE run_par SET stakeholders = %d WHERE ID = %d", STAKEHOLDERS, runID )
-  q[[5]] = sprintf("UPDATE run_par SET manager_budget = %d WHERE ID = %d", MANAGER_BUDGET, runID )
-  q[[6]] = sprintf("UPDATE run_par SET manage_target = %d WHERE ID = %d", MANAGE_TARGET, runID )
-  q[[7]] = sprintf("UPDATE run_par SET observe_type = %d WHERE ID = %d", OBSERVE_TYPE, runID )
-  q[[8]] = sprintf("UPDATE run_par SET res_move_obs = %d WHERE ID = %d", RES_MOVE_OBS, runID )
-  q[[9]] = sprintf("UPDATE run_par SET res_death_k = %d WHERE ID = %d", RES_DEATH_K, runID )
-  q[[10]] = sprintf("UPDATE run_par SET lambda = %f WHERE ID = %d", LAMBDA, runID )
-  q[[11]] = sprintf("UPDATE run_par SET res_death_type = %d WHERE ID = %d", RES_DEATH_TYPE, runID )
-  q[[12]] = sprintf("UPDATE run_par SET remove_pr = %f WHERE ID = %d", REMOVE_PR, runID )
-  q[[13]] = sprintf("UPDATE run_par SET user_budget = %d WHERE ID = %d", USER_BUDGET, runID )
-  q[[14]] = sprintf("UPDATE run_par SET culling = %d WHERE ID = %d", as.numeric(CULLING), runID )
-  q[[14]] = sprintf("UPDATE run_par SET scaring = %d WHERE ID = %d", as.numeric(SCARING), runID )
-  q[[15]] = sprintf("UPDATE run_par SET tend_crops = %d WHERE ID = %d", as.numeric(TEND_CROPS), runID )
-  q[[16]] = sprintf("UPDATE run_par SET land_dim_1 = %d WHERE ID = %d", as.numeric(LAND_DIM_1), runID )
-  q[[17]] = sprintf("UPDATE run_par SET land_dim_2 = %d WHERE ID = %d", as.numeric(LAND_DIM_2), runID )
-  q[[18]] = sprintf("UPDATE run_par SET resource_ini = %d WHERE ID = %d", RESOURCE_INI, runID )
-  q[[19]] = sprintf("UPDATE run_par SET tend_crop_yld = %f WHERE ID = %d", TEND_CROP_YLD, runID )
+  q[[2]] = sprintf("UPDATE run_par SET K = %d WHERE ID = %d", paras$K, runID)
+  q[[3]] = sprintf("UPDATE run_par SET land_ownership = %d WHERE ID = %d", as.numeric(paras$LAND_OWNERSHIP), runID )
+  q[[4]] = sprintf("UPDATE run_par SET stakeholders = %d WHERE ID = %d", paras$STAKEHOLDERS, runID )
+  q[[5]] = sprintf("UPDATE run_par SET manager_budget = %d WHERE ID = %d", paras$MANAGER_BUDGET, runID )
+  q[[6]] = sprintf("UPDATE run_par SET manage_target = %d WHERE ID = %d", paras$MANAGE_TARGET, runID )
+  q[[7]] = sprintf("UPDATE run_par SET observe_type = %d WHERE ID = %d", paras$OBSERVE_TYPE, runID )
+  q[[8]] = sprintf("UPDATE run_par SET res_move_obs = %d WHERE ID = %d", paras$RES_MOVE_OBS, runID )
+  q[[9]] = sprintf("UPDATE run_par SET res_death_k = %d WHERE ID = %d", paras$RES_DEATH_K, runID )
+  q[[10]] = sprintf("UPDATE run_par SET lambda = %f WHERE ID = %d", paras$LAMBDA, runID )
+  q[[11]] = sprintf("UPDATE run_par SET res_death_type = %d WHERE ID = %d", paras$RES_DEATH_TYPE, runID )
+  q[[12]] = sprintf("UPDATE run_par SET remove_pr = %f WHERE ID = %d", paras$REMOVE_PR, runID )
+  q[[13]] = sprintf("UPDATE run_par SET user_budget = %d WHERE ID = %d", paras$USER_BUDGET, runID )
+  q[[14]] = sprintf("UPDATE run_par SET culling = %d WHERE ID = %d", as.numeric(paras$CULLING), runID )
+  q[[14]] = sprintf("UPDATE run_par SET scaring = %d WHERE ID = %d", as.numeric(paras$SCARING), runID )
+  q[[15]] = sprintf("UPDATE run_par SET tend_crops = %d WHERE ID = %d", as.numeric(paras$TEND_CROPS), runID )
+  q[[16]] = sprintf("UPDATE run_par SET land_dim_1 = %d WHERE ID = %d", as.numeric(paras$LAND_DIM_1), runID )
+  q[[17]] = sprintf("UPDATE run_par SET land_dim_2 = %d WHERE ID = %d", as.numeric(paras$LAND_DIM_2), runID )
+  q[[18]] = sprintf("UPDATE run_par SET resource_ini = %d WHERE ID = %d", paras$RESOURCE_INI, runID )
+  q[[19]] = sprintf("UPDATE run_par SET tend_crop_yld = %f WHERE ID = %d", paras$TEND_CROP_YLD, runID )
   
   lapply(q, function(x) dbGetQuery(db, x))
   dbDisconnect(db)
 }
 
-addAllRunPar = function(runID,t) {
+addAllRunPar = function(runID,t,paras) {
   db = connect_game_dbase()
   q = sprintf("INSERT INTO run_par_all (id, t, K, land_ownership, 
                                     stakeholders, manager_budget, manage_target, observe_type, 
@@ -58,10 +58,10 @@ addAllRunPar = function(runID,t) {
                                     land_dim_2, resource_ini, tend_crop_yld) 
                             VALUES (%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %f, %d, %f, 
                                     %d, %d, %d, %d, %d, %d, %d, %f)", 
-              runID,t,K,LAND_OWNERSHIP,STAKEHOLDERS,MANAGER_BUDGET,MANAGE_TARGET,
-              OBSERVE_TYPE, RES_MOVE_OBS, RES_DEATH_K, LAMBDA, RES_DEATH_TYPE, REMOVE_PR,
-              USER_BUDGET, CULLING, SCARING, TEND_CROPS, LAND_DIM_1, LAND_DIM_2, RESOURCE_INI, 
-              TEND_CROP_YLD)
+              runID,t,paras$K,paras$LAND_OWNERSHIP,paras$STAKEHOLDERS,paras$MANAGER_BUDGET,paras$MANAGE_TARGET,
+              paras$OBSERVE_TYPE, paras$RES_MOVE_OBS, paras$RES_DEATH_K, paras$LAMBDA, paras$RES_DEATH_TYPE, paras$REMOVE_PR,
+              paras$USER_BUDGET, paras$CULLING, paras$SCARING, paras$TEND_CROPS, paras$LAND_DIM_1, paras$LAND_DIM_2, paras$RESOURCE_INI, 
+              paras$TEND_CROP_YLD)
   dbGetQuery(db, q)
   dbDisconnect(db)
 }
@@ -201,7 +201,7 @@ addScores = function(runID, gd) {
   
   db = connect_game_dbase()
   
-  res = round((mean(gd$summary[,"res"])/RESOURCE_INI)*100)
+  res = round((mean(gd$summary[,"res"])/gd$laststep$RESOURCE_ini)*100)
   yield = round(mean(gd$yields)*100)
   steps = nrow(gd$summary)
   total = round((yield+res)*(steps/10+1))

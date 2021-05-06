@@ -14,29 +14,8 @@ source("infoDialogs.R")
 source("connect_db.R")
 source("dbase_functions.R")
 
-K <<- 5
-LAND_OWNERSHIP <<- TRUE
-STAKEHOLDERS  <<- 4
-MANAGER_BUDGET  <<- 1000
-MANAGE_TARGET  <<- 2000
-OBSERVE_TYPE  <<- 0
-RES_MOVE_OBS  <<- TRUE
-RES_DEATH_K  <<- 3000
-LAMBDA <<- 0.3
-RES_DEATH_TYPE  <<- 3
-REMOVE_PR <<- 0
-USER_BUDGET <<- 1500
-CULLING <<- TRUE
-SCARING <<- TRUE
-TEND_CROPS  <<- TRUE
-TEND_CROP_YLD <<- 0.2
-LAND_DIM_1 <<- 100
-LAND_DIM_2 <<- 100
-RESOURCE_INI <<- 1000
-
-INIT_SCARING_COST <<- 10
-INIT_CULLING_COST <<- 10
-land_colors <<- sample(grey.colors(STAKEHOLDERS))
+INIT_SCARING_COST = 10
+INIT_CULLING_COST = 10
 
 PLAYER_NAME = "NewPlayer"
 GO = FALSE
@@ -45,31 +24,73 @@ NEWSESSION = TRUE
 initGame = function() {
     gdata = list()
     
-    ### Para randomisation:
-    LAMBDA <<- runif(1, 0.2, 0.4)
-    RES_DEATH_K <<- round(runif(1, 1000, 6000))
-    STAKEHOLDERS <<- round(runif(1, 4, 12))
-    REMOVE_PR <<- runif(1, 0, 0.1)
-    TEND_CROP_YLD <<- runif(1, 0.1, 0.75)
-    
-    land_colors <<- sample(grey.colors(STAKEHOLDERS))
-                            
-    initdata = init_man_control(K = K)
+    GMSE_PARAS = list(
+        K = 5,
+        LAND_OWNERSHIP = TRUE,
+        STAKEHOLDERS  = round(runif(1, 4, 12)),
+        MANAGER_BUDGET  = 1000,
+        MANAGE_TARGET  = 2000,
+        OBSERVE_TYPE  = 0,
+        RES_MOVE_OBS  = TRUE,
+        RES_DEATH_K  = round(runif(1, 1000, 6000)),
+        LAMBDA = runif(1, 0.2, 0.4),
+        RES_DEATH_TYPE  = 3,
+        REMOVE_PR = runif(1, 0, 0.1),
+        USER_BUDGET = 1500,
+        CULLING = TRUE,
+        SCARING = TRUE,
+        TEND_CROPS = TRUE,
+        TEND_CROP_YLD = runif(1, 0.1, 0.75),
+        LAND_DIM_1 = 100,
+        LAND_DIM_2 = 100,
+        RESOURCE_INI = 1000
+    )
+        
+    initdata = init_man_control(K = GMSE_PARAS$K, gmse_paras = GMSE_PARAS)
     gdata$summary = initdata$summary
     gdata$laststep = initdata$gmse_list[[length(initdata$gmse_list)]]
     gdata$observed_suggested = initdata$observed_suggested
     gdata$yields = initdata$prev_yield
+    gdata$paras = GMSE_PARAS
+    
+    gdata$land_colors = sample(grey.colors(GMSE_PARAS$STAKEHOLDERS))
+    
     return(gdata)
 }
 
-initBudget = function() {
+initBudget = function(paras) {
     budget = list(
-        total = MANAGER_BUDGET+2*10*10,
+        total = paras$MANAGER_BUDGET+2*10*10,
         culling = INIT_CULLING_COST*10,
         scaring = INIT_SCARING_COST*10,
-        remaining = (MANAGER_BUDGET+2*10*10)-(INIT_CULLING_COST*10+INIT_SCARING_COST*10)
+        remaining = (paras$MANAGER_BUDGET+2*10*10)-(INIT_CULLING_COST*10+INIT_SCARING_COST*10)
     )
     return(budget)
+}
+
+getLastParas = function(laststep, K) {
+    last_paras = list(
+        K = K,
+        LAND_OWNERSHIP = laststep$land_ownership,
+        STAKEHOLDERS  = laststep$stakeholders,
+        MANAGER_BUDGET  = laststep$manager_budget,
+        MANAGE_TARGET  = laststep$manage_target,
+        OBSERVE_TYPE  = laststep$observe_type,
+        RES_MOVE_OBS  = laststep$res_move_obs,
+        RES_DEATH_K  = laststep$res_death_K,
+        LAMBDA = laststep$lambda,
+        RES_DEATH_TYPE  = laststep$res_death_type,
+        REMOVE_PR = laststep$remove_pr,
+        USER_BUDGET = laststep$user_budget,
+        CULLING = laststep$culling,
+        SCARING = laststep$scaring,
+        TEND_CROPS = laststep$tend_crops,
+        TEND_CROP_YLD = laststep$tend_crop_yld,
+        LAND_DIM_1 = laststep$land_dim_1,
+        LAND_DIM_2 = laststep$land_dim_2,
+        RESOURCE_INI = laststep$RESOURCE_ini
+    )
+    return(last_paras)
 }
 
 updateCurrentBudget = function(budget, manager_budget, culling_cost, scaring_cost) {
@@ -90,18 +111,18 @@ init_waiting_screen <- tagList(
     h4("Starting game...")
 ) 
 
-store_data <- function(GDATA, input) {
-    GDATA$sessionEndTime = Sys.time()
-    out_data = list(summary = GDATA$summary, 
-                    yields = GDATA$yields,
-                    extinction = GDATA$extinction,
-                    sessionID = GDATA$sessionID, 
-                    sessionStartTime = GDATA$sessionStartTime,
-                    sessionEndTime = GDATA$sessionEndTime,
-                    playerName = input$playerName 
-    )
-    save(out_data, file = paste0(as.character(as.numeric(Sys.time())*1000*100),".Rdata"))
-}
+# store_data <- function(GDATA, input) {
+#     GDATA$sessionEndTime = Sys.time()
+#     out_data = list(summary = GDATA$summary, 
+#                     yields = GDATA$yields,
+#                     extinction = GDATA$extinction,
+#                     sessionID = GDATA$sessionID, 
+#                     sessionStartTime = GDATA$sessionStartTime,
+#                     sessionEndTime = GDATA$sessionEndTime,
+#                     playerName = input$playerName 
+#     )
+#     save(out_data, file = paste0(as.character(as.numeric(Sys.time())*1000*100),".Rdata"))
+# }
 
 
 ui <- fluidPage(
@@ -136,9 +157,9 @@ ui <- fluidPage(
                             ),
                             div(id = "input_sliders", style="display:inline-block; vertical-align: middle; padding-left: 4em; padding-right: 4em", 
                                 sliderInput("culling_cost_in", "Culling cost", 
-                                            min = 10, max = (MANAGER_BUDGET/10)+10, value = INIT_CULLING_COST, step = 5, width = 250),
+                                            min = 10, max = (1000/10)+10, value = INIT_CULLING_COST, step = 5, width = 250),
                                 sliderInput("scaring_cost_in", "Scaring cost", 
-                                            min = 10, max = (MANAGER_BUDGET/10)+10, value = INIT_SCARING_COST, step = 5, width = 250)
+                                            min = 10, max = (1000/10)+10, value = INIT_SCARING_COST, step = 5, width = 250)
                             ),
                             div(id = "input_buttons", style="display:inline-block; vertical-align: middle; padding-left: 2em", 
                                 actionButton("nextStep", "GO !", width = 150,
@@ -170,7 +191,7 @@ server <- function(input, output, session) {
     shinyjs::hide(id = "actions_panel")
     shinyjs::hide(id = "bottom_panel")
     
-    var_paras = reactiveValues(res_death_K = NULL)
+    #var_paras = reactiveValues(res_death_K = NULL)
     
     RUN = reactiveValues(id = NULL)
     
@@ -239,13 +260,15 @@ server <- function(input, output, session) {
         
         ### Run initial game steps and initialise budgets:
         gdata = initGame()
-        budget = initBudget()
+        budget = initBudget(paras = gdata$paras)
         ### Add initial game data to reactiveValues:
         GDATA$summary = gdata$summary
         GDATA$laststep = gdata$laststep
         GDATA$observed_suggested = gdata$observed_suggested
         GDATA$yields = gdata$yields
         GDATA$extinction = FALSE
+        GDATA$land_colors = gdata$land_colors
+        GDATA$paras = gdata$paras
         ### Initialise budget reactiveValues:
         CURRENT_BUDGET$total = budget$total
         CURRENT_BUDGET$culling = budget$culling
@@ -259,7 +282,7 @@ server <- function(input, output, session) {
                              extinct = as.numeric(GDATA$extinction))
         
         ## Add GMSE paras for session to database:
-        addRunPar(runID = RUN$id)
+        addRunPar(runID = RUN$id, paras = GDATA$paras)
         
         ## Add initial time steps data to database:
         addInitGdata(runID = RUN$id, gd = GDATA$summary)
@@ -301,7 +324,7 @@ server <- function(input, output, session) {
         
         CURRENT_BUDGET = updateCurrentBudget(
             budget = CURRENT_BUDGET,
-            manager_budget = MANAGER_BUDGET,
+            manager_budget = 1000,    ######## <<<<<<<<<------- NEEDS CHANGING
             culling_cost = input$culling_cost_in,
             scaring_cost = input$scaring_cost_in)
         culling_b = CURRENT_BUDGET$culling
@@ -323,7 +346,7 @@ server <- function(input, output, session) {
         
         CURRENT_BUDGET = updateCurrentBudget(
             budget = CURRENT_BUDGET,
-            manager_budget = MANAGER_BUDGET,
+            manager_budget = 1000,                    ######## <<<<<<<<<------- NEEDS CHANGING
             culling_cost = input$culling_cost_in,
             scaring_cost = input$scaring_cost_in)
         culling_b = CURRENT_BUDGET$culling
@@ -368,7 +391,7 @@ server <- function(input, output, session) {
             addYields(runID = RUN$id, yields = GDATA$yields)
             
             # Add "all para" parameters (parameters per time step, in case variable - also for debugging)
-            addAllRunPar(runID = RUN$id, t = nrow(GDATA$summary))
+            addAllRunPar(runID = RUN$id, t = nrow(GDATA$summary), paras = getLastParas(GDATA$laststep, K = 5))
             
             # Reset time step for GMSE, includes landscape reset.
             nxt$LAND[,,2] = 1
@@ -418,18 +441,18 @@ server <- function(input, output, session) {
         scoresModal()
     })
     
-    ### Debugging output:
-    ###
-    output$gdata_summary = renderTable({
-        GDATA$summary
-    })
-    output$playername = renderText({
-        input$playerName
-    })
-    output$runid = renderText({
-        RUN$id
-    })
-    ### e/o Debugging output
+    # ### Debugging output:
+    # ###
+    # output$gdata_summary = renderTable({
+    #     GDATA$summary
+    # })
+    # output$playername = renderText({
+    #     input$playerName
+    # })
+    # output$runid = renderText({
+    #     RUN$id
+    # })
+    # ### e/o Debugging output
 
     output$pop_plot <- renderPlot({
         if(!is.null(GDATA$summary)) {
@@ -442,7 +465,7 @@ server <- function(input, output, session) {
     output$land_plot <- renderPlot({
         if(!is.null(GDATA$laststep)) {
             plot_land_res(GDATA$laststep$LAND, GDATA$laststep$RESOURCES, 
-                          col = land_colors,
+                          col = GDATA$land_colors,
                           extinction_message = GDATA$extinction
             )
             
