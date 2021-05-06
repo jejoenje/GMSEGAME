@@ -8,6 +8,6 @@ The higher you set either cost, the fewer actions are likely to be taken. Budget
 
 ![](budget2.jpg)
 
-<span style="color:darkred">**Once you have many your budget decision, you click "Go!" to go to the next year.**</span>
+<span style="color:darkred">**Once you have made your budget decision, you click "Go!" to go to the next year.**</span>
 
 Instead of killing animals or scaring them, each farmer may also choose to only farm their land - while this increases their yield (and may make up for some yield lost to the feeding animals), it does not affect the animal population.
