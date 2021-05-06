@@ -18,7 +18,6 @@ INIT_SCARING_COST = 10
 INIT_CULLING_COST = 10
 
 PLAYER_NAME = "NewPlayer"
-GO = FALSE
 NEWSESSION = TRUE
 
 initGame = function() {
@@ -290,6 +289,17 @@ server <- function(input, output, session) {
         ## Add initial yield data to database:
         addInitYieldData(runID = RUN$id, yields = GDATA$yields)
         
+        ### Set max to culling/scaring slides based on MANAGER_BUDGET
+        updateSliderInput(session = getDefaultReactiveDomain(),
+                          inputId = "culling_cost_in",
+                          max = (GDATA$paras$MANAGER_BUDGET/10)+10
+                          )
+        updateSliderInput(session = getDefaultReactiveDomain(),
+                          inputId = "scaring_cost_in",
+                          max = (GDATA$paras$MANAGER_BUDGET/10)+10
+        )
+        
+        ### Set initial culling/scaring costs:
         updateSliderInput(session = getDefaultReactiveDomain(),
                           inputId = "culling_cost_in",
                           value = INIT_CULLING_COST)
@@ -322,9 +332,11 @@ server <- function(input, output, session) {
     ### When CULLING cost is adjusted, update budget and check if still within limits. If not, adjust SCARING.
     observeEvent(input$culling_cost_in, {
         
+        req(GDATA$summary)
+        
         CURRENT_BUDGET = updateCurrentBudget(
             budget = CURRENT_BUDGET,
-            manager_budget = 1000,    ######## <<<<<<<<<------- NEEDS CHANGING
+            manager_budget = GDATA$paras$MANAGER_BUDGET,
             culling_cost = input$culling_cost_in,
             scaring_cost = input$scaring_cost_in)
         culling_b = CURRENT_BUDGET$culling
@@ -344,9 +356,11 @@ server <- function(input, output, session) {
     ### When SCARING cost is adjusted, update budget and check if still within limits. If not, adjust CULLING.
     observeEvent(input$scaring_cost_in, {
         
+        req(GDATA$summary)
+        
         CURRENT_BUDGET = updateCurrentBudget(
             budget = CURRENT_BUDGET,
-            manager_budget = 1000,                    ######## <<<<<<<<<------- NEEDS CHANGING
+            manager_budget = GDATA$paras$MANAGER_BUDGET,
             culling_cost = input$culling_cost_in,
             scaring_cost = input$scaring_cost_in)
         culling_b = CURRENT_BUDGET$culling
