@@ -154,7 +154,7 @@ ui <- fluidPage(
                                 actionButton("resetGame", "Reset game"),
                                 actionButton("newGame", "New game"),
                                 actionButton("showScores", "Scores"),
-                                actionButton("showAllIntro", "Help")
+                                actionButton("showAllIntro", "", icon("question-circle"))
                             )
                             
         )),
