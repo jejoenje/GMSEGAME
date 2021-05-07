@@ -14,7 +14,9 @@ initModal1 = function() {
 
 
 initModal2 = function() {
-  showModal(modalDialog(size = "l", footer = tagList(actionButton("toInit3", "Next"), actionButton("dismissInitModal", "Skip introduction")),
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("toInit1", "Previous"),
+                                                     actionButton("toInit3", "Next"), 
+                                                     actionButton("dismissInitModal", "Skip introduction")),
                         #title = "Welcome to GMSE-GAME!",
                         includeMarkdown("introduction2.Rmd")
   ))  
@@ -22,20 +24,25 @@ initModal2 = function() {
 
 
 initModal3 = function() {
-  showModal(modalDialog(size = "l", footer = tagList(actionButton("toInit4", "Next"), actionButton("dismissInitModal", "Skip introduction")),
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("backtoInit2", "Previous"),
+                                                     actionButton("toInit4", "Next"), 
+                                                     actionButton("dismissInitModal", "Skip introduction")),
                         #title = "Welcome to GMSE-GAME!",
                         includeMarkdown("introduction3.Rmd")
   ))  
 }
 
 initModal4 = function() {
-  showModal(modalDialog(size = "l", footer = tagList(actionButton("toInit5", "Next"), actionButton("dismissInitModal", "Skip introduction")),
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("backtoInit3", "Previous"),
+                                                     actionButton("toInit5", "Next"), 
+                                                     actionButton("dismissInitModal", "Skip introduction")),
                         includeMarkdown("introduction4.Rmd")
   ))  
 }
 
 initModal5 = function() {
-  showModal(modalDialog(size = "l", footer = tagList(actionButton("dismissInitModal", "Okay, go!")),
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("backtoInit4", "Previous"),
+                                                     actionButton("dismissInitModal", "Okay, go!")),
                         includeMarkdown("introduction5.Rmd")
   ))  
 }
