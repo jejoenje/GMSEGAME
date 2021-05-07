@@ -153,7 +153,8 @@ ui <- fluidPage(
                                 br(),
                                 actionButton("resetGame", "Reset game"),
                                 actionButton("newGame", "New game"),
-                                actionButton("showScores", "Scores")
+                                actionButton("showScores", "Scores"),
+                                actionButton("showAllIntro", "Help")
                             )
                             
         )),
@@ -441,6 +442,9 @@ server <- function(input, output, session) {
         scoresModal()
     })
     
+    observeEvent(input$showAllIntro, {
+        allIntroModal()
+    })
     # ### Debugging output:
     # ###
     # output$gdata_summary = renderTable({

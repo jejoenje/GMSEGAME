@@ -40,6 +40,15 @@ initModal5 = function() {
   ))  
 }
 
+allIntroModal = function() {
+  showModal(modalDialog(size = "l", footer = tagList(modalButton("Close")), easyClose = TRUE,
+                        includeMarkdown("introduction1.Rmd"),
+                        includeMarkdown("introduction2.Rmd"),
+                        includeMarkdown("introduction3.Rmd"),
+                        includeMarkdown("introduction4.Rmd"),
+                        includeMarkdown("introduction5.Rmd")
+  ))  
+}
 
 setPlayerModal = function(playername) {
   showModal(modalDialog(size = "s", footer = actionButton("confirmStart", "Go!"),
