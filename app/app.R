@@ -202,8 +202,7 @@ server <- function(input, output, session) {
     }
     
     ### This has repeated observers for both next/back buttons even though some of them do the same thing.
-    ### Would be nicer to have these respond to multiple inputs (where relevant) but I couldn't make this work quickly.
-    ### So, ugly, but this works:
+    ### Would be nicer to have these respond to multiple inputs (where relevant) but I couldn't make this work quickly:
     observeEvent(input$toInit1, {
         removeModal()
         initModal1()
