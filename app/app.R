@@ -113,36 +113,18 @@ ui <- fluidPage(
     shinyjs::useShinyjs(),
     use_waiter(),
     
-    titlePanel("GMSE-GAME"),
-    
     fluidRow(
         column(1),
-        column(4, wellPanel(id = "pop_panel", style = "background: white",
-                            plotOutput("pop_plot",width = "100%")
-        )),
-        column(3, wellPanel(id = "land_panel", style = "background: white",
-                            plotOutput("land_plot",width = "100%")
-        )),
-        column(3, wellPanel(id = "actions_panel", style = "background: white",
-                            plotOutput("actions_user",width = "100%")
-        )),
-        column(1)
-    ),
-    fluidRow(
-        column(2),
-        column(8, wellPanel(id = "bottom_panel", style = "background: white",
+        column(10, wellPanel(id = "bottom_panel", style = "background: white",
                             
-                            div(style="display:inline-block; vertical-align: middle;", 
-                                plotly::plotlyOutput("budget_pie", height = 200, width = 200)    
-                            ),
                             div(id = "budget_report", style="display:inline-block; vertical-align: top; padding-left: 2em; padding-right: 2em", 
-                                span("Budget remaining", style="color:#D35E60; font-size:175%"),
+                                span("Budget free to be allocated", style="color:#D35E60; font-size:175%"),
                                 span(textOutput("budgetRemaining"), style="color:#D35E60; font-size:350%; font-weight: bold")
                             ),
                             div(id = "input_sliders", style="display:inline-block; vertical-align: middle; padding-left: 4em; padding-right: 4em", 
-                                sliderInput("culling_cost_in", "Culling cost", 
+                                sliderInput("culling_cost_in", "How much culling should cost next:", 
                                             min = 10, max = (1000/10)+10, value = INIT_CULLING_COST, step = 5, width = 250),
-                                sliderInput("scaring_cost_in", "Scaring cost", 
+                                sliderInput("scaring_cost_in", "How much scaring should cost next:", 
                                             min = 10, max = (1000/10)+10, value = INIT_SCARING_COST, step = 5, width = 250)
                             ),
                             div(id = "input_buttons", style="display:inline-block; vertical-align: middle; padding-left: 2em", 
@@ -158,14 +140,12 @@ ui <- fluidPage(
                             )
                             
         )),
-        column(2)
-        ### EXTRA COLUMN FOR DEBUGGING INFO:
-        #column(5,
-               #verbatimTextOutput("playername"),
-               #verbatimTextOutput("runid")
-               #tableOutput("cbudget"),
-               #tableOutput("gdata_summary"),
-        #)
+        column(1)
+    ),
+    fluidRow(
+        column(4, plotOutput("pop_plot")),
+        column(4, plotOutput("land_plot")),
+        column(4, plotOutput("actions_user"))
     )
 )
 
@@ -467,18 +447,6 @@ server <- function(input, output, session) {
     observeEvent(input$showAllIntro, {
         allIntroModal()
     })
-    # ### Debugging output:
-    # ###
-    # output$gdata_summary = renderTable({
-    #     GDATA$summary
-    # })
-    # output$playername = renderText({
-    #     input$playerName
-    # })
-    # output$runid = renderText({
-    #     RUN$id
-    # })
-    # ### e/o Debugging output
 
     output$pop_plot <- renderPlot({
         if(!is.null(GDATA$summary)) {
@@ -486,7 +454,7 @@ server <- function(input, output, session) {
                      extinction_message = GDATA$extinction
             )    
         }
-    })
+    }, width = 400, height = 400)
     
     output$land_plot <- renderPlot({
         if(!is.null(GDATA$laststep)) {
@@ -496,7 +464,7 @@ server <- function(input, output, session) {
             )
             
         }
-    })
+    }, width = 400, height = 400)
     
     output$budget_bar <- renderPlot({
         if(!is.null(CURRENT_BUDGET$culling)) {
@@ -545,9 +513,10 @@ server <- function(input, output, session) {
             acts = rbind(scare_cull,t(as.matrix(tend_crops)))
             par(mar = c(5,5,2,1.5))
             barplot(acts, beside = FALSE, col = c("#D35E60","#9067A7","#56BA47"), space = 0.1, 
-                    names = c(1:ncol(acts)), ylab = "Actions", xlab = "Stakeholder", cex.lab = 2, cex.axis = 1.5, cex.names = 1.5)    
+                    names = c(1:ncol(acts)), ylab = "Actions", xlab = "Stakeholder", 
+                    cex.lab = 1, cex.axis = 1, cex.names = 1, main = "Stakeholder actions")
         }
-    })
+    }, width = 400, height = 400)
     
     output$budgetRemaining <- renderText({
         paste("$", CURRENT_BUDGET$leftover)
