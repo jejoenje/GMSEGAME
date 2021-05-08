@@ -12,4 +12,4 @@ This game is all about making decisions about sustainable management of animal p
 
 Each of these farms is occupied by a landowner who grow crops, which are consumed by the animals - the more animals, the less agricultural yield. 
 
-![](landscape_intro.jpg)
+<img src="landscape_intro.jpg" width="100%">

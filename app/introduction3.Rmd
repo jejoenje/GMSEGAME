@@ -6,7 +6,7 @@ output: html_document
 
 The higher you set either cost, the fewer actions are likely to be taken. Budget you "spend" on the cost for one action cannot be used for the other, and although you are free not to spend some or all of your budget in each time step, you cannot go over budget and your budget resets in each time step (anything left over does not carry over).
 
-![](budget2.jpg)
+<img src="budget2.jpg" width="100%">
 
 <span style="color:darkred">**Once you have made your budget decision, you click "Go!" to go to the next year.**</span>
 

@@ -4,7 +4,6 @@ output: html_document
 
 As the manager of this system, <span style="color:darkred">**your aim is to maintain both a population of the animals as well as minimise any overly negative effects on agricultural yield**</span>. 
 
-![](pop_yield_intro2.jpg)
-
+<img src="pop_yield_intro2.jpg" width="100%">
 
 
