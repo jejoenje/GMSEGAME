@@ -114,38 +114,54 @@ ui <- fluidPage(
     use_waiter(),
     
     fluidRow(
+        br(),
         column(1),
-        column(10, wellPanel(id = "bottom_panel", style = "background: white",
-                            
-                            div(id = "budget_report", style="display:inline-block; vertical-align: top; padding-left: 2em; padding-right: 2em", 
-                                span("Budget free to be allocated", style="color:#D35E60; font-size:175%"),
-                                span(textOutput("budgetRemaining"), style="color:#D35E60; font-size:350%; font-weight: bold")
-                            ),
-                            div(id = "input_sliders", style="display:inline-block; vertical-align: middle; padding-left: 4em; padding-right: 4em", 
-                                sliderInput("culling_cost_in", "How much culling should cost next:", 
-                                            min = 10, max = (1000/10)+10, value = INIT_CULLING_COST, step = 5, width = 250),
-                                sliderInput("scaring_cost_in", "How much scaring should cost next:", 
-                                            min = 10, max = (1000/10)+10, value = INIT_SCARING_COST, step = 5, width = 250)
-                            ),
-                            div(id = "input_buttons", style="display:inline-block; vertical-align: middle; padding-left: 2em", 
-                                actionButton("nextStep", "GO !", width = 150,
-                                             icon("paper-plane"),
-                                             style="font-size:200%; color: #fff; background-color: #D35E60; font-weight: bold"),
-                                br(),
-                                br(),
-                                actionButton("resetGame", "Reset game"),
-                                actionButton("newGame", "New game"),
-                                actionButton("showScores", "Scores"),
-                                actionButton("showAllIntro", "", icon("question-circle"))
-                            )
-                            
-        )),
-        column(1)
+        column(9, align = "center", div(id = "pageTitle","GMSE-GAME", style = "font-size:400%;vertical-align: middle;font-weight: bold")),
+        column(2),
+        p(),
+        hr()
     ),
     fluidRow(
-        column(4, plotOutput("pop_plot")),
-        column(4, plotOutput("land_plot")),
-        column(4, plotOutput("actions_user"))
+        br(),
+        column(1),
+        column(3, align = "center",
+            div(id = "budget_report", style="vertical-align: middle; padding: 1em",
+                span("Budget available to set costs", style="color:#D35E60; font-size:150%; text-align:center;"),
+                span(textOutput("budgetRemaining"), style="color:#D35E60; font-size:400%; font-weight: bold")
+                )
+        ),
+        column(3, align = "center",
+               div(id = "input_sliders", style="vertical-align: middle; padding: 1em",
+                   sliderInput("culling_cost_in", "How much culling should cost:",
+                               min = 10, max = (1000/10)+10, value = INIT_CULLING_COST, step = 5, width = "90%"),
+                   sliderInput("scaring_cost_in", "How much scaring should cost:",
+                               min = 10, max = (1000/10)+10, value = INIT_SCARING_COST, step = 5, width = "90%")
+               ),
+        ),
+        column(3, align = "center",
+               div(id = "buttonsPanel", style = "vertical-align: middle; padding-top:5em; padding-bottom:1em; padding-left:1em; padding-right:1em",
+                   actionButton("nextStep", "GO !", width = 150,
+                                icon("paper-plane"),
+                                style="font-size:200%; color: #fff; background-color: #D35E60; font-weight: bold"),
+                   br(),
+                   br(),
+                   actionButton("resetGame", "Reset game"),
+                   actionButton("newGame", "New game"),
+                   actionButton("showScores", "Scores"),
+                   actionButton("showAllIntro", "", icon("question-circle"))
+                   )
+               ),
+        column(2)
+    ),
+    br(),
+    hr(),
+    br(),
+    fluidRow(
+        column(1),
+        column(3, plotOutput("pop_plot", height="auto")),
+        column(3, plotOutput("land_plot", height="auto")),
+        column(3, plotOutput("actions_user", height="auto")),
+        column(2)
     )
 )
 
@@ -153,8 +169,11 @@ server <- function(input, output, session) {
     
     shinyjs::hide(id = "pop_panel")
     shinyjs::hide(id = "land_panel")
-    shinyjs::hide(id = "actions_panel")
-    shinyjs::hide(id = "bottom_panel")
+    shinyjs::hide(id = "buttonsPanel")
+    shinyjs::hide(id = "pageTitle")
+    shinyjs::hide(id = "input_sliders")
+    shinyjs::hide(id = "budget_report")
+    
     
     #var_paras = reactiveValues(res_death_K = NULL)
     
@@ -241,8 +260,10 @@ server <- function(input, output, session) {
         shinyjs::show(id = "nextStep")        
         shinyjs::show(id = "pop_panel")
         shinyjs::show(id = "land_panel")
-        shinyjs::show(id = "actions_panel")
-        shinyjs::show(id = "bottom_panel")
+        shinyjs::show(id = "buttonsPanel")
+        shinyjs::show(id = "pageTitle")
+        shinyjs::show(id = "input_sliders")
+        shinyjs::show(id = "budget_report")
         
         waiter_show(html = init_waiting_screen, color = "black")
         
@@ -454,7 +475,8 @@ server <- function(input, output, session) {
                      extinction_message = GDATA$extinction
             )    
         }
-    }, width = 400, height = 400)
+    }, height = function() { session$clientData$output_pop_plot_width }
+    )
     
     output$land_plot <- renderPlot({
         if(!is.null(GDATA$laststep)) {
@@ -464,7 +486,8 @@ server <- function(input, output, session) {
             )
             
         }
-    }, width = 400, height = 400)
+    }, height = function() { session$clientData$output_land_plot_width }
+    )
     
     output$budget_bar <- renderPlot({
         if(!is.null(CURRENT_BUDGET$culling)) {
@@ -516,7 +539,8 @@ server <- function(input, output, session) {
                     names = c(1:ncol(acts)), ylab = "Actions", xlab = "Stakeholder", 
                     cex.lab = 1, cex.axis = 1, cex.names = 1, main = "Stakeholder actions")
         }
-    }, width = 400, height = 400)
+    }, height = function() { session$clientData$output_actions_user_width }
+    )
     
     output$budgetRemaining <- renderText({
         paste("$", CURRENT_BUDGET$leftover)
