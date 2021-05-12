@@ -109,59 +109,68 @@ init_waiting_screen <- tagList(
     h4("Starting game...")
 ) 
 
-ui <- fluidPage(
+ui <- fixedPage(
     shinyjs::useShinyjs(),
     use_waiter(),
-    
-    fluidRow(
-        br(),
+
+    fixedRow(
         column(1),
-        column(9, align = "center", div(id = "pageTitle","GMSE-GAME", style = "font-size:400%;vertical-align: middle;font-weight: bold")),
-        column(2),
-        p(),
-        hr()
-    ),
-    fluidRow(
-        br(),
-        column(1),
-        column(3, align = "center",
-            div(id = "budget_report", style="vertical-align: middle; padding: 1em",
-                span("Budget available to set costs", style="color:#D35E60; font-size:150%; text-align:center;"),
-                span(textOutput("budgetRemaining"), style="color:#D35E60; font-size:400%; font-weight: bold")
+        column(5, align = "center",
+               div(id = "pop_plot_div", style = "padding: 1em",
+                   plotOutput("pop_plot", height="auto")
+                  )
+        ),
+        column(5, align = "center",
+            fixedRow(
+                div(id = "budget_report", style = "padding-top:4em; padding-left:1em; padding-right:1em, padding-bottom:1em",
+                    column(6, align = "right",
+                           div(style="text-align: center; vertical-align: middle; padding-top: 3em, padding-left: 3em",
+                               span("Budget available", style="color:#D35E60; font-size:150%;"),br(),
+                               span("(to set costs)", style="color:#D35E60; font-size:125%;"),
+                           )
+                    ),
+                    column(6, align = "left", 
+                           div(span(textOutput("budgetRemaining"), style="color:#D35E60; font-size:400%; font-weight: bold;vertical-align: middle; padding-top: 0em, padding-left: 3em"))
+                    )    
                 )
+                        
+                  
+            ),
+            hr(),
+            fixedRow(
+                div(id = "costSliders",
+                    column(6, align = "center", 
+                           sliderInput("culling_cost_in", "How much culling should cost:",
+                                       min = 10, max = (1000/10)+10, value = INIT_CULLING_COST, step = 5, width = "100%")),
+                    column(6, align = "center",
+                           sliderInput("scaring_cost_in", "How much scaring should cost:",
+                                       min = 10, max = (1000/10)+10, value = INIT_SCARING_COST, step = 5, width = "100%"))
+                    )
+            ),
+            hr(),
+            fixedRow(
+                div(id = "buttonsPanel", style = "vertical-align: middle; padding-top:0em; padding-bottom:0em; padding-left:0em; padding-right:0em",
+                    actionButton("nextStep", "GO !", width = 150,
+                                 icon("paper-plane"),
+                                 style="font-size:200%; color: #fff; background-color: #D35E60; font-weight: bold"),
+                    actionButton("resetGame", "Reset game"),
+                    actionButton("newGame", "New game"),
+                    actionButton("showScores", "Scores"),
+                    actionButton("showAllIntro", "", icon("question-circle"))
+                )
+            )
         ),
-        column(3, align = "center",
-               div(id = "input_sliders", style="vertical-align: middle; padding: 1em",
-                   sliderInput("culling_cost_in", "How much culling should cost:",
-                               min = 10, max = (1000/10)+10, value = INIT_CULLING_COST, step = 5, width = "90%"),
-                   sliderInput("scaring_cost_in", "How much scaring should cost:",
-                               min = 10, max = (1000/10)+10, value = INIT_SCARING_COST, step = 5, width = "90%")
-               ),
-        ),
-        column(3, align = "center",
-               div(id = "buttonsPanel", style = "vertical-align: middle; padding-top:5em; padding-bottom:1em; padding-left:1em; padding-right:1em",
-                   actionButton("nextStep", "GO !", width = 150,
-                                icon("paper-plane"),
-                                style="font-size:200%; color: #fff; background-color: #D35E60; font-weight: bold"),
-                   br(),
-                   br(),
-                   actionButton("resetGame", "Reset game"),
-                   actionButton("newGame", "New game"),
-                   actionButton("showScores", "Scores"),
-                   actionButton("showAllIntro", "", icon("question-circle"))
-                   )
-               ),
-        column(2)
+        column(1)
     ),
-    br(),
-    hr(),
-    br(),
-    fluidRow(
+    fixedRow(
         column(1),
-        column(3, plotOutput("pop_plot", height="auto")),
-        column(3, plotOutput("land_plot", height="auto")),
-        column(3, plotOutput("actions_user", height="auto")),
-        column(2)
+        column(5, align = "center",
+               plotOutput("land_plot", height="auto")
+        ),
+        column(5, align = "center",
+               plotOutput("actions_user", height="auto")
+        ),
+        column(1)
     )
 )
 
@@ -173,7 +182,7 @@ server <- function(input, output, session) {
     shinyjs::hide(id = "pageTitle")
     shinyjs::hide(id = "input_sliders")
     shinyjs::hide(id = "budget_report")
-    
+    shinyjs::hide(id = "costSliders")
     
     #var_paras = reactiveValues(res_death_K = NULL)
     
@@ -242,12 +251,15 @@ server <- function(input, output, session) {
         initModal5()
     })
     
-    
     observeEvent(input$dismissInitModal, {
         NEWSESSION = FALSE
         setPlayerModal(playername = GDATA$PLAYER_NAME)
     })
 
+    observeEvent(input$consentAgree, {
+        shinyjs::toggle("confirmStart")
+    })
+    
     observeEvent(input$confirmStart, {
         
         removeModal()
@@ -264,6 +276,7 @@ server <- function(input, output, session) {
         shinyjs::show(id = "pageTitle")
         shinyjs::show(id = "input_sliders")
         shinyjs::show(id = "budget_report")
+        shinyjs::show(id = "costSliders")
         
         waiter_show(html = init_waiting_screen, color = "black")
         

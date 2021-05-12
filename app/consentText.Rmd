@@ -1,0 +1,16 @@
+---
+output: html_document
+---
+
+*By ticking the box below, and clicking 'Go', you confirm that you are over the age of 16, and consent to us recording and storing the player name given above, and the actions you take during the following game session, for the purposes of research into human decision-making in natural resource management.*  
+
+*After you click 'go' you can end your participation at any time by closing your browser window. You have the right to ask us to permanently delete any such data we collect by emailing [emailaddress@togohere.com](emailaddress@togohere.com) us your player name and the date of your game session.*  
+
+*For further details on the background and purpose of the research, please see the links below.*  
+
+[Detailed information sheet]()  
+[Consent sheet]()
+
+
+
+
