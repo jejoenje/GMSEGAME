@@ -6,7 +6,7 @@ output: html_document
 ## <span style="color:darkred">Welcome to GMSE-GAME!</span>
 
 
-This game is all about making decisions about sustainable management of animal populations.
+This game is all about making decisions about sustainable management of animal populations that benefits both conservation and other land uses, such as farming.
   
 <span style="color:darkred">**In this game, you will play the role of a manager tasked with managing a population of wild animals, which live in a farmland landscape, divided into a number of different farms.** </span>
 

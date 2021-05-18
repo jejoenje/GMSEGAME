@@ -58,8 +58,15 @@ allIntroModal = function() {
 }
 
 setPlayerModal = function(playername) {
-  showModal(modalDialog(size = "m", footer = actionButton("confirmStart", "Go!"),
+  showModal(modalDialog(size = "l", footer = actionButton("confirmStart", "Go!"),
                         #title = div(style="padding-left: 10%; padding-right: 10%", "What is your player name?"),
+                        div(style="padding-left: 10%; padding-right: 10%",
+                        includeMarkdown("consentText.Rmd"),
+                        ),
+                        div(style="padding-left: 10%; padding-right: 10%; font-weight: bold;",
+                            checkboxInput("consentAgree", "I consent to the above", value = FALSE, width = NULL)
+                        ),
+                        hr(),
                         div(style="padding-left: 10%; padding-right: 10%;", h3("What is your player name?")),
                         div(style="padding-left: 10%; padding-right: 10%; font-size: 0.75em",
                             textInput("playerName", label = NULL, value = playername, width = NULL, placeholder = NULL),
@@ -69,13 +76,6 @@ setPlayerModal = function(playername) {
                               tags$li(tags$span("We only ask for a nickname so you can keep track of your game scores on the leaderboard.")),
                               tags$li(tags$span("Using your real name means we will record this and that you consent to us doing so; if you do not, please use a nickname.")),
                             ))
-                        ),
-                        hr(),
-                        div(style="padding-left: 10%; padding-right: 10%",
-                        includeMarkdown("consentText.Rmd"),
-                        ),
-                        div(style="padding-left: 10%; padding-right: 10%; font-weight: bold;",
-                            checkboxInput("consentAgree", "I consent to the above", value = FALSE, width = NULL)
                         )
                         
                       )
