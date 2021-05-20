@@ -563,6 +563,7 @@ server <- function(input, output, session) {
                     names = c(1:ncol(acts)), ylab = "Actions", xlab = "Stakeholder", 
                     cex.lab = 1, cex.axis = 1, cex.names = 1, main = "Stakeholder actions")
         }
+    ### This should track/set the width of the figures dynamically:
     }, height = function() { session$clientData$output_actions_user_width }
     )
     
