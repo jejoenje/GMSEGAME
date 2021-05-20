@@ -38,7 +38,7 @@ initGame = function() {
         CULLING = TRUE,
         SCARING = TRUE,
         TEND_CROPS = TRUE,
-        TEND_CROP_YLD = runif(1, 0.1, 0.75),
+        TEND_CROP_YLD = runif(1, 0.1, 0.4),
         LAND_DIM_1 = 100,
         LAND_DIM_2 = 100,
         RESOURCE_INI = 1000
@@ -100,7 +100,7 @@ updateCurrentBudget = function(budget, manager_budget, culling_budget, scaring_b
 }
 
 budgetToCost = function(budgetAllocated, minimum_cost) {
-    return(budgetAllocated/10 + minimum_cost)
+    return(floor(budgetAllocated/10 + minimum_cost))
 }
 
 
@@ -145,10 +145,10 @@ ui <- fixedPage(
             fixedRow(
                 div(id = "costSliders",
                     column(6, align = "center", 
-                           sliderInput("culling", "Budget allocated to preventing culling:",
+                           sliderInput("culling", "Budget to preventing culling:",
                                        min = 0, max = 1000, value = INIT_CULLING_BUDGET, step = 5, width = "100%")),
                     column(6, align = "center",
-                           sliderInput("scaring", "Budget allocated to preventing scaring:",
+                           sliderInput("scaring", "Budget to preventing scaring:",
                                        min = 0, max = 1000, value = INIT_SCARING_BUDGET, step = 5, width = "100%"))
                     )
             ),
@@ -373,7 +373,7 @@ server <- function(input, output, session) {
         
         #If spend on culling+scaring exceeds total budget:
         if((culling_b+scaring_b)>total_b) {
-            scaring_b_adj = total_b-culling_b
+            scaring_b_adj = floor(total_b-culling_b)
             #scaring_cost_adj = scaring_b_adj/10
             updateSliderInput(session = getDefaultReactiveDomain(),
                               inputId = "scaring",
@@ -389,8 +389,8 @@ server <- function(input, output, session) {
         CURRENT_BUDGET = updateCurrentBudget(
             budget = CURRENT_BUDGET,
             manager_budget = GDATA$paras$MANAGER_BUDGET,
-            culling_cost = input$culling,
-            scaring_cost = input$scaring)
+            culling_budget = input$culling,
+            scaring_budget = input$scaring)
         culling_b = CURRENT_BUDGET$culling
         scaring_b = CURRENT_BUDGET$scaring
         total_b = CURRENT_BUDGET$total
@@ -398,7 +398,7 @@ server <- function(input, output, session) {
         # If spend on culling+scaring exceeds total budget:
         if((culling_b+scaring_b)>total_b) {
             # Max available to culling after new scaring cost input:
-            culling_b_adj = total_b-scaring_b
+            culling_b_adj = floor(total_b-scaring_b)
             # This amounts to this updated cost for culling:
             #culling_cost_adj = culling_b_adj/10
             # Update the slider; this in turn should update
@@ -413,13 +413,6 @@ server <- function(input, output, session) {
         req(GDATA$summary)
         
         ### User input
-        
-        ###
-        ###
-        ### THE FOLLOWING LINE NOW NEEDS TO TRANSLATE FROM GIVEN BUDGET TO COST SET:
-        ###
-        ###
-        
         culling_cost = budgetToCost(input$culling, minimum_cost = 10)
         scaring_cost = budgetToCost(input$scaring, minimum_cost = 10)
         
@@ -437,6 +430,7 @@ server <- function(input, output, session) {
             GDATA$yields = rbind(GDATA$yields, tapply(nxt$LAND[,,2],nxt$LAND[,,3],mean)) # Store per-user yield (before reset)
             
             # Add time new time step game data to database:
+            print(GDATA$summary)
             addNewData(runID = RUN$id, gd = GDATA$summary)
             
             # Add new yield data to database:
