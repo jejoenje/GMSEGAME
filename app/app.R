@@ -13,8 +13,8 @@ source("infoDialogs.R")
 source("connect_db.R")
 source("dbase_functions.R")
 
-INIT_SCARING_COST = 10
-INIT_CULLING_COST = 10
+INIT_SCARING_BUDGET = 100
+INIT_CULLING_BUDGET = 100
 
 #PLAYER_NAME = "NewPlayer"
 NEWSESSION = TRUE
@@ -58,10 +58,10 @@ initGame = function() {
 
 initBudget = function(paras) {
     budget = list(
-        total = paras$MANAGER_BUDGET+2*10*10,
-        culling = INIT_CULLING_COST*10,
-        scaring = INIT_SCARING_COST*10,
-        remaining = (paras$MANAGER_BUDGET+2*10*10)-(INIT_CULLING_COST*10+INIT_SCARING_COST*10)
+        total = paras$MANAGER_BUDGET,
+        culling = INIT_CULLING_BUDGET,
+        scaring = INIT_SCARING_BUDGET,
+        remaining = paras$MANAGER_BUDGET-(INIT_CULLING_BUDGET+INIT_SCARING_BUDGET)
     )
     return(budget)
 }
@@ -91,13 +91,18 @@ getLastParas = function(laststep, K) {
     return(last_paras)
 }
 
-updateCurrentBudget = function(budget, manager_budget, culling_cost, scaring_cost) {
-    budget$total = manager_budget+2*10*10
-    budget$culling = culling_cost*10
-    budget$scaring = scaring_cost*10
+updateCurrentBudget = function(budget, manager_budget, culling_budget, scaring_budget) {
+    budget$total = manager_budget
+    budget$culling = culling_budget
+    budget$scaring = scaring_budget
     budget$leftover = budget$total-(budget$culling+budget$scaring)
     return(budget)
 }
+
+budgetToCost = function(budgetAllocated, minimum_cost) {
+    return(budgetAllocated/10 + minimum_cost)
+}
+
 
 reset_waiting_screen <- tagList(
     spin_flower(),
@@ -140,11 +145,11 @@ ui <- fixedPage(
             fixedRow(
                 div(id = "costSliders",
                     column(6, align = "center", 
-                           sliderInput("culling_cost_in", "How much culling should cost:",
-                                       min = 10, max = (1000/10)+10, value = INIT_CULLING_COST, step = 5, width = "100%")),
+                           sliderInput("culling", "Budget allocated to preventing culling:",
+                                       min = 0, max = 1000, value = INIT_CULLING_BUDGET, step = 5, width = "100%")),
                     column(6, align = "center",
-                           sliderInput("scaring_cost_in", "How much scaring should cost:",
-                                       min = 10, max = (1000/10)+10, value = INIT_SCARING_COST, step = 5, width = "100%"))
+                           sliderInput("scaring", "Budget allocated to preventing scaring:",
+                                       min = 0, max = 1000, value = INIT_SCARING_BUDGET, step = 5, width = "100%"))
                     )
             ),
             hr(),
@@ -314,21 +319,21 @@ server <- function(input, output, session) {
         
         ### Set max to culling/scaring slides based on MANAGER_BUDGET
         updateSliderInput(session = getDefaultReactiveDomain(),
-                          inputId = "culling_cost_in",
-                          max = (GDATA$paras$MANAGER_BUDGET/10)+10
+                          inputId = "culling",
+                          max = GDATA$paras$MANAGER_BUDGET
                           )
         updateSliderInput(session = getDefaultReactiveDomain(),
-                          inputId = "scaring_cost_in",
-                          max = (GDATA$paras$MANAGER_BUDGET/10)+10
+                          inputId = "scaring",
+                          max = GDATA$paras$MANAGER_BUDGET
         )
         
         ### Set initial culling/scaring costs:
         updateSliderInput(session = getDefaultReactiveDomain(),
-                          inputId = "culling_cost_in",
-                          value = INIT_CULLING_COST)
+                          inputId = "culling",
+                          value = INIT_CULLING_BUDGET)
         updateSliderInput(session = getDefaultReactiveDomain(),
-                          inputId = "scaring_cost_in",
-                          value = INIT_SCARING_COST)
+                          inputId = "scaring",
+                          value = INIT_SCARING_BUDGET)
         
         waiter_hide()
     })
@@ -353,15 +358,15 @@ server <- function(input, output, session) {
     })
     
     ### When CULLING cost is adjusted, update budget and check if still within limits. If not, adjust SCARING.
-    observeEvent(input$culling_cost_in, {
+    observeEvent(input$culling, {
         
         req(GDATA$summary)
         
         CURRENT_BUDGET = updateCurrentBudget(
             budget = CURRENT_BUDGET,
             manager_budget = GDATA$paras$MANAGER_BUDGET,
-            culling_cost = input$culling_cost_in,
-            scaring_cost = input$scaring_cost_in)
+            culling_budget = input$culling,
+            scaring_budget = input$scaring)
         culling_b = CURRENT_BUDGET$culling
         scaring_b = CURRENT_BUDGET$scaring
         total_b = CURRENT_BUDGET$total
@@ -369,23 +374,23 @@ server <- function(input, output, session) {
         #If spend on culling+scaring exceeds total budget:
         if((culling_b+scaring_b)>total_b) {
             scaring_b_adj = total_b-culling_b
-            scaring_cost_adj = scaring_b_adj/10
+            #scaring_cost_adj = scaring_b_adj/10
             updateSliderInput(session = getDefaultReactiveDomain(),
-                              inputId = "scaring_cost_in",
-                              value = scaring_cost_adj)
+                              inputId = "scaring",
+                              value = scaring_b_adj)
         }
     })
     
     ### When SCARING cost is adjusted, update budget and check if still within limits. If not, adjust CULLING.
-    observeEvent(input$scaring_cost_in, {
+    observeEvent(input$scaring, {
         
         req(GDATA$summary)
         
         CURRENT_BUDGET = updateCurrentBudget(
             budget = CURRENT_BUDGET,
             manager_budget = GDATA$paras$MANAGER_BUDGET,
-            culling_cost = input$culling_cost_in,
-            scaring_cost = input$scaring_cost_in)
+            culling_cost = input$culling,
+            scaring_cost = input$scaring)
         culling_b = CURRENT_BUDGET$culling
         scaring_b = CURRENT_BUDGET$scaring
         total_b = CURRENT_BUDGET$total
@@ -395,11 +400,11 @@ server <- function(input, output, session) {
             # Max available to culling after new scaring cost input:
             culling_b_adj = total_b-scaring_b
             # This amounts to this updated cost for culling:
-            culling_cost_adj = culling_b_adj/10
+            #culling_cost_adj = culling_b_adj/10
             # Update the slider; this in turn should update
             updateSliderInput(session = getDefaultReactiveDomain(),
-                              inputId = "culling_cost_in",
-                              value = culling_cost_adj)
+                              inputId = "culling",
+                              value = culling_b_adj)
         }
     })
     
@@ -408,7 +413,17 @@ server <- function(input, output, session) {
         req(GDATA$summary)
         
         ### User input
-        costs_as_input = list(culling = input$culling_cost_in, scaring = input$scaring_cost_in)
+        
+        ###
+        ###
+        ### THE FOLLOWING LINE NOW NEEDS TO TRANSLATE FROM GIVEN BUDGET TO COST SET:
+        ###
+        ###
+        
+        culling_cost = budgetToCost(input$culling, minimum_cost = 10)
+        scaring_cost = budgetToCost(input$scaring, minimum_cost = 10)
+        
+        costs_as_input = list(culling = culling_cost, scaring = scaring_cost)
         prev = GDATA$laststep
         prev = set_man_costs(prev, newcost = costs_as_input)
         
@@ -444,7 +459,9 @@ server <- function(input, output, session) {
     
     observeEvent(GDATA$extinction, {
         if(GDATA$extinction == TRUE) {
-            addLastCostsOnExtinction(runID = RUN$id, cull_cost = input$culling_cost_in, scare_cost = input$scaring_cost_in)
+            culling_cost = budgetToCost(input$culling, minimum_cost = 10)
+            scaring_cost = budgetToCost(input$scaring, minimum_cost = 10)
+            addLastCostsOnExtinction(runID = RUN$id, cull_cost = culling_cost, scare_cost = scaring_cost)
             updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
             addScores(runID = RUN$id, gd = GDATA)
             extinctionModal()
