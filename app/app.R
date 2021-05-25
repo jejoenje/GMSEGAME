@@ -561,6 +561,7 @@ server <- function(input, output, session) {
             barplot(acts, beside = FALSE, col = c("#D35E60","#9067A7","#56BA47"), space = 0.1, 
                     names = c(1:ncol(acts)), ylab = "Actions", xlab = "Stakeholder", 
                     cex.lab = 1, cex.axis = 1, cex.names = 1, main = "Stakeholder actions")
+            legend(x = ncol(acts)+1, y = max(acts)+1, legend = c("Culling","Scaring","Tending crops"), fill = c("#D35E60","#9067A7","#56BA47"))
         }
     ### This should track/set the width of the figures dynamically:
     }, height = function() { session$clientData$output_actions_user_width }
