@@ -149,7 +149,8 @@ plot_land = function(x, cols = NULL) {
   
   if(sum(x == 1)>0) land_cols[1] = "#FFFFFF"
   
-  par(mar = c(5,2,2,2))
+  par(oma = c(2,2,2,2))
+  par(mar = c(2,2,2,2))
   image(x = x, col = land_cols, yaxt = "n", xaxt = "n", main = "Landscape")
 
 }
