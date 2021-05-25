@@ -5,7 +5,7 @@ output: html_document
 ### Electronic Participant Consent Form (v. 18/05/2021)
   
   
-*I confirm that I have read and understood the [participant information sheet](GMSEGAME_ParticipantInformationSheet.pdf) dated 18/05/2021 explaining the above research project and I have had the opportunity to ask questions about the project.*
+*I confirm that I have read and understood the <a href="https://ochil-ds.co.uk/GMSEGAME_ParticipantInformationSheet.pdf" target="_blank">Participant Information Sheet</a> dated 18/05/2021 explaining the above research project and I have had the opportunity to ask questions about the project.*
 
 *I understand that my participation is voluntary and that I am free to withdraw at any time during the study and withdraw my data before January 2022 without giving a reason, and without any penalty. I understand that beyond January 2022 it may not be possible to remove my data from the study.*
 
@@ -15,9 +15,7 @@ output: html_document
 
 *By ticking the box below, and clicking 'Go', you confirm that you are over the age of 16, and consent to us recording and storing the player name given above, and the actions you take during the following game session, for the purposes of research into human decision-making in natural resource management.* 
 
-[Detailed information sheet](GMSEGAME_ParticipantInformationSheet.pdf)  
-[Consent sheet](GMSEGAME_ParticipantConsentForm.pdf)
-
-
-
+<a href="https://ochil-ds.co.uk/GMSEGAME_ParticipantInformationSheet.pdf" target="_blank">Participant Information Sheet</a>
+  
+<a href="https://ochil-ds.co.uk/GMSEGAME_ParticipantConsentForm.pdf" target="_blank">Consent Form</a>
 
