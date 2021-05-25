@@ -16,7 +16,6 @@ source("dbase_functions.R")
 INIT_SCARING_BUDGET = 100
 INIT_CULLING_BUDGET = 100
 
-#PLAYER_NAME = "NewPlayer"
 NEWSESSION = TRUE
 
 initGame = function() {
