@@ -557,11 +557,14 @@ server <- function(input, output, session) {
             tend_crops = prev_acts[2,10,2:dim(prev_acts)[3]] 
             # rows: scares, culls, tend_crops:
             acts = rbind(scare_cull,t(as.matrix(tend_crops)))
-            par(mar = c(5,5,2,1.5))
+            #par(oma = c(0,0,0,6))
+            par(mar = c(5,5,5,1.5))
             barplot(acts, beside = FALSE, col = c("#D35E60","#9067A7","#56BA47"), space = 0.1, 
-                    names = c(1:ncol(acts)), ylab = "Actions", xlab = "Stakeholder", 
-                    cex.lab = 1, cex.axis = 1, cex.names = 1, main = "Stakeholder actions")
-            legend(x = ncol(acts)+1, y = max(acts)+1, legend = c("Culling","Scaring","Tending crops"), fill = c("#D35E60","#9067A7","#56BA47"))
+                    names = LETTERS[1:ncol(acts)], ylab = "No. actions taken by farmer", xlab = "Farmer", 
+                    cex.lab = 2, cex.axis = 1.5, cex.names = 1.25, main = "")
+            legend("top", inset=c(0,-0.25), legend = c("Culling","Scaring","Farming"), 
+                   fill = c("#D35E60","#9067A7","#56BA47"), cex = 1.5,
+                   ncol = 3, x.intersp=0.3, text.width = floor(ncol(acts)/3.5), xjust = 0, bty = "n", xpd = T)
         }
     ### This should track/set the width of the figures dynamically:
     }, height = function() { session$clientData$output_actions_user_width }
