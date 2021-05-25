@@ -25,7 +25,7 @@ plot_pop = function(dat, yield_dat = NULL, yrange = 10, track_range = TRUE, exti
   
   plot(t, obs, ylim = c(0, max(obs, na.rm=T)*2), 
        type = "b", pch = 21, col = "black", bg = "grey", lwd = 2, xaxt = "n",
-       xlab = "Time step", ylab = "Observed population size", cex.axis = 1, cex.lab = 1, main = "Population & yield")
+       xlab = "Time step", ylab = "Observed population size", cex.axis = 1, cex.lab = 1, main = "Population & farming yield", cex.main = 1.5)
   axis(1, at = t, cex.lab = 1.25)
   points(tail(t[!is.na(obs)],1),tail(obs[!is.na(obs)],1), 
          pch = 21, col = "black", bg = "red", lwd = 2, cex = 2)
@@ -151,8 +151,19 @@ plot_land = function(x, cols = NULL) {
   
   par(oma = c(2,2,2,2))
   par(mar = c(2,2,2,2))
-  image(x = x, col = land_cols, yaxt = "n", xaxt = "n", main = "Landscape")
-
+  image(x = x, col = land_cols, yaxt = "n", xaxt = "n", main = "Farming landscape & animal positions", cex.main = 1.5)
+  
+  # users = as.numeric(names(table(x)))
+  # n_users = length(users)
+  # for(i in 1:n_users) {
+  #   id_pos = which(x == users[i], arr.ind = T)
+  #   id_x = id_pos[,"row"]
+  #   id_y = id_pos[,"col"]
+  #   xpos = min(id_x)+5
+  #   ypos = min(id_x)+5
+  #   text(x = xpos/100, y = ypos/100, LETTERS[users[i]-1])
+  # }
+  
 }
 
 placeResources = function(res, xd, yd) {
@@ -165,11 +176,25 @@ placeResources = function(res, xd, yd) {
   return(land_res)
 }
 
-plot_land_res = function(land, resources, cols = NULL, extinction_message = FALSE) {
+plot_land_res = function(land, resources, cols = NULL, extinction_message = FALSE, show_labels = FALSE) {
   plot_land(land[,,3], cols = cols)
   if(extinction_message==FALSE) {
     par(new = T)
     res_positions = placeResources(res = resources, xd = dim(land[,,3])[1], yd = dim(land[,,3])[1])
-    image(res_positions, col = "darkred", xaxt = "n", yaxt = "n")  
+    image(res_positions, col = "darkred", xaxt = "n", yaxt = "n")
+    
+    if(show_labels == TRUE) {
+      users = as.numeric(names(table(land[,,3])))
+      n_users = length(users)
+      for(i in 1:n_users) {
+        poss = which(land[,,3]==users[i], arr.ind = T)
+        #points(poss[,1]/100,poss[,2]/100,col="red",pch=16)
+        xpos = mean(poss[,1])/100
+        ypos = mean(poss[,2])/100
+        points(x = xpos, y = ypos, pch = 21, col = alpha("black",0.75), bg = alpha("white",0.75), cex = 4)
+        text(x = xpos, y = ypos, LETTERS[users[i]-1], col = alpha("black",0.75), cex = 1)
+      }
+    }
+    
   }
 }

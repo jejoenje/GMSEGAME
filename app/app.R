@@ -7,6 +7,7 @@ library(GMSE) # CURRENTLY NEEDS devtools::install_github("ConFooBio/GMSE", ref =
 library(RMySQL)
 library(reshape2)
 library(DT)
+library(scales)
 
 source("app_helpers.R")
 source("infoDialogs.R")
@@ -505,7 +506,8 @@ server <- function(input, output, session) {
         if(!is.null(GDATA$laststep)) {
             plot_land_res(GDATA$laststep$LAND, GDATA$laststep$RESOURCES, 
                           col = GDATA$land_colors,
-                          extinction_message = GDATA$extinction
+                          extinction_message = GDATA$extinction,
+                          show_labels = TRUE
             )
             
         }
