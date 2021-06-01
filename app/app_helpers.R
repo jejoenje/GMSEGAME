@@ -174,7 +174,7 @@ placeResources = function(res, xd, yd) {
   return(land_res)
 }
 
-plot_land_res = function(land, resources, cols = NULL, extinction_message = FALSE, show_labels = FALSE) {
+plot_land_res = function(land, resources, cols = NULL, extinction_message = FALSE, show_labels = FALSE, selected_user = NULL) {
   plot_land(land[,,3], cols = cols)
   if(extinction_message==FALSE) {
     par(new = T)
@@ -184,12 +184,16 @@ plot_land_res = function(land, resources, cols = NULL, extinction_message = FALS
     if(show_labels == TRUE) {
       users = as.numeric(names(table(land[,,3])))
       n_users = length(users)
+      users_cols = rep(alpha("white",0.75), n_users)
+      if(!is.null(selected_user)) {
+        users_cols[selected_user] = "#D35E60"
+      }
       for(i in 1:n_users) {
         poss = which(land[,,3]==users[i], arr.ind = T)
         #points(poss[,1]/100,poss[,2]/100,col="red",pch=16)
         xpos = mean(poss[,1])/100
         ypos = mean(poss[,2])/100
-        points(x = xpos, y = ypos, pch = 21, col = alpha("black",0.75), bg = alpha("white",0.75), cex = 4)
+        points(x = xpos, y = ypos, pch = 21, col = alpha("black",0.75), bg = users_cols[i], cex = 4)
         text(x = xpos, y = ypos, LETTERS[users[i]-1], col = alpha("black",0.75), cex = 1)
       }
     }

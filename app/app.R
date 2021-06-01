@@ -1,6 +1,7 @@
 rm(list=ls())
 library(shiny)
 library(shinyjs)
+library(shinyBS)
 library(waiter)
 library(plotly)
 library(GMSE) # CURRENTLY NEEDS devtools::install_github("ConFooBio/GMSE", ref = "man_control")
@@ -152,7 +153,7 @@ ui <- fixedPage(
                            sliderInput("scaring", "Budget to preventing scaring:",
                                        min = 0, max = 1000, value = INIT_SCARING_BUDGET, step = 5, width = "100%"))
                     ),
-                bsTooltip(id = "costSliders", "How much of your budget will be invested in preventing culling of animals (e.g. the cost of a shooting licence), and in preventing scaring of animals (e.g. the cost of a scaring licence).", placement = "top", trigger = "hover", options = NULL)
+                bsTooltip(id = "costSliders", "How much of your budget will be invested in preventing culling of animals (e.g. the cost of a shooting licence), and in preventing scaring of animals (e.g. the cost of a scaring licence).", placement = "left", trigger = "hover", options = NULL)
                 
             ),
             hr(),
@@ -173,12 +174,12 @@ ui <- fixedPage(
     fixedRow(
         column(1),
         column(5, align = "center",
-               plotOutput("land_plot", height="auto"),
+               plotOutput("land_plot", height="auto", click = "land_plot_click"),
                bsTooltip(id = "land_plot", "The farming landscape; grey labelled sections are individual farms, red dots are the current animal positions.", placement = "left", trigger = "hover", options = NULL)
                
         ),
         column(5, align = "center",
-               plotOutput("actions_user", height="auto"),
+               plotOutput("actions_user", height="auto", click = "act_plot_click"),
                bsTooltip(id = "actions_user", "Actions taken by the farmers in the previous year. Different colours represent the three different possible actions; killing animals, scaring animals off their land, or tending crops. The letter labels link the individual farmer to the individual farm on the farmland map.", placement = "top", trigger = "hover", options = NULL)
                
         ),
@@ -211,6 +212,7 @@ server <- function(input, output, session) {
                                     culling = NULL,
                                     scaring = NULL,
                                     leftover = NULL)
+    USER_DISPLAY_SELECT = reactiveValues(user = NULL, act_plot_dat = NULL)
     
     ### This updates a "global" player name in response to a change in the playerName input.
     observeEvent(input$playerName, {
@@ -270,6 +272,22 @@ server <- function(input, output, session) {
 
     observeEvent(input$consentAgree, {
         shinyjs::toggle("confirmStart")
+    })
+    
+    observeEvent(input$land_plot_click, {
+        x = ceiling(dim(GDATA$laststep$LAND[,,3])[1]*input$land_plot_click$x)
+        y = ceiling(dim(GDATA$laststep$LAND[,,3])[2]*input$land_plot_click$y)
+        # Note the user number index tracked in USER_DISPLAY_SELECT has base 1, not 2 as in the GMSE internal data, hence -1.
+        USER_DISPLAY_SELECT$user = GDATA$laststep$LAND[,,3][x,y]-1
+    })
+    
+    ### Observer for monitoring clicks on action plot
+    observeEvent(input$act_plot_click, {
+        mins = USER_DISPLAY_SELECT$act_plot_dat-0.5
+        maxs = USER_DISPLAY_SELECT$act_plot_dat+0.5
+        picklevel = input$act_plot_click$x>mins & input$act_plot_click$x<maxs
+        # Note 'user' numeric value has base 1, not 2 as in the GMSE internal data!
+        USER_DISPLAY_SELECT$user = which(picklevel)
     })
     
     observeEvent(input$confirmStart, {
@@ -514,7 +532,8 @@ server <- function(input, output, session) {
             plot_land_res(GDATA$laststep$LAND, GDATA$laststep$RESOURCES, 
                           col = GDATA$land_colors,
                           extinction_message = GDATA$extinction,
-                          show_labels = TRUE
+                          show_labels = TRUE,
+                          selected_user = USER_DISPLAY_SELECT$user
             )
             
         }
@@ -568,9 +587,27 @@ server <- function(input, output, session) {
             acts = rbind(scare_cull,t(as.matrix(tend_crops)))
             #par(oma = c(0,0,0,6))
             par(mar = c(5,5,5,1.5))
-            barplot(acts, beside = FALSE, col = c("#D35E60","#9067A7","#56BA47"), space = 0.1, 
-                    names = LETTERS[1:ncol(acts)], ylab = "No. actions taken by farmer", xlab = "Farmer", 
-                    cex.lab = 2, cex.axis = 1.5, cex.names = 1.25, main = "")
+            #bcols = matrix("black", nrow = 3, ncol = ncol(acts))
+            #bcols = c(rep("black",4),rep("red",4))
+            # if(!is.null(USER_DISPLAY_SELECT$user)) {
+            #     bcols[,USER_DISPLAY_SELECT$user] = "red"
+            # } 
+            # act_plot_dat = barplot(acts, beside = FALSE, col = c("#D35E60","#9067A7","#56BA47"), space = 0.1, 
+            #         names = LETTERS[1:ncol(acts)], ylab = "No. actions taken by farmer", xlab = "Farmer", 
+            #         cex.lab = 2, cex.axis = 1.5, cex.names = 1.25, main = "", border = "red")
+            USER_DISPLAY_SELECT$act_plot_dat = barplot(acts, beside = FALSE, col = c("#D35E60","#9067A7","#56BA47"), space = 0.1, 
+                                   xaxt = "n", ylab = "No. actions taken by farmer", xlab = "Farmer", 
+                                   cex.lab = 2, cex.axis = 1.5, cex.names = 1.25, main = "")
+            USERS = LETTERS[1:ncol(acts)]
+            USER_LAB_COLS = rep("white", ncol(acts))
+            if(!is.null(USER_DISPLAY_SELECT$user)) {
+                USER_LAB_COLS[USER_DISPLAY_SELECT$user] = "#D35E60"
+            }
+            xlab_ypos = 0-(max(acts, na.rm = T)*0.075)
+            for(i in 1:ncol(acts)) {
+                points(USER_DISPLAY_SELECT$act_plot_dat[i], y = xlab_ypos, cex = 4, xpd = T, pch = 21, bg = USER_LAB_COLS[i], col = "black")
+                text(USERS[i], x = USER_DISPLAY_SELECT$act_plot_dat[i], y = xlab_ypos, xpd = T, cex = 1.25)
+            }
             legend("top", inset=c(0,-0.25), legend = c("Culling","Scaring","Farming"), 
                    fill = c("#D35E60","#9067A7","#56BA47"), cex = 1.5,
                    ncol = 3, x.intersp=0.3, text.width = floor(ncol(acts)/3.5), xjust = 0, bty = "n", xpd = T)
@@ -602,23 +639,6 @@ server <- function(input, output, session) {
         
         formatStyle(scores_dt, "id", target = "row",  backgroundColor = styleEqual(RUN$id, "darkred"), color = styleEqual(RUN$id, "white"))
 
-    })
-    
-    output$tableForTest <- renderDataTable({
-        datatable(cars)
-    })
-    
-    output$clientdataText <- renderText({
-        cnames <- names(cdata)
-        
-        allvalues <- lapply(cnames, function(name) {
-            paste(name, cdata[[name]], sep = " = ")
-        })
-        paste(allvalues, collapse = "\n")
-    })
-    
-    output$sessiontoken = renderText({
-        session$token
     })
     
 }
