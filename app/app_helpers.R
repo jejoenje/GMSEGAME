@@ -21,24 +21,22 @@ plot_pop = function(dat, yield_dat = NULL, yrange = 10, track_range = TRUE, exti
     yield_dat = tail(yield_dat, yrange)
   }
   
-  #par(mar = c(5,5,2,5))
+  par(mar = c(5,5,5,5))
   
   plot(t, obs, ylim = c(0, max(obs, na.rm=T)*2), 
        type = "b", pch = 21, col = "black", bg = "grey", lwd = 2, xaxt = "n",
-       xlab = "Time step", ylab = "Observed population size", cex.axis = 1, cex.lab = 1, main = "Population & farming yield", cex.main = 1.5)
-  axis(1, at = t, cex.lab = 1.25)
+       xlab = "Year", ylab = "Observed population size", cex.axis = 1.5, cex.lab = 2, main = "Population & farming yield", cex.main = 1.5)
+  axis(1, at = t, cex.lab = 2)
   points(tail(t[!is.na(obs)],1),tail(obs[!is.na(obs)],1), 
          pch = 21, col = "black", bg = "red", lwd = 2, cex = 2)
   
   if(!is.null(yield_dat)) {
     par(new = T)
     yield_ylim = c(0, round(max(yield_dat, na.rm=T)*1.25,2))
-    #yield_pos = seq(yield_ylim[1],yield_ylim[2],(yield_ylim[2]-yield_ylim[1])/6)
-    #yield_labs = yield_pos*100
-    plot(yield_dat[,1], type = "n", col = "darkgreen", xaxt = "n", yaxt = "n", xlab = "", ylab = "", ylim = yield_ylim)
+    plot(yield_dat[,1], type = "n", col = "darkgreen", xaxt = "n", yaxt = "n", xlab = "", ylab = "", ylim = yield_ylim, cex.axis = 1.5, cex.lab = 1.5)
     apply(yield_dat, 2, function(x) lines(x, col = "darkgreen"))
-    #axis(4, at = yield_pos, labels = yield_labs, col.ticks = "darkgreen")
-    axis(4, col.ticks = "darkgreen")
+    axis(4, at = c(0,0.2,0.4,0.6,0.8,1.0,1.2), labels = c(0, 20, 40, 60, 80, 100, 120), 
+         col.ticks = "darkgreen", col = "darkgreen", cex.axis = 1.5, cex.lab = 1.5)
     mtext("Yield %",side = 4,cex = 2, line = 3, col = "darkgreen")
     abline(h=1, col = "darkgreen", lty = "dashed")
   }
