@@ -123,7 +123,8 @@ ui <- fixedPage(
         column(5, align = "center",
                div(id = "pop_plot_div", style = "padding: 1em",
                    plotOutput("pop_plot", height="auto")
-                  )
+                  ),
+               bsTooltip(id = "pop_plot_div", "Animal population trend (black line and points) and agricultural yield (green lines). Dotted horizontal green line represents expected maximum yield without damage from animals or investment in crops.", placement = "left", trigger = "hover", options = NULL)
         ),
         column(5, align = "center",
             fixedRow(
@@ -150,7 +151,9 @@ ui <- fixedPage(
                     column(6, align = "center",
                            sliderInput("scaring", "Budget to preventing scaring:",
                                        min = 0, max = 1000, value = INIT_SCARING_BUDGET, step = 5, width = "100%"))
-                    )
+                    ),
+                bsTooltip(id = "costSliders", "How much of your budget will be invested in preventing culling of animals (e.g. the cost of a shooting licence), and in preventing scaring of animals (e.g. the cost of a scaring licence).", placement = "top", trigger = "hover", options = NULL)
+                
             ),
             hr(),
             fixedRow(
@@ -162,20 +165,24 @@ ui <- fixedPage(
                     actionButton("newGame", "New game"),
                     actionButton("showScores", "Scores"),
                     actionButton("showAllIntro", "", icon("question-circle"))
-                )
+                ),
             )
         ),
-        column(1)
+        #column(1)
     ),
     fixedRow(
         column(1),
         column(5, align = "center",
-               plotOutput("land_plot", height="auto")
+               plotOutput("land_plot", height="auto"),
+               bsTooltip(id = "land_plot", "The farming landscape; grey labelled sections are individual farms, red dots are the current animal positions.", placement = "left", trigger = "hover", options = NULL)
+               
         ),
         column(5, align = "center",
-               plotOutput("actions_user", height="auto")
+               plotOutput("actions_user", height="auto"),
+               bsTooltip(id = "actions_user", "Actions taken by the farmers in the previous year. Different colours represent the three different possible actions; killing animals, scaring animals off their land, or tending crops. The letter labels link the individual farmer to the individual farm on the farmland map.", placement = "top", trigger = "hover", options = NULL)
+               
         ),
-        column(1)
+        #column(1)
     )
 )
 
