@@ -2,12 +2,16 @@
 output: html_document
 ---
 
-The animals grow and reproduce at some rate you don't know; so you will have to manage accordingly. 
+<div style="text-align: center">
+<img src="GMSEGAME_logo_only.jpg" width="40%"><br>
+</div>
 
-<span style="color:darkred">**The game is over when all the animals have died**</span> (the population has gone extinct); or you can choose to end the game at any point.
+<span style="font-family: Courier New; font-size: 1.25em">
+<span style="color:#ca1b1b;">**You can also see how many actions were taken by each farmer**</span> in the previous year. This is represented in the barplot below.</span>
 
-<img src="extinction.jpg" width="100%">
+<div style="text-align: center">
+<img src="actions3.jpg" width="50%">
+</div>
 
-<span style="color:darkred">**You can improve your score in the game**</span> by (1) maintaining a higher population of animals, (2) maintaining a higher yield, and (3) keeping the population from going extinct for longer. We will show your score as well as the top 10 high scores at the end of the game.
+<span style="font-family: Courier New; font-size: 1.25em">Each bar is the count of all actions taken by a single farmer; the <span style="color:#ca1b1b;">different colours represent the three different types of action</span>. If you had set the cost of killing higher in the previous year, you would for example expect to see less killing taking place.</span>
 
-You can play as often as you want; have fun!

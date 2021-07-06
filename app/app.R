@@ -116,6 +116,8 @@ init_waiting_screen <- tagList(
 ) 
 
 ui <- fixedPage(
+    tagList(tags$head(tags$style(".butt{font-family: Courier New;}"))),
+    
     shinyjs::useShinyjs(),
     use_waiter(),
 
@@ -263,6 +265,16 @@ server <- function(input, output, session) {
     observeEvent(input$toInit5, {
         removeModal()
         initModal5()
+    })
+    
+    observeEvent( input$backtoInit5 , {
+        removeModal()
+        initModal5()
+    })
+    
+    observeEvent(input$toInit6, {
+        removeModal()
+        initModal6()
     })
     
     observeEvent(input$dismissInitModal, {

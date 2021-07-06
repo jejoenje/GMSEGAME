@@ -6,7 +6,7 @@
 # }
 
 initModal1 = function() {
-  showModal(modalDialog(size = "l", footer = tagList(actionButton("toInit2", "Next"), actionButton("dismissInitModal", "Skip introduction")),
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("toInit2", "Next", class="butt"), actionButton("dismissInitModal", "Skip introduction", class="butt", style="float:left")),
                         #title = "Welcome to GMSE-GAME!",
                         includeMarkdown("introduction1.Rmd")
   ))  
@@ -14,9 +14,9 @@ initModal1 = function() {
 
 
 initModal2 = function() {
-  showModal(modalDialog(size = "l", footer = tagList(actionButton("toInit1", "Previous"),
-                                                     actionButton("toInit3", "Next"), 
-                                                     actionButton("dismissInitModal", "Skip introduction")),
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("toInit1", "Previous", class = "butt"),
+                                                     actionButton("toInit3", "Next", class = "butt"), 
+                                                     actionButton("dismissInitModal", "Skip introduction", class = "butt", style="float:left")),
                         #title = "Welcome to GMSE-GAME!",
                         includeMarkdown("introduction2.Rmd")
   ))  
@@ -24,26 +24,34 @@ initModal2 = function() {
 
 
 initModal3 = function() {
-  showModal(modalDialog(size = "l", footer = tagList(actionButton("backtoInit2", "Previous"),
-                                                     actionButton("toInit4", "Next"), 
-                                                     actionButton("dismissInitModal", "Skip introduction")),
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("backtoInit2", "Previous", class = "butt"),
+                                                     actionButton("toInit4", "Next", class = "butt"), 
+                                                     actionButton("dismissInitModal", "Skip introduction", class = "butt", style="float:left")),
                         #title = "Welcome to GMSE-GAME!",
                         includeMarkdown("introduction3.Rmd")
   ))  
 }
 
 initModal4 = function() {
-  showModal(modalDialog(size = "l", footer = tagList(actionButton("backtoInit3", "Previous"),
-                                                     actionButton("toInit5", "Next"), 
-                                                     actionButton("dismissInitModal", "Skip introduction")),
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("backtoInit3", "Previous", class = "butt"),
+                                                     actionButton("toInit5", "Next", class = "butt"), 
+                                                     actionButton("dismissInitModal", "Skip introduction", class = "butt", style="float:left")),
                         includeMarkdown("introduction4.Rmd")
   ))  
 }
 
 initModal5 = function() {
-  showModal(modalDialog(size = "l", footer = tagList(actionButton("backtoInit4", "Previous"),
-                                                     actionButton("dismissInitModal", "Okay, go!")),
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("backtoInit4", "Previous", class = "butt"),
+                                                     actionButton("toInit6", "Next", class = "butt"),
+                                                     actionButton("dismissInitModal", "Skip introduction", class = "butt", style="float:left")),
                         includeMarkdown("introduction5.Rmd")
+  ))  
+}
+
+initModal6 = function() {
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("backtoInit5", "Previous", class = "butt"),
+                                                     actionButton("dismissInitModal", "Okay, go!", class = "butt", style = "color: #fff; background-color: #D35E60; font-weight: bold")),
+                        includeMarkdown("introduction6.Rmd")
   ))  
 }
 

@@ -1,13 +1,50 @@
 ---
 output: html_document
 ---
+<div style="text-align: center">
+<img src="GMSEGAME_logo_only.jpg" width="40%"><br>
+</div>
 
-<span style="color:darkred">**You influence the animals and farmers by using some of your annual budget to set the cost of two actions the farmers may take in each time step**</span>: either killing some of the animals, or scaring them off their land. 
+<span style="font-family: Courier New; font-size: 1.25em">
+<span style="color:#ca1b1b;">Your aim is to maintain both a number of grazing animals of your choice, as well as the agricultural yield on the landscape.</span>
 
-The higher you set either cost, the fewer actions are likely to be taken. Budget you "spend" on the cost for one action cannot be used for the other, and although you are free not to spend some or all of your budget in each time step, you cannot go over budget and your budget resets in each time step (anything left over does not carry over).
+<span style="font-family: Courier New; font-size: 1.25em">
+Although as the manager, you cannot affect the animal population directly, you can <span style="color:#ca1b1b;">influence the decisions the farmers may make each year, by changing the cost of scaring animals or killing animals</span> - for example, this would be through changing to cost of scaring or hunting permits. 
+</span>
 
-<img src="budget2.jpg" width="100%">
+<div style="display: flex; text-align: center; align-items: center; align: center;">
 
-<span style="color:darkred">**Once you have made your budget decision, you click "Go!" to go to the next year.**</span>
+<div style="width: 25%; text-align: right;">
+<img src="hunt_icon.jpg" width="60%">
+</div>
 
-Instead of killing animals or scaring them, each farmer may also choose to only farm their land - while this increases their yield (and may make up for some yield lost to the feeding animals), it does not affect the animal population.
+<div style="width: 50%;">
+<img src="budget_allocation2.jpg" width="100%">
+</div>
+
+<div style="width: 25%; text-align: left;">
+<img src="scarecrow_icon.jpg" width="60%">
+</div>
+
+</div>
+
+<div style="display: flex; text-align: center; align-items: center;">
+
+<div style="width: 75%; text-align: left;">
+<span style="font-family: Courier New; font-size: 1.25em">
+The <span style="color:#ca1b1b;">higher you set the cost</span> of either action, the <span style="color:#ca1b1b;">fewer of those actions are likely to be taken</span> by each farmer. <br>
+You have a fixed budget to allocate to setting the cost of each action; budget invested in one cannot be invested in the other. <br>
+You get the same budget each year.</span><br>
+<span style="font-family: Courier New; font-size: 1.25em">
+Note that you cannot directly change the cost of farming itself, but it is likely that more farming will happen if the cost of other actions are higher than the expected return of farming.</span>
+</div>
+
+<div style="width: 25%; text-align: left;">
+<img src="crop_icon.jpg" width="60%">
+</div>
+
+</div>
+
+<div style="text-align: center; font-family: Courier New;">Icons made by <a href="https://www.flaticon.com/authors/monkik" title="monkik">monkik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+
+

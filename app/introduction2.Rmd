@@ -1,9 +1,39 @@
 ---
 output: html_document
 ---
+<div style="text-align: center">
+<img src="GMSEGAME_logo_only.jpg" width="40%"><br>
+</div>
 
-As the manager of this system, <span style="color:darkred">**your aim is to maintain both a population of the animals as well as minimise any overly negative effects on agricultural yield**</span>. 
+<span style="font-family: Courier New; font-size: 1.25em">
+In this game, <span style="color:#ca1b1b;">you play the manager of a landscape that holds a population of grazing animals</span>, over a period of 20 years (turns).
+The landscape consists of a number of farms (the square shades on the landscape) occupied by farmers growing crops.
+The grazing animals can negatively affect how well each farm does (decrease yield from the land).
+</span>
 
-<img src="pop_yield_intro2.jpg" width="100%">
+<div style="display: flex; text-align: center; align-items: center;">
 
+<div style="width: 30%"; align-items: right;>
+<img src="goose_icon.jpg" width="75%"><br>
+<img src="hunt_icon.jpg" width="75%">
+</div>
+
+<div style="width: 50%">
+<img src="landscape2.jpg">
+</div>
+
+<div style="width: 30%"; align-items: right;>
+<img src="crop_icon.jpg" width="75%"><br>
+<img src="farmer_icon.jpg" width="75%">
+</div>
+
+</div>
+
+<span style="font-family: Courier New; font-size: 1.25em">
+In each round of the game the <span style="color:#ca1b1b;">farmers decide how to spend their time; they can farm their land, scare animals away, or kill animals by hunting them</span>.
+Hunting animals directly removes them from the population, whereas scaring may move them away from a farmer's land. 
+Farmers can only take actions on their own land.
+</span>
+
+<div style="text-align: center; font-family: Courier New;">Icons made by <a href="https://www.flaticon.com/authors/monkik" title="monkik">monkik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 

@@ -1,15 +1,19 @@
 ---
 output: html_document
 ---
+<div style="text-align: center">
+<img src="GMSEGAME_logo_only.jpg" width="40%"><br>
+<img src="intro_icons1.png" width="50%">
+</div>
 
+<span style="font-family: Courier New; font-size: 1.25em">
+<span style="color:darkred">Welcome to GMSE-GAME! </span>
+This game is all about making decisions about sustainable management of animal populations, balancing conservation with other land uses such as farming.
+</span>
+<br>
 
-## <span style="color:darkred">Welcome to GMSE-GAME!</span>
+<div style="text-align: center">
+<img src="affiliation_funder_logos.jpg" width="30%"><br>
+</div>
 
-
-This game is all about making decisions about sustainable management of animal populations that benefits both conservation and other land uses, such as farming.
-  
-<span style="color:darkred">**In this game, you will play the role of a manager tasked with managing a population of wild animals, which live in a farmland landscape, divided into a number of different farms.** </span>
-
-Each of these farms is occupied by a landowner who grow crops, which are consumed by the animals - the more animals, the less agricultural yield. 
-
-<img src="landscape_intro.jpg" width="100%">
+<div style="text-align: center; font-family: Courier New;">Icons made by <a href="https://www.flaticon.com/authors/monkik" title="monkik">monkik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
