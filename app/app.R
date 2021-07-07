@@ -42,7 +42,8 @@ initGame = function() {
         TEND_CROP_YLD = runif(1, 0.1, 0.4),
         LAND_DIM_1 = 100,
         LAND_DIM_2 = 100,
-        RESOURCE_INI = 1000
+        RESOURCE_INI = 1000,
+        TIME_MAX = 20
     )
         
     initdata = init_man_control(K = GMSE_PARAS$K, gmse_paras = GMSE_PARAS)
@@ -208,6 +209,9 @@ server <- function(input, output, session) {
                            laststep = NULL,
                            observed_suggested = NULL,
                            yields = NULL,
+                           year = NULL,
+                           MaxYear = NULL,
+                           achievedMaxYear = NULL,
                            extinction = NULL,
                            PLAYER_NAME = NULL)
     CURRENT_BUDGET = reactiveValues(total = NULL,
@@ -330,6 +334,9 @@ server <- function(input, output, session) {
         GDATA$laststep = gdata$laststep
         GDATA$observed_suggested = gdata$observed_suggested
         GDATA$yields = gdata$yields
+        GDATA$year = 0
+        GDATA$MaxYear = gdata$paras$TIME_MAX
+        GDATA$achievedMaxYear = FALSE
         GDATA$extinction = FALSE
         GDATA$land_colors = gdata$land_colors
         GDATA$paras = gdata$paras
@@ -485,10 +492,27 @@ server <- function(input, output, session) {
             nxt$LAND[,,2] = 1
             GDATA$laststep = nxt
             
+            # Increment year counter and check if we're inside MaxYear:
+            GDATA$year = GDATA$year+1
+            if(GDATA$year > (GDATA$MaxYear-1) ) GDATA$achievedMaxYear = TRUE
+            
         } else {
             
             GDATA$extinction = TRUE
 
+        }
+        
+    })
+    
+    observeEvent(GDATA$achievedMaxYear, {
+        if(GDATA$achievedMaxYear == TRUE) { 
+            shinyjs::hide(id = "nextStep")
+            shinyjs::hide(id = "resetGame")
+            shinyjs::show(id = "newGame")
+            shinyjs::show(id = "showScores")
+            updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
+            addScores(runID = RUN$id, gd = GDATA)
+            finishedModal()
         }
         
     })
@@ -516,7 +540,10 @@ server <- function(input, output, session) {
         setPlayerModal(playername = GDATA$PLAYER_NAME)
     })
     
-    ### This can probably be removed and replaced by the simple modalButton action
+    observeEvent(input$confirmFinished, {
+        scoresModal()
+    })
+    
     observeEvent(input$confirmExtinction, {
         #removeModal()
         scoresModal()

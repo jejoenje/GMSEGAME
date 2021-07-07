@@ -98,6 +98,14 @@ confirmResetModal = function() {
             )
 }
 
+finishedModal = function() {
+  showModal(modalDialog(size = "m", footer = actionButton("confirmFinished", "Ok", class = "butt"),
+                        title = span(style = "font-family: Courier New; font-weight: bold; color:darkred","You've reached the final management year!"),
+                        span(style = "font-family: Courier New","Some further message...")
+  )
+  )
+}
+
 extinctionModal = function() {
   showModal(modalDialog(size = "m", footer = actionButton("confirmExtinction", "Ok", class = "butt"),
                         title = span(style = "font-family: Courier New; font-weight: bold; color:darkred","Population extinct!"),
