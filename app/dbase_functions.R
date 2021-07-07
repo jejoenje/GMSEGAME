@@ -274,7 +274,8 @@ getCurrentRunScore = function(runID) {
 #   land_dim_1 INT,
 #   land_dim_2 INT,
 #   resource_ini INT,
-#   tend_crop_yld FLOAT
+#   tend_crop_yld FLOAT,
+#   max_years INT
 # );
 
 # CREATE TABLE scores (
