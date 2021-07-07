@@ -1,10 +1,7 @@
 ---
 output: html_document
 ---
-<div style="text-align: center">
-<img src="GMSEGAME_logo_only.jpg" width="40%"><br>
-</div>
-
+<p>
 <span style="font-family: Courier New; font-size: 1.25em">
 In this game, <span style="color:#ca1b1b;">you play the manager of a landscape that holds a population of grazing animals</span>, over a period of 20 years (turns).
 The landscape consists of a number of farms (the square shades on the landscape) occupied by farmers growing crops.

@@ -1,9 +1,7 @@
 ---
 output: html_document
 ---
-<div style="text-align: center">
-<img src="GMSEGAME_logo_only.jpg" width="40%"><br>
-</div>
+<p>
 
 <span style="font-family: Courier New; font-size: 1.25em">
 <span style="color:#ca1b1b;">Your aim is to maintain both a number of grazing animals of your choice, as well as the agricultural yield on the landscape.</span>

@@ -134,12 +134,12 @@ ui <- fixedPage(
                 div(id = "budget_report", style = "padding-top:4em; padding-left:1em; padding-right:1em, padding-bottom:1em",
                     column(6, align = "right",
                            div(style="text-align: center; vertical-align: middle; padding-top: 3em, padding-left: 3em",
-                               span("Budget available", style="color:#D35E60; font-size:150%;"),br(),
-                               span("(to set costs)", style="color:#D35E60; font-size:125%;"),
+                               span("Budget available", style="color:#D35E60; font-family: Courier New; font-size:125%;"),br(),
+                               span("(to set costs)", style="color:#D35E60; font-family: Courier New; font-size:100%;"),
                            )
                     ),
                     column(6, align = "left", 
-                           div(span(textOutput("budgetRemaining"), style="color:#D35E60; font-size:400%; font-weight: bold;vertical-align: middle; padding-top: 0em, padding-left: 3em"))
+                           div(span(textOutput("budgetRemaining"), style="color:#D35E60; font-family: Courier New; font-size:350%; font-weight: bold;vertical-align: middle; padding-top: 0em, padding-left: 3em"))
                     )    
                 )
                         
@@ -163,8 +163,8 @@ ui <- fixedPage(
                 div(id = "buttonsPanel", style = "vertical-align: middle; padding-top:0em; padding-bottom:0em; padding-left:0em; padding-right:0em",
                     actionButton("nextStep", "GO !", width = 150,
                                  icon("paper-plane"),
-                                 style="font-size:200%; color: #fff; background-color: #D35E60; font-weight: bold"),
-                    actionButton("resetGame", "Reset game"),
+                                 style="font-family: Courier New; font-size:200%; color: #fff; background-color: #D35E60; font-weight: bold"),
+                    actionButton("resetGame", "Reset game", class = "butt"),
                     actionButton("newGame", "New game"),
                     actionButton("showScores", "Scores"),
                     actionButton("showAllIntro", "", icon("question-circle"))
@@ -392,6 +392,11 @@ server <- function(input, output, session) {
         ### setPlayerModal() has confirmStart button
         #setPlayerModal(playername = PLAYER_NAME)
 
+    })
+    #
+    
+    observeEvent(input$cancelReset, {
+        removeModal()
     })
     
     ### When CULLING cost is adjusted, update budget and check if still within limits. If not, adjust SCARING.
@@ -645,9 +650,14 @@ server <- function(input, output, session) {
         scores = subset(scores, select = c("player","steps","mean_res","mean_yield","total","id"))
         # Make DT while hiding the "id" column:
         scores_dt = datatable(scores, colnames = c("Player","Time","Population","Yield","TOTAL","id"), autoHideNavigation = TRUE, rownames = FALSE, filter = "none",
-                              options=list(columnDefs = list(list(visible=FALSE, targets=c(5))), dom = 't'))
+                              options=list(columnDefs = list(list(visible=FALSE, targets=c(5))), dom = 't', initComplete = JS(
+                                  "function(settings, json) {",
+                                  "$('body').css({'font-family': 'Courier New'});",
+                                  "}"
+                              ))
+                              )
 
-        scores_dt = formatStyle(scores_dt, "player", target = "row",  backgroundColor = styleEqual(current_player, "orange"), color = styleEqual(current_player, "white"))
+        scores_dt = formatStyle(scores_dt, "player", target = "row", backgroundColor = styleEqual(current_player, "orange"), color = styleEqual(current_player, "white"))
         
         formatStyle(scores_dt, "id", target = "row",  backgroundColor = styleEqual(RUN$id, "darkred"), color = styleEqual(RUN$id, "white"))
 

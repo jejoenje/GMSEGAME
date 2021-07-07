@@ -91,24 +91,24 @@ setPlayerModal = function(playername) {
 }
 
 confirmResetModal = function() {
-  showModal(modalDialog(size = "m", footer = tagList(modalButton("Cancel"),actionButton("confirmReset", "Yes, reset.")),
-                        title = "Are you sure you want to reset?",
-                        "Resetting the game means you go back to the start!"
+  showModal(modalDialog(size = "m", footer = tagList(actionButton("cancelReset", "Cancel", class = "butt"),actionButton("confirmReset", "Yes, reset.", class = "butt")),
+                        title = span(style = "font-family: Courier New; font-weight: bold; color:darkred", "Are you sure you want to reset?"),
+                        span(style = "font-family: Courier New;","Resetting the game means you go back to the start!")
                         )
             )
 }
 
 extinctionModal = function() {
-  showModal(modalDialog(size = "m", footer = actionButton("confirmExtinction", "Ok"),
-                        title = "Population extinct!",
-                        "No resources left to manage!"
+  showModal(modalDialog(size = "m", footer = actionButton("confirmExtinction", "Ok", class = "butt"),
+                        title = span(style = "font-family: Courier New; font-weight: bold; color:darkred","Population extinct!"),
+                        span(style = "font-family: Courier New","No resources left to manage!")
                       )
   )
 }
 
 scoresModal = function() {
-  showModal(modalDialog(size = "l", footer = tagList(modalButton("Close"),actionButton("closeScores", "New Game")), easyClose = TRUE,
-                        title = "High scores",
+  showModal(modalDialog(size = "l", footer = tagList(actionButton("closeScores", "New Game", class = "butt")), easyClose = TRUE,
+                        title = span(style = "font-family: Courier New; font-weight: bold;","High scores"),
                         dataTableOutput("highScores")
                         
   ))  

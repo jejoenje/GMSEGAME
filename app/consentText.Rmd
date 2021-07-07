@@ -2,21 +2,29 @@
 output: html_document
 ---
 
-![](GMSEGAME_logo_wide.jpg)
+<img src="GMSEGAME_logo_wide.jpg" width = 75%>
 
-### Electronic Participant Consent Form (v. 18/05/2021)
-  
-*I confirm that I have read and understood the <a href="https://ochil-ds.co.uk/GMSEGAME_ParticipantInformationSheet.pdf" target="_blank">Participant Information Sheet</a> dated 18/05/2021 explaining the above research project and I have had the opportunity to ask questions about the project.*
+<div style = "font-family: Courier New; font-size: 1.5em; font-weight: bold">
+Electronic Participant Consent Form (v. 18/05/2021)
+</div>
+<div style = "font-family: Courier New; font-style: italic">
+<p>
+I confirm that I have read and understood the <a href="https://ochil-ds.co.uk/GMSEGAME_ParticipantInformationSheet.pdf" target="_blank">Participant Information Sheet</a> dated 18/05/2021 explaining the above research project and I have had the opportunity to ask questions about the project.<br>
+<p>
+I understand that my participation is voluntary and that I am free to withdraw at any time during the study and withdraw my data before January 2022 without giving a reason, and without any penalty. I understand that beyond January 2022 it may not be possible to remove my data from the study.
+<p>
+I understand that my responses will be kept anonymous (excluding player name I provide below), and I give permission for members of the research team to have access to my anonymised in-game decision data. I understand that my player nickname is not expected to be my real name, and that choosing to use my real name as player nickname means that my responses will not be anonymous.
+<p>
+After you consent and click 'go' you can end your participation at any time by closing your browser window. You have the right to ask us to permanently delete any such data we collect by emailing [emailaddress@togohere.com](emailaddress@togohere.com) us your player name and the date of your game session.
+<p><b>
+By ticking the box below, and clicking 'Go', you confirm that you are over the age of 16, and consent to us recording and storing the player name given above, and the actions you take during the following game session, for the purposes of research into human decision-making in natural resource management.
+</b>
+</div>
 
-*I understand that my participation is voluntary and that I am free to withdraw at any time during the study and withdraw my data before January 2022 without giving a reason, and without any penalty. I understand that beyond January 2022 it may not be possible to remove my data from the study.*
-
-*I understand that my responses will be kept anonymous (excluding player name I provide below), and I give permission for members of the research team to have access to my anonymised in-game decision data. I understand that my player nickname is not expected to be my real name, and that choosing to use my real name as player nickname means that my responses will not be anonymous.*
-
-*After you consent and click 'go' you can end your participation at any time by closing your browser window. You have the right to ask us to permanently delete any such data we collect by emailing [emailaddress@togohere.com](emailaddress@togohere.com) us your player name and the date of your game session.*
-
-*By ticking the box below, and clicking 'Go', you confirm that you are over the age of 16, and consent to us recording and storing the player name given above, and the actions you take during the following game session, for the purposes of research into human decision-making in natural resource management.* 
+<div style = "font-family: Courier New">
 
 <a href="https://ochil-ds.co.uk/GMSEGAME_ParticipantInformationSheet.pdf" target="_blank">Participant Information Sheet</a>
   
 <a href="https://ochil-ds.co.uk/GMSEGAME_ParticipantConsentForm.pdf" target="_blank">Consent Form</a>
 
+</div>
