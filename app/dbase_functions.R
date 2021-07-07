@@ -44,6 +44,7 @@ addRunPar = function(runID, paras) {
   q[[17]] = sprintf("UPDATE run_par SET land_dim_2 = %d WHERE ID = %d", as.numeric(paras$LAND_DIM_2), runID )
   q[[18]] = sprintf("UPDATE run_par SET resource_ini = %d WHERE ID = %d", paras$RESOURCE_INI, runID )
   q[[19]] = sprintf("UPDATE run_par SET tend_crop_yld = %f WHERE ID = %d", paras$TEND_CROP_YLD, runID )
+  q[[20]] = sprintf("UPDATE run_par SET max_years = %d WHERE ID = %d", paras$TIME_MAX, runID)
   
   lapply(q, function(x) dbGetQuery(db, x))
   dbDisconnect(db)
