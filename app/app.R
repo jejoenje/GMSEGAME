@@ -656,7 +656,8 @@ server <- function(input, output, session) {
                                   "}"
                               ))
                               )
-
+        ### NOTE JS INSERTION ABOVE APPEARS TO CHANGE FONT THROUGHOUT BY DEFAULT, ONCE RUN.
+        
         scores_dt = formatStyle(scores_dt, "player", target = "row", backgroundColor = styleEqual(current_player, "orange"), color = styleEqual(current_player, "white"))
         
         formatStyle(scores_dt, "id", target = "row",  backgroundColor = styleEqual(RUN$id, "darkred"), color = styleEqual(RUN$id, "white"))
