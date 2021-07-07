@@ -101,7 +101,7 @@ confirmResetModal = function() {
 finishedModal = function() {
   showModal(modalDialog(size = "m", footer = actionButton("confirmFinished", "Ok", class = "butt"),
                         title = span(style = "font-family: Courier New; font-weight: bold; color:darkred","You've reached the final management year!"),
-                        span(style = "font-family: Courier New","Some further message...")
+                        span(style = "font-family: Courier New","Well done, you have reached the maximum number of management years. The grazing animal population has not gone extinct.")
   )
   )
 }
