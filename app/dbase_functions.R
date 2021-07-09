@@ -239,11 +239,18 @@ addScores = function(runID, gd) {
   
 }
 
-getScores = function() {
+getScores = function(score_version = NULL) {
   db = connect_game_dbase()
   
   # Get top 10 and match player name:
-  scores = dbGetQuery(db, "SELECT scores.*, run.player FROM scores INNER JOIN run ON scores.id = run.id ORDER BY scores.total DESC LIMIT 10")
+  
+  
+  if(!is.null(score_version)) {
+    scores = dbGetQuery(db, sprintf("SELECT scores.*, run.player FROM scores INNER JOIN run ON scores.id = run.id WHERE scores.score_version = %d ORDER BY scores.total DESC LIMIT 10",
+                                    score_version))
+  } else {
+    scores = dbGetQuery(db, "SELECT scores.*, run.player FROM scores INNER JOIN run ON scores.id = run.id ORDER BY scores.total DESC LIMIT 10")
+  }
   
   dbDisconnect(db)
   return(scores)

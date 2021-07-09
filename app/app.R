@@ -708,7 +708,8 @@ server <- function(input, output, session) {
     
     output$highScores <- renderDataTable({
         req(RUN$id)
-        scores = getScores()
+        scores = getScores(score_version = 1)
+        
         if(!(RUN$id %in% scores$id)) {
             scores = scores[1:9,]
             current_score = getCurrentRunScore(RUN$id)
@@ -717,6 +718,7 @@ server <- function(input, output, session) {
         current_player = unique(scores$player[which(scores$id == RUN$id)])
 
         scores = subset(scores, select = c("player","mean_res","mean_yield","total","id"))
+        
         # Make DT while hiding the "id" column:
         scores_dt = datatable(scores, colnames = c("Player","Population","Yield","TOTAL","id"), autoHideNavigation = TRUE, rownames = FALSE, filter = "none",
                               options=list(columnDefs = list(list(visible=FALSE, targets=c(4))), dom = 't', initComplete = JS(
