@@ -172,7 +172,9 @@ ui <- fixedPage(
                 ),
             )
         ),
-        #column(1)
+        column(1, 
+            textOutput("live_resScore"),br(),textOutput("live_yldScore")
+        )
     ),
     fixedRow(
         column(1),
@@ -213,7 +215,8 @@ server <- function(input, output, session) {
                            MaxYear = NULL,
                            achievedMaxYear = NULL,
                            extinction = NULL,
-                           PLAYER_NAME = NULL)
+                           PLAYER_NAME = NULL,
+                           live_scores = NULL)
     CURRENT_BUDGET = reactiveValues(total = NULL,
                                     culling = NULL,
                                     scaring = NULL,
@@ -340,6 +343,7 @@ server <- function(input, output, session) {
         GDATA$extinction = FALSE
         GDATA$land_colors = gdata$land_colors
         GDATA$paras = gdata$paras
+        GDATA$live_scores = list(res = 100, yld = 100)
         ### Initialise budget reactiveValues:
         CURRENT_BUDGET$total = budget$total
         CURRENT_BUDGET$culling = budget$culling
@@ -491,6 +495,9 @@ server <- function(input, output, session) {
             # Reset time step for GMSE, includes landscape reset.
             nxt$LAND[,,2] = 1
             GDATA$laststep = nxt
+            
+            # Update live scores.
+            GDATA$live_scores = updateLiveScores(GDATA)
             
             # Increment year counter and check if we're inside MaxYear:
             GDATA$year = GDATA$year+1
@@ -662,6 +669,14 @@ server <- function(input, output, session) {
     
     output$budgetRemaining <- renderText({
         paste("$", CURRENT_BUDGET$leftover)
+    })
+    
+    output$live_resScore <- renderText({
+        GDATA$live_scores$res
+    })
+    
+    output$live_yldScore <- renderText({
+        GDATA$live_scores$yld
     })
     
     output$highScores <- renderDataTable({

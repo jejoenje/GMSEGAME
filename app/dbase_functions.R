@@ -198,6 +198,22 @@ addLastCostsOnExtinction = function(runID, cull_cost, scare_cost) {
   
 }
 
+updateLiveScores = function(gd) {
+  res = as.vector(gd$summary[,"res"])
+  yld = as.vector(apply(gd$yields, 1, mean))
+  
+  res = res[5:length(res)]
+  res0 = res[1]
+  res_score = (mean(res)/res0)*100
+  
+  yld = yld[5:length(yld)]
+  yld0 = yld[1]
+  yld_score = (mean(yld)/yld0)*100
+  
+  return(list(res = round(res_score), yld = round(yld_score) ))
+  
+}
+
 addScores = function(runID, gd) {
   
   db = connect_game_dbase()
