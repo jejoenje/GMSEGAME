@@ -693,10 +693,10 @@ server <- function(input, output, session) {
         }
         current_player = unique(scores$player[which(scores$id == RUN$id)])
 
-        scores = subset(scores, select = c("player","steps","mean_res","mean_yield","total","id"))
+        scores = subset(scores, select = c("player","mean_res","mean_yield","total","id"))
         # Make DT while hiding the "id" column:
-        scores_dt = datatable(scores, colnames = c("Player","Time","Population","Yield","TOTAL","id"), autoHideNavigation = TRUE, rownames = FALSE, filter = "none",
-                              options=list(columnDefs = list(list(visible=FALSE, targets=c(5))), dom = 't', initComplete = JS(
+        scores_dt = datatable(scores, colnames = c("Player","Population","Yield","TOTAL","id"), autoHideNavigation = TRUE, rownames = FALSE, filter = "none",
+                              options=list(columnDefs = list(list(visible=FALSE, targets=c(4))), dom = 't', initComplete = JS(
                                   "function(settings, json) {",
                                   "$('body').css({'font-family': 'Courier New'});",
                                   "}"
