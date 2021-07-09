@@ -199,16 +199,14 @@ addLastCostsOnExtinction = function(runID, cull_cost, scare_cost) {
 }
 
 updateLiveScores = function(gd) {
+  
   res = as.vector(gd$summary[,"res"])
-  yld = as.vector(apply(gd$yields, 1, mean))
+  res = res[6:length(res)]
+  res_score = round(mean(res/res[1])*100)
   
-  res = res[5:length(res)]
-  res0 = res[1]
-  res_score = (mean(res)/res0)*100
-  
-  yld = yld[5:length(yld)]
-  yld0 = yld[1]
-  yld_score = (mean(yld)/yld0)*100
+  yld = gd$yields
+  yld = yld[6:nrow(yld),]
+  yld_score = round(mean(yld)*100)
   
   return(list(res = round(res_score), yld = round(yld_score) ))
   
@@ -216,14 +214,26 @@ updateLiveScores = function(gd) {
 
 addScores = function(runID, gd) {
   
+  ### Flag to keep a record of what scoring calculaton is used. Where this is NA in the database, the score was calculated using a the
+  ### initial version of this function, i.e. commit 0f501c2877caa1ab00f73044da7186287fed514f and older.
+  SCORE_VERSION_ID = 1
+  
   db = connect_game_dbase()
   
-  res = round((mean(gd$summary[,"res"])/gd$laststep$RESOURCE_ini)*100)
-  yield = round(mean(gd$yields)*100)
-  steps = nrow(gd$summary)
-  total = round((yield+res)*(steps/10+1))
+  res = gd$summary[,"res"]
+  res = res[6:length(res)]
+  res_score = round(mean(res/res[1])*100)
   
-  dbGetQuery(db, sprintf("INSERT INTO scores (id, steps, mean_res, mean_yield, total) VALUES (%d,%d,%d,%d,%d)",runID,steps,res,yield,total))
+  yld = gd$yields
+  yld = yld[6:nrow(yld),]
+  yld_score = round(mean(yld)*100)
+  
+  steps = nrow(gd$summary)
+  
+  total_score = res_score + yld_score
+  
+  dbGetQuery(db, sprintf("INSERT INTO scores (id, steps, mean_res, mean_yield, total, score_version) VALUES (%d,%d,%d,%d,%d,%d)",
+                         runID,steps,res_score,yld_score,total_score,SCORE_VERSION_ID))
   
   dbDisconnect(db)
   
