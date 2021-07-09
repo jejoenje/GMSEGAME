@@ -136,19 +136,44 @@ ui <- fixedPage(
         ),
         column(5, align = "center",
             fixedRow(
-                div(id = "budget_report", style = "padding-top:4em; padding-left:1em; padding-right:1em, padding-bottom:1em",
-                    column(6, align = "right",
-                           div(style="text-align: center; vertical-align: middle; padding-top: 3em, padding-left: 3em",
-                               span("Budget available", style="color:#D35E60; font-family: Courier New; font-size:125%;"),br(),
-                               span("(to set costs)", style="color:#D35E60; font-family: Courier New; font-size:100%;"),
-                           )
+                div(id = "budget_report_header", style = "padding-top:4em; padding-left:1em; padding-right:1em, padding-bottom:1em",
+                    column(4,
+                           div(span("Budget remaining", 
+                                    style = "color:#D35E60; font-family: Courier New; font-size:125%; font-weight: bold;vertical-align: middle;"))
                     ),
-                    column(6, align = "left", 
-                           div(span(textOutput("budgetRemaining"), style="color:#D35E60; font-family: Courier New; font-size:350%; font-weight: bold;vertical-align: middle; padding-top: 0em, padding-left: 3em"))
+                    column(4,
+                           div(span("Resource Score", 
+                                    style = "color:#000000; font-family: Courier New; font-size:125%; font-weight: bold;vertical-align: middle;"))
+                    ),
+                    column(4,
+                           div(span("Yield Score", 
+                                    style = "color:#000000; font-family: Courier New; font-size:125%; font-weight: bold;vertical-align: middle;"), 
+                               style = "padding-left: 1em;padding-right: 1em;")
                     )    
                 )
-                        
-                  
+                
+            ),
+            
+            fixedRow(
+                div(id = "budget_report", style = "padding-top:1em; padding-left:1em; padding-right:1em, padding-bottom:1em",
+                    # column(4, align = "right",
+                    #        div(style="text-align: center; vertical-align: middle; padding-top: 3em, padding-left: 3em",
+                    #            span("Budget available", style="color:#D35E60; font-family: Courier New; font-size:125%;"),br(),
+                    #            span("(to set costs)", style="color:#D35E60; font-family: Courier New; font-size:100%;"),
+                    #        )
+                    # ),
+                    column(4, align = "center", 
+                           div(span(textOutput("budgetRemaining"), style="color:#D35E60; font-family: Courier New; font-size:325%; font-weight: bold;vertical-align: middle; padding-top: 0em, padding-left: 3em"))
+                    ),
+                    column(4,
+                        div(span(textOutput("live_resScore"), 
+                                 style="color:#000000; font-family: Courier New; font-size:325%; font-weight: bold;vertical-align: middle; padding-top: 0em, padding-left: 3em"))
+                    ),
+                    column(4,
+                        div(span(textOutput("live_yldScore"),
+                                 style="color:#000000; font-family: Courier New; font-size:325%; font-weight: bold;vertical-align: middle; padding-top: 0em, padding-left: 3em"))
+                    )
+                )
             ),
             hr(),
             fixedRow(
@@ -176,9 +201,7 @@ ui <- fixedPage(
                 ),
             )
         ),
-        column(1, 
-            textOutput("live_resScore"),br(),textOutput("live_yldScore")
-        )
+        column(1)
     ),
     fixedRow(
         column(1),
@@ -672,7 +695,7 @@ server <- function(input, output, session) {
     )
     
     output$budgetRemaining <- renderText({
-        paste("$", CURRENT_BUDGET$leftover)
+        paste0("$", CURRENT_BUDGET$leftover)
     })
     
     output$live_resScore <- renderText({
