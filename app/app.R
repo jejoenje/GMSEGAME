@@ -3,7 +3,6 @@ library(shiny)
 library(shinyjs)
 library(shinyBS)
 library(waiter)
-library(plotly)
 library(GMSE) # CURRENTLY NEEDS devtools::install_github("ConFooBio/GMSE", ref = "man_control")
 library(RMySQL)
 library(reshape2)
@@ -627,30 +626,6 @@ server <- function(input, output, session) {
             barplot(plotdat, col = c("#f46d43","#3288bd","#abdda4"), yaxt = "n", border = NA)
             #plot(x=1,y=1, ylim=c(0,CURRENT_BUDGET$total), type ="n", xaxt = "n", yaxt = "n", xlab ="n", ylab = "n", bty = "n")
             #text(0.75, 300, "test", adj = 0, cex = 3, )
-        }
-    })
-    
-    output$budget_pie <- plotly::renderPlotly({
-        if(!is.null(CURRENT_BUDGET$culling)) {
-            plotdat = matrix(c(CURRENT_BUDGET$culling, CURRENT_BUDGET$scaring, CURRENT_BUDGET$leftover), nrow = 3, ncol = 1)
-            plotdat = as.data.frame(plotdat, row.names = c("Culling","Scaring","Available"))
-            plotdat$items = row.names(plotdat)
-            colors = c("rgb(211,94,96)","rgb(144,103,167)","rgb(240, 245, 245)")
-            #tfont = list(family = "sans serif", size = 22)
-            fig2 = plot_ly(plotdat, 
-                           labels = ~items, values = ~V1, type = "pie", 
-                           textinfo = 'text+label',
-                           #textfont = tfont,
-                           hoverinfo = 'percent',
-                           text = ~paste('$', V1),
-                           marker = list(colors = colors, line = list(color = '#000000', width = 0)))
-            fig2 = layout(fig2,
-                          #font = tfont,
-                          margin = list(l = 1, r = 1, b = 0, t = 0, pad = 0),
-                          showlegend = FALSE,
-                          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-            fig2
         }
     })
     
