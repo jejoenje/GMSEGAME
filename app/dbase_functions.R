@@ -45,6 +45,9 @@ addRunPar = function(runID, paras) {
   q[[18]] = sprintf("UPDATE run_par SET resource_ini = %d WHERE ID = %d", paras$RESOURCE_INI, runID )
   q[[19]] = sprintf("UPDATE run_par SET tend_crop_yld = %f WHERE ID = %d", paras$TEND_CROP_YLD, runID )
   q[[20]] = sprintf("UPDATE run_par SET max_years = %d WHERE ID = %d", paras$TIME_MAX, runID)
+  q[[21]] = sprintf("UPDATE run_par SET public_land = %f WHERE ID = %d", paras$PUBLIC_LAND, runID)
+  q[[22]] = sprintf("UPDATE run_par SET ownership_var = %f WHERE ID = %d", paras$OWNERSHIP_VAR, runID)
+  q[[23]] = sprintf("UPDATE run_par SET usr_budget_rng = %d WHERE ID = %d", paras$USR_BUDGET_RNG, runID)
   
   lapply(q, function(x) dbGetQuery(db, x))
   dbDisconnect(db)
@@ -56,13 +59,13 @@ addAllRunPar = function(runID,t,paras) {
                                     stakeholders, manager_budget, manage_target, observe_type, 
                                     res_move_obs, res_death_K, lambda, res_death_type, remove_pr, 
                                     user_budget, culling, scaring, tend_crops, land_dim_1, 
-                                    land_dim_2, resource_ini, tend_crop_yld) 
+                                    land_dim_2, resource_ini, tend_crop_yld, public_land, ownership_var, usr_budget_rng) 
                             VALUES (%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %f, %d, %f, 
-                                    %d, %d, %d, %d, %d, %d, %d, %f)", 
+                                    %d, %d, %d, %d, %d, %d, %d, %f, %f, %f, %d)", 
               runID,t,paras$K,paras$LAND_OWNERSHIP,paras$STAKEHOLDERS,paras$MANAGER_BUDGET,paras$MANAGE_TARGET,
               paras$OBSERVE_TYPE, paras$RES_MOVE_OBS, paras$RES_DEATH_K, paras$LAMBDA, paras$RES_DEATH_TYPE, paras$REMOVE_PR,
               paras$USER_BUDGET, paras$CULLING, paras$SCARING, paras$TEND_CROPS, paras$LAND_DIM_1, paras$LAND_DIM_2, paras$RESOURCE_INI, 
-              paras$TEND_CROP_YLD)
+              paras$TEND_CROP_YLD, paras$PUBLIC_LAND, paras$OWNERSHIP_VAR, paras$USR_BUDGET_RNG)
   dbGetQuery(db, q)
   dbDisconnect(db)
 }
@@ -308,7 +311,10 @@ getCurrentRunScore = function(runID) {
 #   land_dim_2 INT,
 #   resource_ini INT,
 #   tend_crop_yld FLOAT,
-#   max_years INT
+#   max_years INT,
+#   public_land FLOAT,
+#   ownership_var FLOAT,
+#   usr_budget_rng INT
 # );
 
 # CREATE TABLE scores (

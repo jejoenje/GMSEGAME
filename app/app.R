@@ -94,7 +94,10 @@ getLastParas = function(laststep, K) {
         TEND_CROP_YLD = laststep$tend_crop_yld,
         LAND_DIM_1 = laststep$land_dim_1,
         LAND_DIM_2 = laststep$land_dim_2,
-        RESOURCE_INI = laststep$RESOURCE_ini
+        RESOURCE_INI = laststep$RESOURCE_ini,
+        PUBLIC_LAND = laststep$public_land,
+        OWNERSHIP_VAR = laststep$ownership_var,
+        USR_BUDGET_RNG = laststep$usr_budget_rng
     )
     return(last_paras)
 }
