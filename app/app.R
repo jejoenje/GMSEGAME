@@ -46,7 +46,10 @@ initGame = function() {
         LAND_DIM_1 = 100,
         LAND_DIM_2 = 100,
         RESOURCE_INI = 1000,
-        TIME_MAX = 20
+        TIME_MAX = 20,
+        PUBLIC_LAND = 0.2,
+        OWNERSHIP_VAR = 0.5,
+        USR_BUDGET_RNG = 500
     )
         
     initdata = init_man_control(K = GMSE_PARAS$K, gmse_paras = GMSE_PARAS)
@@ -625,7 +628,7 @@ server <- function(input, output, session) {
     output$land_plot <- renderPlot({
         if(!is.null(GDATA$laststep)) {
             plot_land_res(GDATA$laststep$LAND, GDATA$laststep$RESOURCES, 
-                          col = GDATA$land_colors,
+                          cols = GDATA$land_colors,
                           extinction_message = GDATA$extinction,
                           show_labels = TRUE,
                           selected_user = USER_DISPLAY_SELECT$user

@@ -175,6 +175,11 @@ placeResources = function(res, xd, yd) {
 }
 
 plot_land_res = function(land, resources, cols = NULL, extinction_message = FALSE, show_labels = FALSE, selected_user = NULL) {
+  ### Check for presences of "public" land in landscape, if so add public land "color":
+  if(length(cols)<length(names(table(land[,,3])))) {
+    cols = c("#FFFFFF", cols)
+  }
+  
   plot_land(land[,,3], cols = cols)
   if(extinction_message==FALSE) {
     par(new = T)
@@ -189,12 +194,14 @@ plot_land_res = function(land, resources, cols = NULL, extinction_message = FALS
         users_cols[selected_user] = "#D35E60"
       }
       for(i in 1:n_users) {
-        poss = which(land[,,3]==users[i], arr.ind = T)
-        #points(poss[,1]/100,poss[,2]/100,col="red",pch=16)
-        xpos = mean(poss[,1])/100
-        ypos = mean(poss[,2])/100
-        points(x = xpos, y = ypos, pch = 21, col = alpha("black",0.75), bg = users_cols[i], cex = 4)
-        text(x = xpos, y = ypos, LETTERS[users[i]-1], col = alpha("black",0.75), cex = 1)
+        if(users[i]>1) {  # Only place label if not 1 (public land)
+          poss = which(land[,,3]==users[i], arr.ind = T)
+          #points(poss[,1]/100,poss[,2]/100,col="red",pch=16)
+          xpos = mean(poss[,1])/100
+          ypos = mean(poss[,2])/100
+          points(x = xpos, y = ypos, pch = 21, col = alpha("black",0.75), bg = users_cols[i], cex = 4)
+          text(x = xpos, y = ypos, LETTERS[users[i]-1], col = alpha("black",0.75), cex = 1)  
+        }
       }
     }
     
