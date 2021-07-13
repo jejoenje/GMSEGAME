@@ -47,9 +47,9 @@ initGame = function() {
         LAND_DIM_2 = 100,
         RESOURCE_INI = 1000,
         TIME_MAX = 20,
-        PUBLIC_LAND = 0,
-        OWNERSHIP_VAR = 0,
-        USR_BUDGET_RNG = 0
+        PUBLIC_LAND = 0.2,
+        OWNERSHIP_VAR = 0.5,
+        USR_BUDGET_RNG = 500
     )
         
     initdata = init_man_control(K = GMSE_PARAS$K, gmse_paras = GMSE_PARAS)
