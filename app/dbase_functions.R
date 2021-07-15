@@ -21,7 +21,7 @@ updateRunRecord = function(runID, endTime, extinct) {
   dbDisconnect(db)
 }
 
-addRunPar = function(runID, paras) {
+addRunPar = function(runID, paras, score_display) {
   db = connect_game_dbase()
   q = list()
   q[[1]] = sprintf("INSERT INTO run_par (id) VALUES (%d)", runID)
@@ -48,7 +48,7 @@ addRunPar = function(runID, paras) {
   q[[21]] = sprintf("UPDATE run_par SET public_land = %f WHERE ID = %d", paras$PUBLIC_LAND, runID)
   q[[22]] = sprintf("UPDATE run_par SET ownership_var = %f WHERE ID = %d", paras$OWNERSHIP_VAR, runID)
   q[[23]] = sprintf("UPDATE run_par SET usr_budget_rng = %d WHERE ID = %d", paras$USR_BUDGET_RNG, runID)
-  
+  q[[24]] = sprintf("UPDATE run_par SET score_display = '%s' WHERE ID = %d", score_display, runID)
   lapply(q, function(x) dbGetQuery(db, x))
   dbDisconnect(db)
 }
@@ -242,17 +242,32 @@ addScores = function(runID, gd) {
   
 }
 
-getScores = function(score_version = NULL) {
+getScores = function(score_version = NULL, rank = "total", limit = 10) {
   db = connect_game_dbase()
+  
+  if(!(rank %in% c("total","res","yield","mean_res","mean_yield"))) { 
+    warning("Invalid 'rank' specified, defaulting to rank = 'total'.")
+    rank = "total"
+  }
+  
+  if(rank == "res") rank = "mean_res"
+  if(rank == "yield") rank = "mean_yield"
   
   # Get top 10 and match player name:
   
-  
   if(!is.null(score_version)) {
-    scores = dbGetQuery(db, sprintf("SELECT scores.*, run.player FROM scores INNER JOIN run ON scores.id = run.id WHERE scores.score_version = %d ORDER BY scores.total DESC LIMIT 10",
-                                    score_version))
+    scores = dbGetQuery(db, sprintf("SELECT scores.*, run.player 
+                                    FROM scores 
+                                    INNER JOIN run ON scores.id = run.id 
+                                    WHERE scores.score_version = %d 
+                                    ORDER BY scores.%s DESC LIMIT %d",
+                                    score_version, rank, limit))
   } else {
-    scores = dbGetQuery(db, "SELECT scores.*, run.player FROM scores INNER JOIN run ON scores.id = run.id ORDER BY scores.total DESC LIMIT 10")
+    scores = dbGetQuery(db, sprintf("SELECT scores.*, run.player 
+                             FROM scores 
+                             INNER JOIN run ON scores.id = run.id 
+                             ORDER BY scores.%s DESC LIMIT %d",
+                             rank, limit))
   }
   
   dbDisconnect(db)

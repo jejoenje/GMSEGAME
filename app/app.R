@@ -266,7 +266,8 @@ server <- function(input, output, session) {
                            achievedMaxYear = NULL,
                            extinction = NULL,
                            PLAYER_NAME = NULL,
-                           live_scores = NULL)
+                           live_scores = NULL,
+                           score_display = NULL)
     CURRENT_BUDGET = reactiveValues(total = NULL,
                                     culling = NULL,
                                     scaring = NULL,
@@ -394,6 +395,7 @@ server <- function(input, output, session) {
         GDATA$land_colors = gdata$land_colors
         GDATA$paras = gdata$paras
         GDATA$live_scores = list(res = 100, yld = 100)
+        GDATA$score_display = "split"
         ### Initialise budget reactiveValues:
         CURRENT_BUDGET$total = budget$total
         CURRENT_BUDGET$culling = budget$culling
@@ -407,7 +409,7 @@ server <- function(input, output, session) {
                              extinct = as.numeric(GDATA$extinction))
         
         ## Add GMSE paras for session to database:
-        addRunPar(runID = RUN$id, paras = GDATA$paras)
+        addRunPar(runID = RUN$id, paras = GDATA$paras, score_display = GDATA$score_display)
         
         ## Add initial time steps data to database:
         addInitGdata(runID = RUN$id, gd = GDATA$summary)
@@ -448,7 +450,7 @@ server <- function(input, output, session) {
             addScores(runID = RUN$id, gd = GDATA)
             
         }
-        scoresModal()
+        scoresModal(score_display = GDATA$score_display)
         
         ### setPlayerModal() has confirmStart button
         #setPlayerModal(playername = PLAYER_NAME)
@@ -598,12 +600,12 @@ server <- function(input, output, session) {
     })
     
     observeEvent(input$confirmFinished, {
-        scoresModal()
+        scoresModal(score_display = GDATA$score_display)
     })
     
     observeEvent(input$confirmExtinction, {
         #removeModal()
-        scoresModal()
+        scoresModal(score_display = GDATA$score_display)
     })
     
     observeEvent(input$resetGame, {
@@ -612,7 +614,7 @@ server <- function(input, output, session) {
     })
     
     observeEvent(input$showScores, {
-        scoresModal()
+        scoresModal(score_display = GDATA$score_display)
     })
     
     observeEvent(input$showAllIntro, {
@@ -707,8 +709,9 @@ server <- function(input, output, session) {
     
     output$highScores <- renderDataTable({
         req(RUN$id)
-        scores = getScores(score_version = 1)
         
+        scores = getScores(score_version = 1, limit = 10, rank = "total")
+      
         if(!(RUN$id %in% scores$id)) {
             scores = scores[1:9,]
             current_score = getCurrentRunScore(RUN$id)
@@ -719,19 +722,82 @@ server <- function(input, output, session) {
         scores = subset(scores, select = c("player","mean_res","mean_yield","total","id"))
         
         # Make DT while hiding the "id" column:
-        scores_dt = datatable(scores, colnames = c("Player","Population","Yield","TOTAL","id"), autoHideNavigation = TRUE, rownames = FALSE, filter = "none",
+        scores_dt = datatable(scores, colnames = c("Player","Population","Yield","TOTAL","id"), 
+                              autoHideNavigation = TRUE, rownames = FALSE, filter = "none",
                               options=list(columnDefs = list(list(visible=FALSE, targets=c(4))), dom = 't', initComplete = JS(
                                   "function(settings, json) {",
                                   "$('body').css({'font-family': 'Courier New'});",
                                   "}"
                               ))
-                              )
+        )
         ### NOTE JS INSERTION ABOVE APPEARS TO CHANGE FONT THROUGHOUT BY DEFAULT, ONCE RUN.
-        
-        scores_dt = formatStyle(scores_dt, "player", target = "row", backgroundColor = styleEqual(current_player, "orange"), color = styleEqual(current_player, "white"))
+        scores_dt = formatStyle(scores_dt, "player", target = "row", 
+                                backgroundColor = styleEqual(current_player, "orange"), 
+                                color = styleEqual(current_player, "white"))
         
         formatStyle(scores_dt, "id", target = "row",  backgroundColor = styleEqual(RUN$id, "darkred"), color = styleEqual(RUN$id, "white"))
-
+    })
+    
+    output$highScores_res <- renderDataTable({ 
+        req(RUN$id)
+        
+        scores = getScores(score_version = 1, limit = 10, rank = "res")
+        
+        if(!(RUN$id %in% scores$id)) {
+            scores = scores[1:9,]
+            current_score = getCurrentRunScore(RUN$id)
+            scores = rbind(scores,current_score)
+        }
+        current_player = unique(scores$player[which(scores$id == RUN$id)])
+        
+        scores = subset(scores, select = c("player","mean_res","id"))
+        
+        # Make DT while hiding the "id" column:
+        scores_dt = datatable(scores, colnames = c("Player","Population","id"), 
+                              autoHideNavigation = TRUE, rownames = FALSE, filter = "none",
+                              options=list(columnDefs = list(list(visible=FALSE, targets=c(2))), dom = 't', initComplete = JS(
+                                  "function(settings, json) {",
+                                  "$('body').css({'font-family': 'Courier New'});",
+                                  "}"
+                              ))
+        )
+        ### NOTE JS INSERTION ABOVE APPEARS TO CHANGE FONT THROUGHOUT BY DEFAULT, ONCE RUN.
+        scores_dt = formatStyle(scores_dt, "player", target = "row", 
+                                backgroundColor = styleEqual(current_player, "orange"), 
+                                color = styleEqual(current_player, "white"))
+        
+        formatStyle(scores_dt, "id", target = "row",  backgroundColor = styleEqual(RUN$id, "darkred"), color = styleEqual(RUN$id, "white"))
+    })
+    
+    output$highScores_yld <- renderDataTable({ 
+        req(RUN$id)
+        
+        scores = getScores(score_version = 1, limit = 10, rank = "yield")
+        
+        if(!(RUN$id %in% scores$id)) {
+            scores = scores[1:9,]
+            current_score = getCurrentRunScore(RUN$id)
+            scores = rbind(scores,current_score)
+        }
+        current_player = unique(scores$player[which(scores$id == RUN$id)])
+        
+        scores = subset(scores, select = c("player","mean_yield","id"))
+        
+        # Make DT while hiding the "id" column:
+        scores_dt = datatable(scores, colnames = c("Player","Yield","id"), 
+                              autoHideNavigation = TRUE, rownames = FALSE, filter = "none",
+                              options=list(columnDefs = list(list(visible=FALSE, targets=c(2))), dom = 't', initComplete = JS(
+                                  "function(settings, json) {",
+                                  "$('body').css({'font-family': 'Courier New'});",
+                                  "}"
+                              ))
+        )
+        ### NOTE JS INSERTION ABOVE APPEARS TO CHANGE FONT THROUGHOUT BY DEFAULT, ONCE RUN.
+        scores_dt = formatStyle(scores_dt, "player", target = "row", 
+                                backgroundColor = styleEqual(current_player, "orange"), 
+                                color = styleEqual(current_player, "white"))
+        
+        formatStyle(scores_dt, "id", target = "row",  backgroundColor = styleEqual(RUN$id, "darkred"), color = styleEqual(RUN$id, "white"))
     })
     
 }

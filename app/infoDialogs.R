@@ -114,10 +114,28 @@ extinctionModal = function() {
   )
 }
 
-scoresModal = function() {
-  showModal(modalDialog(size = "l", footer = tagList(actionButton("closeScores", "New Game", class = "butt")), easyClose = TRUE,
-                        title = span(style = "font-family: Courier New; font-weight: bold;","High scores"),
-                        dataTableOutput("highScores")
-                        
-  ))  
+scoresModal = function(score_display = "total") {
+  
+  if(score_display == "total") {
+    showModal(modalDialog(size = "l", footer = tagList(actionButton("closeScores", "New Game", class = "butt")), easyClose = TRUE,
+                          title = span(style = "font-family: Courier New; font-weight: bold;","High scores"),
+                          dataTableOutput("highScores")
+    ))  
+  }
+  
+  if(score_display == "split") {
+    showModal(modalDialog(size = "l", footer = tagList(actionButton("closeScores", "New Game", class = "butt")), easyClose = TRUE,
+                          title = span(style = "font-family: Courier New; font-weight: bold;","High scores"),
+                          div(style="display: inline-block;vertical-align:top; width: 400px;", 
+                              span(style="font-size:1.5em;align:center; text-align:center;", "Animal score"),
+                              p(),
+                              dataTableOutput("highScores_res")),
+                          div(style="display: inline-block;vertical-align:top; width: 50px;"," "),
+                          div(style="display: inline-block;vertical-align:top; width: 400px;", 
+                              span(style="font-size:1.5em;align:center; text-align:center; ", "Farming score"),
+                              p(),
+                              dataTableOutput("highScores_yld")),
+    ))  
+  }
+  
 }
