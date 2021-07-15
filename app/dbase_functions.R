@@ -283,6 +283,23 @@ getCurrentRunScore = function(runID) {
   return(scores)
 }
 
+getScoreRank = function(runID, score_version = 1) {
+  db = connect_game_dbase()
+
+  total_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
+                                       WHERE score_version = 1 
+                                       AND total > (SELECT total FROM scores WHERE score_version = %d AND id = %d)", score_version, runID))
+  yld_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
+                                       WHERE score_version = 1 
+                                       AND mean_yield > (SELECT mean_yield FROM scores WHERE score_version = %d AND id = %d)", score_version, runID))
+  res_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
+                                       WHERE score_version = 1 
+                                       AND mean_res > (SELECT mean_res FROM scores WHERE score_version = %d AND id = %d)", score_version, runID))
+  
+  dbDisconnect(db)
+  return(list(total_rank, res_rank, yld_rank))
+}
+
 # CREATE TABLE run (
 #   id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 #   session VARCHAR(32) NOT NULL,
