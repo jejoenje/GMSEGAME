@@ -283,21 +283,36 @@ getCurrentRunScore = function(runID) {
   return(scores)
 }
 
-getScoreRank = function(runID, score_version = 1) {
+getScoreRank = function(runID) {
   db = connect_game_dbase()
 
-  total_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
-                                       WHERE score_version = 1 
-                                       AND total > (SELECT total FROM scores WHERE score_version = %d AND id = %d)", score_version, runID))
-  yld_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
-                                       WHERE score_version = 1 
-                                       AND mean_yield > (SELECT mean_yield FROM scores WHERE score_version = %d AND id = %d)", score_version, runID))
-  res_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
-                                       WHERE score_version = 1 
-                                       AND mean_res > (SELECT mean_res FROM scores WHERE score_version = %d AND id = %d)", score_version, runID))
-  
+  score_version = dbGetQuery(db,sprintf("SELECT score_version FROM scores WHERE id = %d",runID))[1,]
+  if(is.na(score_version)) {
+    total_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
+                                       WHERE score_version IS NULL 
+                                       AND total > (SELECT total FROM scores WHERE score_version IS NULL AND id = %d)", runID))
+    yld_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
+                                       WHERE score_version IS NULL 
+                                       AND mean_yield > (SELECT mean_yield FROM scores WHERE score_version IS NULL AND id = %d)", runID))
+    res_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
+                                       WHERE score_version IS NULL
+                                       AND mean_res > (SELECT mean_res FROM scores WHERE score_version IS NULL AND id = %d)", runID))
+    score_count = dbGetQuery(db, "SELECT COUNT(*) FROM scores WHERE score_version IS NULL")
+  } else {
+    total_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
+                                       WHERE score_version = %d 
+                                       AND total > (SELECT total FROM scores WHERE score_version = %d AND id = %d)", score_version, score_version, runID))
+    yld_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
+                                       WHERE score_version = %d 
+                                       AND mean_yield > (SELECT mean_yield FROM scores WHERE score_version = %d AND id = %d)", score_version, score_version, runID))
+    res_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
+                                       WHERE score_version = %d
+                                       AND mean_res > (SELECT mean_res FROM scores WHERE score_version = %d AND id = %d)", score_version, score_version, runID))  
+    score_count = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores WHERE score_version = %d",score_version))
+  }
+
   dbDisconnect(db)
-  return(list(total_rank, res_rank, yld_rank))
+  return(list(total = total_rank[1,]+1, res = res_rank[1,]+1, yld = yld_rank[1,]+1, score_count = score_count[1,]))
 }
 
 # CREATE TABLE run (
