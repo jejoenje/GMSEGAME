@@ -707,6 +707,10 @@ server <- function(input, output, session) {
         GDATA$live_scores$yld
     })
     
+    output$rank_total <- renderText({
+
+    })
+    
     output$highScores <- renderDataTable({
         req(RUN$id)
         

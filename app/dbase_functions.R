@@ -286,6 +286,13 @@ getCurrentRunScore = function(runID) {
 getScoreRank = function(runID) {
   db = connect_game_dbase()
 
+  ### Catch if no scores were recorded for current run:
+  if(nrow(dbGetQuery(db,sprintf("SELECT * FROM scores WHERE id = %d",runID)))==0) {
+
+    dbDisconnect(db)
+    return(list(total = 0, res = 0, yld = 0, score_count = 0))  
+  }
+  
   score_version = dbGetQuery(db,sprintf("SELECT score_version FROM scores WHERE id = %d",runID))[1,]
   if(is.na(score_version)) {
     total_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
@@ -298,6 +305,10 @@ getScoreRank = function(runID) {
                                        WHERE score_version IS NULL
                                        AND mean_res > (SELECT mean_res FROM scores WHERE score_version IS NULL AND id = %d)", runID))
     score_count = dbGetQuery(db, "SELECT COUNT(*) FROM scores WHERE score_version IS NULL")
+    
+    dbDisconnect(db)
+    return(list(total = total_rank[1,]+1, res = res_rank[1,]+1, yld = yld_rank[1,]+1, score_count = score_count[1,]))  
+    
   } else {
     total_rank = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores 
                                        WHERE score_version = %d 
@@ -309,10 +320,12 @@ getScoreRank = function(runID) {
                                        WHERE score_version = %d
                                        AND mean_res > (SELECT mean_res FROM scores WHERE score_version = %d AND id = %d)", score_version, score_version, runID))  
     score_count = dbGetQuery(db, sprintf("SELECT COUNT(*) FROM scores WHERE score_version = %d",score_version))
+    
+    dbDisconnect(db)
+    return(list(total = total_rank[1,]+1, res = res_rank[1,]+1, yld = yld_rank[1,]+1, score_count = score_count[1,]))  
   }
 
-  dbDisconnect(db)
-  return(list(total = total_rank[1,]+1, res = res_rank[1,]+1, yld = yld_rank[1,]+1, score_count = score_count[1,]))
+  
 }
 
 # CREATE TABLE run (
