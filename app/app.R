@@ -674,7 +674,7 @@ server <- function(input, output, session) {
             # act_plot_dat = barplot(acts, beside = FALSE, col = c("#D35E60","#9067A7","#56BA47"), space = 0.1, 
             #         names = LETTERS[1:ncol(acts)], ylab = "No. actions taken by farmer", xlab = "Farmer", 
             #         cex.lab = 2, cex.axis = 1.5, cex.names = 1.25, main = "", border = "red")
-            USER_DISPLAY_SELECT$act_plot_dat = barplot(acts, beside = FALSE, col = c("#D35E60","#9067A7","#56BA47"), space = 0.1, 
+            USER_DISPLAY_SELECT$act_plot_dat = barplot(acts, beside = FALSE, col = c("#d95f02","#7570b3","#1b9e77"), space = 0.1, 
                                    xaxt = "n", ylab = "No. actions taken by farmer", xlab = "Farmer", 
                                    cex.lab = 2, cex.axis = 1.5, cex.names = 1.25, main = "")
             USERS = LETTERS[1:ncol(acts)]
@@ -687,8 +687,8 @@ server <- function(input, output, session) {
                 points(USER_DISPLAY_SELECT$act_plot_dat[i], y = xlab_ypos, cex = 4, xpd = T, pch = 21, bg = USER_LAB_COLS[i], col = "black")
                 text(USERS[i], x = USER_DISPLAY_SELECT$act_plot_dat[i], y = xlab_ypos, xpd = T, cex = 1.25)
             }
-            legend("top", inset=c(0,-0.25), legend = c("Culling","Scaring","Farming"), 
-                   fill = c("#D35E60","#9067A7","#56BA47"), cex = 1.5,
+            legend("top", inset=c(0,-0.25), legend = c("Hunting","Scaring","Farming"), 
+                   fill = c("#d95f02","#7570b3","#1b9e77"), cex = 1.5,
                    ncol = 3, x.intersp=0.3, text.width = floor(ncol(acts)/3.5), xjust = 0, bty = "n", xpd = T)
         }
     ### This should track/set the width of the figures dynamically:
