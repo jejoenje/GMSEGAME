@@ -15,7 +15,7 @@ I understand that my participation is voluntary and that I am free to withdraw a
 <p>
 I understand that my responses will be kept anonymous (excluding player name I provide below), and I give permission for members of the research team to have access to my anonymised in-game decision data. I understand that my player nickname is not expected to be my real name, and that choosing to use my real name as player nickname means that my responses will not be anonymous.
 <p>
-After you consent and click 'go' you can end your participation at any time by closing your browser window. You have the right to ask us to permanently delete any such data we collect by [emailing us](jm241@stir.ac.uk) your player name and the date of your game session.
+After you consent and click 'go' you can end your participation at any time by closing your browser window. You have the right to ask us to permanently delete any such data we collect by <a href="mailto:jm241@stir.ac.uk">emailing us</a> your player name and the date of your game session.
 <p><b>
 By ticking the box below, and clicking 'Go', you confirm that you are over the age of 16, and consent to us recording and storing the player name given above, and the actions you take during the following game session, for the purposes of research into human decision-making in natural resource management.
 </b>
@@ -24,7 +24,7 @@ By ticking the box below, and clicking 'Go', you confirm that you are over the a
 <div style = "font-family: Courier New">
 
 <a href="https://ochil-ds.co.uk/GMSEGAME_ParticipantInformationSheet.pdf" target="_blank">Participant Information Sheet</a>
-  
+<br>  
 <a href="https://ochil-ds.co.uk/GMSEGAME_ParticipantConsentForm.pdf" target="_blank">Consent Form</a>
 
 </div>
