@@ -114,26 +114,44 @@ extinctionModal = function() {
   )
 }
 
-scoresModal = function(score_display = "total") {
+scoresModal = function(score_display = "total", total_scores = NULL) {
   
   if(score_display == "total") {
     showModal(modalDialog(size = "l", footer = tagList(actionButton("closeScores", "New Game", class = "butt")), easyClose = TRUE,
-                          title = span(style = "font-family: Courier New; font-weight: bold;","High scores"),
+                          title = span(style = "font-size:1.75em; font-family: Courier New; font-weight: bold;","Top 10 High scores: Total"),
+                          span(style = "font-size:1.25em; font-weight: bold;", 
+                               "You are", 
+                               span(style = "font-size:1.5em; color:red;", textOutput("rank_total",inline=T)), 
+                               "out of ", 
+                               span(style = "font-size:1.5em; color:darkred;", total_scores),"!"
+                          ),
                           dataTableOutput("highScores")
     ))  
   }
   
   if(score_display == "split") {
     showModal(modalDialog(size = "l", footer = tagList(actionButton("closeScores", "New Game", class = "butt")), easyClose = TRUE,
-                          title = span(style = "font-family: Courier New; font-weight: bold;","High scores"),
+                          title = span(style = "font-size:2em; font-family: Courier New; font-weight: bold;","Top 10 High scores"),
                           div(style="display: inline-block;vertical-align:top; width: 400px;", 
                               span(style="font-size:1.5em;align:center; text-align:center;", "Animal score"),
                               p(),
+                              span(style = "font-size:1.25em; font-weight: bold;", 
+                                   "You are", 
+                                   span(style = "font-size:1.5em; color:red;", textOutput("rank_res",inline=T)), 
+                                   "out of ", 
+                                   span(style = "font-size:1.5em; color:darkred;", total_scores),"!"
+                              ),
                               dataTableOutput("highScores_res")),
                           div(style="display: inline-block;vertical-align:top; width: 50px;"," "),
                           div(style="display: inline-block;vertical-align:top; width: 400px;", 
                               span(style="font-size:1.5em;align:center; text-align:center; ", "Farming score"),
                               p(),
+                              span(style = "font-size:1.25em; font-weight: bold;", 
+                                   "You are", 
+                                   span(style = "font-size:1.5em; color:green;", textOutput("rank_yld",inline=T)), 
+                                   "out of ", 
+                                   span(style = "font-size:1.5em; color:darkred;", total_scores),"!"
+                              ),
                               dataTableOutput("highScores_yld")),
     ))  
   }

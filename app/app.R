@@ -165,7 +165,7 @@ ui <- fixedPage(
                                     style = "color:#D35E60; font-family: Courier New; font-size:125%; font-weight: bold;vertical-align: middle;"))
                     ),
                     column(4,
-                           div(span("Resource Score", 
+                           div(span("Animal Score", 
                                     style = "color:#000000; font-family: Courier New; font-size:125%; font-weight: bold;vertical-align: middle;"))
                     ),
                     column(4,
@@ -450,7 +450,7 @@ server <- function(input, output, session) {
             addScores(runID = RUN$id, gd = GDATA)
             
         }
-        scoresModal(score_display = GDATA$score_display)
+        scoresModal(score_display = GDATA$score_display, total_scores = getScoreRank(RUN$id)$score_count)
         
         ### setPlayerModal() has confirmStart button
         #setPlayerModal(playername = PLAYER_NAME)
@@ -600,12 +600,12 @@ server <- function(input, output, session) {
     })
     
     observeEvent(input$confirmFinished, {
-        scoresModal(score_display = GDATA$score_display)
+        scoresModal(score_display = GDATA$score_display, total_scores = getScoreRank(RUN$id)$score_count)
     })
     
     observeEvent(input$confirmExtinction, {
         #removeModal()
-        scoresModal(score_display = GDATA$score_display)
+        scoresModal(score_display = GDATA$score_display, total_scores = getScoreRank(RUN$id)$score_count)
     })
     
     observeEvent(input$resetGame, {
@@ -614,7 +614,7 @@ server <- function(input, output, session) {
     })
     
     observeEvent(input$showScores, {
-        scoresModal(score_display = GDATA$score_display)
+        scoresModal(score_display = GDATA$score_display, total_scores = getScoreRank(RUN$id)$score_count)
     })
     
     observeEvent(input$showAllIntro, {
@@ -708,7 +708,23 @@ server <- function(input, output, session) {
     })
     
     output$rank_total <- renderText({
-
+      #req(RUN$id)
+      getScoreRank(RUN$id)$total
+    })
+    
+    output$rank_res <- renderText({
+      #req(RUN$id)
+      getScoreRank(RUN$id)$res
+    })
+    
+    output$rank_yld <- renderText({
+      #req(RUN$id)
+      getScoreRank(RUN$id)$yld
+    })
+    
+    output$rank_total_scores <- renderText({
+      #req(RUN$id)
+      getScoreRank(RUN$id)$score_count
     })
     
     output$highScores <- renderDataTable({
