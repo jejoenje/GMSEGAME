@@ -395,7 +395,7 @@ server <- function(input, output, session) {
         GDATA$land_colors = gdata$land_colors
         GDATA$paras = gdata$paras
         GDATA$live_scores = list(res = 100, yld = 100)
-        GDATA$score_display = "total"
+        GDATA$score_display = "split"
         ### Initialise budget reactiveValues:
         CURRENT_BUDGET$total = budget$total
         CURRENT_BUDGET$culling = budget$culling
