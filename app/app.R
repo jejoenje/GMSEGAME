@@ -196,7 +196,8 @@ ui <- fixedPage(
                         div(span(textOutput("live_yldScore"),
                                  style="color:#000000; font-family: Courier New; font-size:325%; font-weight: bold;vertical-align: middle; padding-top: 0em, padding-left: 3em"))
                     )
-                )
+                ),
+                bsTooltip(id = "budget_report", "Budget remaining to invest in costs for licences, and scores. Animal score is the mean % of the starting animal population, and Farming score is the mean % of yield in the landscape (100% means no damage from animals, and no additional investment in farming).", placement = "left", trigger = "hover", options = NULL)
             ),
             hr(),
             fixedRow(
