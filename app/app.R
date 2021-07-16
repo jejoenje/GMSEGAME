@@ -48,7 +48,7 @@ initGame = function() {
         RESOURCE_INI = 1000,
         TIME_MAX = 20,
         PUBLIC_LAND = 0,
-        OWNERSHIP_VAR = 0.5,
+        OWNERSHIP_VAR = sample(c(0,0.25,0.5),1),
         USR_BUDGET_RNG = 0
     )
         
