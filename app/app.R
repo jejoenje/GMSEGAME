@@ -48,7 +48,7 @@ initGame = function() {
         RESOURCE_INI = 1000,
         TIME_MAX = 20,
         PUBLIC_LAND = 0,
-        OWNERSHIP_VAR = 0,
+        OWNERSHIP_VAR = 0.5,
         USR_BUDGET_RNG = 0
     )
         
@@ -696,7 +696,7 @@ server <- function(input, output, session) {
     )
     
     output$budgetRemaining <- renderText({
-        paste0("$", CURRENT_BUDGET$leftover)
+        paste0("€", CURRENT_BUDGET$leftover)
     })
     
     output$live_resScore <- renderText({
