@@ -3,7 +3,7 @@ output: html_document
 ---
 <p>
 <span style="font-family: Courier New; font-size: 1.25em">
-In this game, <span style="color:#ca1b1b;">you play the manager of a landscape that holds a population of grazing animals</span>, over a period of 20 years (turns).
+In this game, <span style="color:#ca1b1b;">you play as the manager of a farmland landscape with a population of grazing animals</span>, over a period of 20 years (turns).
 The landscape consists of a number of farms (the square shades on the landscape) occupied by farmers growing crops.
 The grazing animals can negatively affect how well each farm does (decrease yield from the land).
 </span>

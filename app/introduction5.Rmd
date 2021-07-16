@@ -10,5 +10,5 @@ output: html_document
 <img src="actions3.jpg" width="50%">
 </div>
 
-<span style="font-family: Courier New; font-size: 1.25em">Each bar is the count of all actions taken by a single farmer; the <span style="color:#ca1b1b;">different colours represent the three different types of action</span>. If you had set the cost of killing higher in the previous year, you would for example expect to see less killing taking place.</span>
+<span style="font-family: Courier New; font-size: 1.25em">Each bar is the count of all actions taken by a single farmer; the <span style="color:#ca1b1b;">different colours represent the three different types of action</span>. If you had set the cost of hunting licences higher in the previous year, you would expect to see less hunting taking place, for example.</span>
 

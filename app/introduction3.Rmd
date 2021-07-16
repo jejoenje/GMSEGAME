@@ -4,10 +4,11 @@ output: html_document
 <p>
 
 <span style="font-family: Courier New; font-size: 1.25em">
-<span style="color:#ca1b1b;">Your aim is to maintain both a number of grazing animals of your choice, as well as the agricultural yield on the landscape.</span>
+<span style="color:#ca1b1b;">Your aim is to maintain a number of animals (individuals) of your choice, as well as the agricultural yield on the landscape.</span>
 
 <span style="font-family: Courier New; font-size: 1.25em">
-Although as the manager, you cannot affect the animal population directly, you can <span style="color:#ca1b1b;">influence the decisions the farmers may make each year, by changing the cost of scaring animals or killing animals</span> - for example, this would be through changing to cost of scaring or hunting permits. 
+As the manager, you make policy decisions on licences for farmers to hunt or scare the animals.
+Although you cannot affect the animal population directly, you can <span style="color:#ca1b1b;">influence the decisions the farmers may make each year, by changing the cost hunting or scaring licences</span>. 
 </span>
 
 <div style="display: flex; text-align: center; align-items: center; align: center;">
@@ -30,9 +31,9 @@ Although as the manager, you cannot affect the animal population directly, you c
 
 <div style="width: 75%; text-align: left;">
 <span style="font-family: Courier New; font-size: 1.25em">
-The <span style="color:#ca1b1b;">higher you set the cost</span> of either action, the <span style="color:#ca1b1b;">fewer of those actions are likely to be taken</span> by each farmer. <br>
+The <span style="color:#ca1b1b;">higher you set the cost</span> of either licence, the <span style="color:#ca1b1b;">fewer of those actions are likely to be taken</span> by each farmer. <br>
 You have a fixed budget to allocate to setting the cost of each action; budget invested in one cannot be invested in the other. <br>
-You get the same budget each year.</span><br>
+Leftover budgets are not rolled over to the next year.</span><br>
 <span style="font-family: Courier New; font-size: 1.25em">
 Note that you cannot directly change the cost of farming itself, but it is likely that more farming will happen if the cost of other actions are higher than the expected return of farming.</span>
 </div>

@@ -4,7 +4,7 @@ output: html_document
 <p>
 
 <span style="font-family: Courier New; font-size: 1.25em">
-<span style="color:#ca1b1b;">As the number of animals increases, your "biodiversity" score increases, whereas as the agricultural yield increases, your "yield" score increases.</span>
+<span style="color:#ca1b1b;">As the number of animals increases, your "animal" score increases, whereas as the agricultural yield increases, your "yield" score increases.</span>
 We'll show you how you've done on a leaderboard at the end of each session.</span>
 
 <div style="display: flex; text-align: center; align-items: center;">

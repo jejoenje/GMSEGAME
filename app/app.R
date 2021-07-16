@@ -202,10 +202,10 @@ ui <- fixedPage(
             fixedRow(
                 div(id = "costSliders",
                     column(6, align = "center", 
-                           sliderInput("culling", "Budget to preventing culling:",
+                           sliderInput("culling", "Cost of a hunting licence:",
                                        min = 0, max = 1000, value = INIT_CULLING_BUDGET, step = 5, width = "100%")),
                     column(6, align = "center",
-                           sliderInput("scaring", "Budget to preventing scaring:",
+                           sliderInput("scaring", "Cost of a scaring licence:",
                                        min = 0, max = 1000, value = INIT_SCARING_BUDGET, step = 5, width = "100%"))
                     ),
                 bsTooltip(id = "costSliders", "How much of your budget will be invested in preventing culling of animals (e.g. the cost of a shooting licence), and in preventing scaring of animals (e.g. the cost of a scaring licence).", placement = "left", trigger = "hover", options = NULL)
@@ -235,7 +235,7 @@ ui <- fixedPage(
         ),
         column(5, align = "center",
                plotOutput("actions_user", height="auto", click = "act_plot_click"),
-               bsTooltip(id = "actions_user", "Actions taken by the farmers in the previous year. Different colours represent the three different possible actions; killing animals, scaring animals off their land, or tending crops. The letter labels link the individual farmer to the individual farm on the farmland map.", placement = "top", trigger = "hover", options = NULL)
+               bsTooltip(id = "actions_user", "Actions taken by the farmers in the previous year. Different colours represent the three different possible actions; hunting animals, scaring animals off their land, or tending crops. The letter labels link the individual farmer to the individual farm on the farmland map.", placement = "top", trigger = "hover", options = NULL)
                
         ),
         #column(1)
