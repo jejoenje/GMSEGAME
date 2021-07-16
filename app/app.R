@@ -179,12 +179,6 @@ ui <- fixedPage(
             
             fixedRow(
                 div(id = "budget_report", style = "padding-top:1em; padding-left:1em; padding-right:1em, padding-bottom:1em",
-                    # column(4, align = "right",
-                    #        div(style="text-align: center; vertical-align: middle; padding-top: 3em, padding-left: 3em",
-                    #            span("Budget available", style="color:#D35E60; font-family: Courier New; font-size:125%;"),br(),
-                    #            span("(to set costs)", style="color:#D35E60; font-family: Courier New; font-size:100%;"),
-                    #        )
-                    # ),
                     column(4, align = "center", 
                            div(span(textOutput("budgetRemaining"), style="color:#D35E60; font-family: Courier New; font-size:325%; font-weight: bold;vertical-align: middle; padding-top: 0em, padding-left: 3em"))
                     ),
@@ -740,12 +734,15 @@ server <- function(input, output, session) {
         }
         current_player = unique(scores$player[which(scores$id == RUN$id)])
 
-        scores = subset(scores, select = c("player","mean_res","mean_yield","total","id"))
+        scores$rank = c(1:9,getScoreRank(RUN$id)$total)
+        scores$rank = as.character(scores$rank)
+        
+        scores = subset(scores, select = c("rank","player","mean_res","mean_yield","total","id"))
         
         # Make DT while hiding the "id" column:
-        scores_dt = datatable(scores, colnames = c("Player","Population","Yield","TOTAL","id"), 
+        scores_dt = datatable(scores, colnames = c("Rank","Player","Population","Yield","TOTAL","id"), 
                               autoHideNavigation = TRUE, rownames = FALSE, filter = "none",
-                              options=list(columnDefs = list(list(visible=FALSE, targets=c(4))), dom = 't', initComplete = JS(
+                              options=list(columnDefs = list(list(visible=FALSE, targets=c(5))), dom = 't', initComplete = JS(
                                   "function(settings, json) {",
                                   "$('body').css({'font-family': 'Courier New'});",
                                   "}"
@@ -771,12 +768,14 @@ server <- function(input, output, session) {
         }
         current_player = unique(scores$player[which(scores$id == RUN$id)])
         
-        scores = subset(scores, select = c("player","mean_res","id"))
+        scores$rank = c(1:9,getScoreRank(RUN$id)$res)
+        scores$rank = as.character(scores$rank)
+        scores = subset(scores, select = c("rank","player","mean_res","id"))
         
         # Make DT while hiding the "id" column:
-        scores_dt = datatable(scores, colnames = c("Player","Population","id"), 
+        scores_dt = datatable(scores, colnames = c("Rank","Player","Population","id"), 
                               autoHideNavigation = TRUE, rownames = FALSE, filter = "none",
-                              options=list(columnDefs = list(list(visible=FALSE, targets=c(2))), dom = 't', initComplete = JS(
+                              options=list(columnDefs = list(list(visible=FALSE, targets=c(3))), dom = 't', initComplete = JS(
                                   "function(settings, json) {",
                                   "$('body').css({'font-family': 'Courier New'});",
                                   "}"
@@ -802,12 +801,15 @@ server <- function(input, output, session) {
         }
         current_player = unique(scores$player[which(scores$id == RUN$id)])
         
-        scores = subset(scores, select = c("player","mean_yield","id"))
+        scores$rank = c(1:9,getScoreRank(RUN$id)$yld)
+        scores$rank = as.character(scores$rank)
+        
+        scores = subset(scores, select = c("rank","player","mean_yield","id"))
         
         # Make DT while hiding the "id" column:
-        scores_dt = datatable(scores, colnames = c("Player","Yield","id"), 
+        scores_dt = datatable(scores, colnames = c("Rank","Player","Yield","id"), 
                               autoHideNavigation = TRUE, rownames = FALSE, filter = "none",
-                              options=list(columnDefs = list(list(visible=FALSE, targets=c(2))), dom = 't', initComplete = JS(
+                              options=list(columnDefs = list(list(visible=FALSE, targets=c(3))), dom = 't', initComplete = JS(
                                   "function(settings, json) {",
                                   "$('body').css({'font-family': 'Courier New'});",
                                   "}"
