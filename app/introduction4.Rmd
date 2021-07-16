@@ -6,12 +6,12 @@ output: html_document
 <span style="font-family: Courier New; font-size: 1.25em">
 **To help you decide what costs to set for hunting and scaring permits in the following round, you can monitor the state of the environment**.</span>
 
-<span style="font-family: Courier New; font-size: 1.25em">You can see the <span style="color:#ca1b1b;">population trend of the animal population in the plot on the left</span> (**black line**) - the red dot is the most recent count, but bear in mind that this count may be inaccurate (you may not have seen all the animals, for example). The animals grow and reproduce at some rate you don't know; so you will have to manage accordingly. </span>
+<span style="font-family: Courier New; font-size: 1.25em">You can see the <span style="font-weight:bold;">population trend of the animal population in the plot on the left</span> (**black line**) - the red dot is the most recent count, but bear in mind that this count may be inaccurate (you may not have seen all the animals, for example). The animals grow and reproduce at some rate you don't know; so you will have to manage accordingly. </span>
 
 <div style="text-align: center">
 <img src="trends2.jpg" width="50%">
 </div>
 
-<span style="font-family: Courier New; font-size: 1.25em">In the same plot, the relative agricultural <span style="color:#ca1b1b;">yield achieved by each farmer is represented by the</span> <span style="color:#1c7519;">**green line**</span>. This is expressed as a percentage of the expected total yield on a farmer's land - anything below 100% means some yield was lost to grazing animals.</span>
+<span style="font-family: Courier New; font-size: 1.25em">In the same plot, the relative agricultural <span style="font-weight:bold;">yield achieved by each farmer is represented by the</span> <span style="font-weight:bold;">**green line**</span>. This is expressed as a percentage of the expected total yield on a farmer's land - anything below 100% means some yield was lost to grazing animals.</span>
 
 

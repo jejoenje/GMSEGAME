@@ -4,7 +4,7 @@ output: html_document
 <p>
 
 <span style="font-family: Courier New; font-size: 1.25em">
-<span style="color:#ca1b1b;">As the number of animals increases, your "animal" score increases, whereas as the agricultural yield increases, your "yield" score increases.</span>
+<span style="font-weight:bold;">As the number of animals increases, your "animal" score increases, whereas as the agricultural yield increases, your "yield" score increases.</span>
 We'll show you how you've done on a leaderboard at the end of each session.</span>
 
 <div style="display: flex; text-align: center; align-items: center;">
@@ -31,7 +31,7 @@ We'll show you how you've done on a leaderboard at the end of each session.</spa
 
 </div>
 
-<span style="font-family: Courier New; font-size: 1.25em">Remember, <span style="color:#ca1b1b;">your aim is to maintain the number of animals and overall agricultural yield of your choice</span>. You have 20 years (turns) to do this in; but <span style="color:#ca1b1b;">**if the population of animals goes extinct it's game over**</span>! Remember to keep an eye on the population and yield trends, and bear in mind that more farmers mean more actions taken!</span>
+<span style="font-family: Courier New; font-size: 1.25em">Remember, <span style="font-weight:bold;">your aim is to maintain the number of animals and overall agricultural yield of your choice</span>. You have 20 years (turns) to do this in; but <span style="font-weight:bold;">if the population of animals goes extinct it's game over</span>! Remember to keep an eye on the population and yield trends, and bear in mind that more farmers mean more actions taken!</span>
 
 <br>
 <span style="font-family: Courier New; font-size: 1.25em; text-align: center;">

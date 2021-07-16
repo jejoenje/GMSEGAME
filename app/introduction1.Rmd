@@ -7,7 +7,7 @@ output: html_document
 </div>
 
 <span style="font-family: Courier New; font-size: 1.25em">
-<span style="color:darkred">Welcome to GMSE-GAME! </span>
+<span style="font-weight:bold">Welcome to GMSE-GAME! </span>
 This game is all about making decisions on the sustainable management of animal populations; balancing conservation, hunting and farming activities.
 </span>
 <br>

@@ -4,11 +4,11 @@ output: html_document
 <p>
 
 <span style="font-family: Courier New; font-size: 1.25em">
-<span style="color:#ca1b1b;">Your aim is to maintain a number of animals (individuals) of your choice, as well as the agricultural yield on the landscape.</span>
+<span style="font-weight:bold;">Your aim is to maintain a number of animals (individuals) of your choice, as well as the agricultural yield on the landscape.</span>
 
 <span style="font-family: Courier New; font-size: 1.25em">
 As the manager, you make policy decisions on licences for farmers to hunt or scare the animals.
-Although you cannot affect the animal population directly, you can <span style="color:#ca1b1b;">influence the decisions the farmers may make each year, by changing the cost hunting or scaring licences</span>. 
+Although you cannot affect the animal population directly, you can <span style="font-weight:bold;">influence the decisions the farmers may make each year, by changing the cost hunting or scaring licences</span>. 
 </span>
 
 <div style="display: flex; text-align: center; align-items: center; align: center;">
@@ -31,7 +31,7 @@ Although you cannot affect the animal population directly, you can <span style="
 
 <div style="width: 75%; text-align: left;">
 <span style="font-family: Courier New; font-size: 1.25em">
-The <span style="color:#ca1b1b;">higher you set the cost</span> of either licence, the <span style="color:#ca1b1b;">fewer of those actions are likely to be taken</span> by each farmer. <br>
+The <span style="font-weight:bold;">higher you set the cost</span> of either licence, the <span style="font-weight:bold;">fewer of those actions are likely to be taken</span> by each farmer. <br>
 You have a fixed budget to allocate to setting the cost of each action; budget invested in one cannot be invested in the other. <br>
 Leftover budgets are not rolled over to the next year.</span><br>
 <span style="font-family: Courier New; font-size: 1.25em">

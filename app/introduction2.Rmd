@@ -3,7 +3,7 @@ output: html_document
 ---
 <p>
 <span style="font-family: Courier New; font-size: 1.25em">
-In this game, <span style="color:#ca1b1b;">you play as the manager of a farmland landscape with a population of grazing animals</span>, over a period of 20 years (turns).
+In this game, <span style="font-weight:bold;">you play as the manager of a farmland landscape with a population of grazing animals</span>, over a period of 20 years (turns).
 The landscape consists of a number of farms (the square shades on the landscape) occupied by farmers growing crops.
 The grazing animals can negatively affect how well each farm does (decrease yield from the land).
 </span>
@@ -27,7 +27,7 @@ The grazing animals can negatively affect how well each farm does (decrease yiel
 </div>
 
 <span style="font-family: Courier New; font-size: 1.25em">
-In each round of the game the <span style="color:#ca1b1b;">farmers decide how to spend their time; they can farm their land, scare animals away, or kill animals by hunting them</span>.
+In each round of the game the <span style="font-weight:bold;">farmers decide how to spend their time; they can farm their land, scare animals away, or kill animals by hunting them</span>.
 Hunting animals directly removes them from the population, whereas scaring may move them away from a farmer's land. 
 Farmers can only take actions on their own land.
 </span>
