@@ -2,12 +2,11 @@
 output: html_document
 ---
 <div style="text-align: center">
-<img src="GMSEGAME_logo_only.jpg" width="40%"><br>
-<img src="intro_icons1.png" width="50%">
+<img src="intro_icons2.jpg" width="60%">
 </div>
 
 <span style="font-family: Courier New; font-size: 1.25em">
-<span style="font-weight:bold">Welcome to GMSE-GAME! </span>
+<span style="font-weight:bold">Welcome to Animal&Farm! </span>
 This game is all about making decisions on the sustainable management of animal populations; balancing conservation, hunting and farming activities.
 </span>
 <br>

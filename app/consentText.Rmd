@@ -2,12 +2,12 @@
 output: html_document
 ---
 
-<img src="GMSEGAME_logo_wide.jpg" width = 75%>
+<img src="GMSEGAME_logo_and_banner.jpg" width = 100%>
 
 <div style = "font-family: Courier New; font-size: 1.5em; font-weight: bold">
 Electronic Participant Consent Form (v. 18/05/2021)
 </div>
-<div style = "font-family: Courier New; font-style: italic">
+<div style = "font-family: Courier New; font-style: italic; font-size: 0.9em">
 <p>
 I confirm that I have read and understood the <a href="https://ochil-ds.co.uk/GMSEGAME_ParticipantInformationSheet.pdf" target="_blank">Participant Information Sheet</a> dated 18/05/2021 explaining the above research project and I have had the opportunity to ask questions about the project.<br>
 <p>
@@ -21,7 +21,7 @@ By ticking the box below, and clicking 'Go', you confirm that you are over the a
 </b>
 </div>
 
-<div style = "font-family: Courier New">
+<div style = "font-family: Courier New; font-size: 0.9em;">
 
 <a href="https://ochil-ds.co.uk/GMSEGAME_ParticipantInformationSheet.pdf" target="_blank">Participant Information Sheet</a>
 <br>  
