@@ -511,6 +511,12 @@ server <- function(input, output, session) {
     observeEvent(input$nextStep, {
         
         req(GDATA$summary)
+      
+        ### Disable inputs while calculating next time step:
+        shinyjs::hide(id = "nextStep")
+        shinyjs::hide(id = "showScores")
+        shinyjs::hide(id = "showAllIntro")
+        shinyjs::hide(id = "resetGame")
         
         ### User input
         culling_cost = budgetToCost(input$culling, minimum_cost = 10)
@@ -556,6 +562,11 @@ server <- function(input, output, session) {
 
         }
         
+        ### Re-enable inputs after calc is done:
+        shinyjs::show(id = "nextStep")
+        shinyjs::show(id = "showScores")
+        shinyjs::show(id = "showAllIntro")
+        shinyjs::show(id = "resetGame")
     })
     
     observeEvent(GDATA$achievedMaxYear, {
