@@ -1,5 +1,5 @@
 library(RMySQL)
-source("app/connect_db.R")
+source("connect_db.R")
 
 db = connect_game_dbase()
 
