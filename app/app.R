@@ -19,8 +19,11 @@ INIT_CULLING_BUDGET = 100
 
 NEWSESSION = TRUE
 
+### Sets up data structures for game session:
 initGame = function() {
     gdata = list()
+    
+    ### THESE ARE THE MAIN PARAMETERS GOING INTO THE GMSE SIMULATIONS:
     
     GMSE_PARAS = list(
         K = 5,
@@ -30,18 +33,14 @@ initGame = function() {
         MANAGE_TARGET  = 2000,
         OBSERVE_TYPE  = 0,
         RES_MOVE_OBS  = TRUE,
-        #RES_DEATH_K  = round(runif(1, 1000, 6000)),
         RES_DEATH_K  = 5000,
-        #LAMBDA = runif(1, 0.2, 0.4),
         LAMBDA = 0.3,
         RES_DEATH_TYPE  = 3,
         REMOVE_PR = runif(1, 0.05, 0.2),
-        #REMOVE_PR = 0.25,
         USER_BUDGET = 1500,
         CULLING = TRUE,
         SCARING = TRUE,
         TEND_CROPS = TRUE,
-        #TEND_CROP_YLD = runif(1, 0.1, 0.4),
         TEND_CROP_YLD = 0.3,
         LAND_DIM_1 = 100,
         LAND_DIM_2 = 100,
@@ -64,6 +63,7 @@ initGame = function() {
     return(gdata)
 }
 
+### Sets initial budgets
 initBudget = function(paras) {
     budget = list(
         total = paras$MANAGER_BUDGET,
@@ -74,6 +74,8 @@ initBudget = function(paras) {
     return(budget)
 }
 
+### Helper function for use if all parameters need to be stored for each time step
+###  (no other use for this really)
 getLastParas = function(laststep, K) {
     last_paras = list(
         K = K,
@@ -102,6 +104,7 @@ getLastParas = function(laststep, K) {
     return(last_paras)
 }
 
+### Helper function to update budget (needed for managing data lists / Shiny updating values)
 updateCurrentBudget = function(budget, manager_budget, culling_budget, scaring_budget) {
     budget$total = manager_budget
     budget$culling = culling_budget
@@ -110,21 +113,23 @@ updateCurrentBudget = function(budget, manager_budget, culling_budget, scaring_b
     return(budget)
 }
 
+### Translates between budget allocated and "costs" as in GMSE, which has some assumed minimum cost of 10 units, and assumes the GMSE
+###  a 10-factor relationship between costs set and budget, as per GMSE. Needs a rounding to avoid fractions going into GMSE calls.
 budgetToCost = function(budgetAllocated, minimum_cost) {
     return(floor(budgetAllocated/10 + minimum_cost))
 }
 
-
+### For "waiting" screen:
 reset_waiting_screen <- tagList(
     spin_flower(),
     h4("Resetting game - running intial time steps...")
 ) 
-
 init_waiting_screen <- tagList(
     spin_flower(),
     h4("Starting game...")
 ) 
 
+### This sets the fonts throughout the app.
 ui <- fixedPage(
     tagList(tags$head(
         tags$style(".butt{font-family: Courier New;}"),
