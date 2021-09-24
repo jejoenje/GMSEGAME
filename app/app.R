@@ -129,9 +129,14 @@ init_waiting_screen <- tagList(
     h4("Starting game...")
 ) 
 
-### This sets the fonts throughout the app.
+###
+### MAIN UI CODE
+### 
+
 ui <- fixedPage(
-    tagList(tags$head(
+
+   ### This sets the fonts throughout the app.
+   tagList(tags$head(
         tags$style(".butt{font-family: Courier New;}"),
     )),
     
@@ -225,6 +230,10 @@ ui <- fixedPage(
         #column(1)
     )
 )
+
+###
+### Main Server code:
+### 
 
 server <- function(input, output, session) {
     
