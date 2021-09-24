@@ -1,5 +1,6 @@
 
-
+### Add new game run session data to database and get new runID token.
+### Called once for every new session.
 newRunRecord = function(session, player, startTime, extinct) {
   
   db = connect_game_dbase()
@@ -12,6 +13,7 @@ newRunRecord = function(session, player, startTime, extinct) {
   return(newID)
 }
 
+### Updates the run record in the database on session end (e.g. when final number of years or extinction reached.)
 updateRunRecord = function(runID, endTime, extinct) {
   db = connect_game_dbase()
   q1 = sprintf("UPDATE run SET endTime = '%s' WHERE id = %d", endTime, runID)
@@ -21,6 +23,7 @@ updateRunRecord = function(runID, endTime, extinct) {
   dbDisconnect(db)
 }
 
+### Add GMSE paras for session to database:
 addRunPar = function(runID, paras, score_display) {
   db = connect_game_dbase()
   q = list()
@@ -53,6 +56,9 @@ addRunPar = function(runID, paras, score_display) {
   dbDisconnect(db)
 }
 
+### Does the same as addRunPar() but adds all parameters for each time step in each session.
+### This is somewhat superfluous (and does massively increase amount of data stored) but is here
+###  just in case in the future, parameter data per time-step (e.g. when paras are changed mid-way through) is needed.
 addAllRunPar = function(runID,t,paras) {
   db = connect_game_dbase()
   q = sprintf("INSERT INTO run_par_all (id, t, K, land_ownership, 
@@ -97,6 +103,7 @@ addInitGdata = function(runID, gd) {
   
 }
 
+### Dumps the yield data from the initial time steps into the yield database table.
 addInitYieldData = function(runID, yields) {
   db = connect_game_dbase()
   
@@ -119,6 +126,8 @@ addInitYieldData = function(runID, yields) {
   
 }
 
+### Adds user yields to database on each time step. Notes this adds multiple lines per time step
+### (one for each user).
 addYields = function(runID, yields) {
   db = connect_game_dbase()
   
@@ -201,6 +210,7 @@ addLastCostsOnExtinction = function(runID, cull_cost, scare_cost) {
   
 }
 
+### Updates game scores as  the game progresses, so they can be displayed in UI.
 updateLiveScores = function(gd) {
   
   res = as.vector(gd$summary[,"res"])
@@ -215,6 +225,7 @@ updateLiveScores = function(gd) {
   
 }
 
+### Add scores to the scores database. Called only once when game session finishes.
 addScores = function(runID, gd) {
   
   ### Flag to keep a record of what scoring calculaton is used. Where this is NA in the database, the score was calculated using a the
@@ -242,6 +253,8 @@ addScores = function(runID, gd) {
   
 }
 
+### Retrieve top X (`limit`) scores from database; used for displaying leaderboard.
+### Also allows selection by `score_version`.
 getScores = function(score_version = NULL, rank = "total", limit = 10) {
   db = connect_game_dbase()
   
@@ -255,6 +268,7 @@ getScores = function(score_version = NULL, rank = "total", limit = 10) {
   
   # Get top 10 and match player name:
   
+  ### Note complex SQL calls below are necessary to ensure quick retrieval of top X scores:
   if(!is.null(score_version)) {
     scores = dbGetQuery(db, sprintf("SELECT scores.*, run.player 
                                     FROM scores 
@@ -274,6 +288,7 @@ getScores = function(score_version = NULL, rank = "total", limit = 10) {
   return(scores)
 }
 
+### Retrieves score from current session only; used in displaying the leaderboard.
 getCurrentRunScore = function(runID) {
   db = connect_game_dbase()
   scores = dbGetQuery(db, sprintf("SELECT * FROM scores WHERE id = '%d'", runID))
@@ -283,6 +298,7 @@ getCurrentRunScore = function(runID) {
   return(scores)
 }
 
+### Get rank of current score relative to all other plays. Used in display of leaderboard.
 getScoreRank = function(runID) {
   db = connect_game_dbase()
 
@@ -327,6 +343,8 @@ getScoreRank = function(runID) {
 
   
 }
+
+###### THE FOLLOWING IS A RECORD OF HOW THE DATABASE TABLES REFERENCED ABOVE WERE SET UP ORIGINALLY:
 
 # CREATE TABLE run (
 #   id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
