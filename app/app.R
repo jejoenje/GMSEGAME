@@ -508,11 +508,16 @@ server <- function(input, output, session) {
         }
     })
     
+    ###
+    ### nextStep observeEvent is the main "game time step":
+    ###
     observeEvent(input$nextStep, {
         
         req(GDATA$summary)
       
-        ### Disable inputs while calculating next time step:
+        ### Disable inputs while calculating next time step.
+        ### This is important to avoid click button "bounces" (when "next" is clicked rapidly before calculation of previous is complete);
+        ###  this potentially leads to game sessions that are longer than the maximum number of time steps.
         shinyjs::hide(id = "nextStep")
         shinyjs::hide(id = "showScores")
         shinyjs::hide(id = "showAllIntro")
@@ -524,9 +529,13 @@ server <- function(input, output, session) {
         
         costs_as_input = list(culling = culling_cost, scaring = scaring_cost)
         prev = GDATA$laststep
+        # Crucial function overriding the GMSE manager costs set with those chosen by the player.
+        # This function is here: 
+        # https://github.com/ConFooBio/gmse/blob/0e8aab2fb325421915a7c3615820812e45f42a74/R/gmse_apply_control.R#L284-L320
         prev = set_man_costs(prev, newcost = costs_as_input)
         
-        ### Run next time step:
+        ### Run next time step. Reference to function:
+        ### https://github.com/ConFooBio/gmse/blob/0e8aab2fb325421915a7c3615820812e45f42a74/R/gmse_apply_control.R#L146-L244
         nxt = try({gmse_apply_UROM(get_res = "Full", old_list = prev)}, silent = TRUE)
         
         if(class(nxt)!="try-error") {
