@@ -2,7 +2,7 @@
 ### Add new game run session data to database and get new runID token.
 ### Called once for every new session.
 newRunRecord = function(session, player, startTime, extinct) {
-  
+  browser()
   db = connect_game_dbase()
   
   q = sprintf("INSERT INTO run (session, player, startTime, extinct) VALUES ('%s', '%s', '%s', %d)", session, player, startTime, extinct)

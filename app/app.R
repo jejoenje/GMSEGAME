@@ -395,10 +395,12 @@ server <- function(input, output, session) {
         CURRENT_BUDGET$scaring = budget$scaring
         CURRENT_BUDGET$leftover = budget$remaining
         
+        browser()
+        
         ## Add new game run session data to database and get new runID token.
         RUN$id = newRunRecord(session = as.character(session$token),
                              player = GDATA$PLAYER_NAME,
-                             startTime = as.character(Sys.time()),
+                             startTime = as.character(format(Sys.time(),"%Y-%m-%d %H:%M:%S")),
                              extinct = as.numeric(GDATA$extinction))
         
         ## Add GMSE paras for session to database:
@@ -439,7 +441,7 @@ server <- function(input, output, session) {
             shinyjs::show(id = "newGame")
             shinyjs::show(id = "showScores")
             ### If extinct, this update would have happened already:
-            updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
+            updateRunRecord(runID = RUN$id, endTime = as.character(format(Sys.time(),"%Y-%m-%d %H:%M:%S")), extinct = GDATA$extinction)
             addScores(runID = RUN$id, gd = GDATA)
             
         }
@@ -582,7 +584,7 @@ server <- function(input, output, session) {
             shinyjs::hide(id = "resetGame")
             shinyjs::show(id = "newGame")
             shinyjs::show(id = "showScores")
-            updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
+            updateRunRecord(runID = RUN$id, endTime = as.character(format(Sys.time(),"%Y-%m-%d %H:%M:%S")), extinct = GDATA$extinction)
             addScores(runID = RUN$id, gd = GDATA)
             finishedModal()
         }
@@ -594,7 +596,7 @@ server <- function(input, output, session) {
             culling_cost = budgetToCost(input$culling, minimum_cost = 10)
             scaring_cost = budgetToCost(input$scaring, minimum_cost = 10)
             addLastCostsOnExtinction(runID = RUN$id, cull_cost = culling_cost, scare_cost = scaring_cost)
-            updateRunRecord(runID = RUN$id, endTime = as.character(Sys.time()), extinct = GDATA$extinction)
+            updateRunRecord(runID = RUN$id, endTime = as.character(format(Sys.time(),"%Y-%m-%d %H:%M:%S")), extinct = GDATA$extinction)
             addScores(runID = RUN$id, gd = GDATA)
             extinctionModal()
             shinyjs::hide(id = "nextStep")
